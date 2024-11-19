@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Elenco dei Giochi</h2>
+<ul>
+    {% for game in games %}
+    <li>{{ game.name }} ({{ game.category }}) - {{ game.players }} giocatori - Tempo medio: {{ game.average_time }} min
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

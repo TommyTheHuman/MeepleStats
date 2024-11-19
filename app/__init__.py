@@ -11,14 +11,9 @@ def create_app():
 
     db.init_app(app)
 
-    with app.app_context():
-        # Importa i modelli per registrarli con SQLAlchemy
-        from .models import Player, Game, Match, Score
-
-
     # Importa le route
-    #with app.app_context():
-    #    from .routes import bp as main_blueprint
-    #    app.register_blueprint(main_blueprint)
+    with app.app_context():
+        from .routes import bp as main_blueprint
+        app.register_blueprint(main_blueprint)
 
     return app
