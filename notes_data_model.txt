@@ -1,0 +1,73 @@
+OSSERVAZIONI DATA MODEL 
+
+//////// PLAYERs Collection/Statistiche ////////
+- Aggiungerei un campo con il numero di partite giocate complessivamente 
+	(ok che si può derivare come n_sconfitte + n_vittore (se non esistono 
+	 esiti intermedi) ma comunque può far comodo) 
+- Aggiungerei un campo "record_score" per tener traccia del punteggio più alto 
+	mai ottenuto (dal tempo 0 del giocatore) -> supporta la prima query 
+	della sezione statistiche per giocatore
+- Stessa cosa per punteggio medio (dal tampo 0 del giocatore) (questi campi 
+	sono utili a prescindere dal se queste query prevedono anche la 
+	possibilità di specificare un intervallo temporale, intanto il 
+	caso base così ce lo hai (quasi) gratis) 
+
+- Statistica "Miglior giocatore del mese/anno -> win rate più alto nella finestra: 
+	Non mi sembra supportata dalla versione attuale del data model, non vedo 
+	tracciati da nessuna parte i vincitori delle partire. 
+	Quello che farei è aggiungere nell'array di match embedded nel Documento 
+	Player anche i)la data della partita, ii)un booleano is_winner. 
+	In questo modo puoi rispondere alla query accedendo solamente alla 
+	collection dei Player. (Esistono anche soluzioni che userebbero la 
+	Collection dei Match, ma ha molto più senso usare quella dei Player 
+	secondo me, perché verosimilmente sarà significativamente meno 
+	numerosa di quella dei Match)
+	Altra cosa: nell'array "matches" terrei solamente le partite giocate 
+	l'ultimo anno (non può crescere all'infinito). 
+	
+- Statistica "Gioco dove hai vinto di più e gioco dove hai vinto di meno": 
+	Per supportare meglio questa aggiungerei un altro campo all'array 
+	"matches" del doc Player con il nome del gioco giocato in quella
+	partita. In questo modo, se la query riguarda un invervallo temporale 
+	<= all'ultimo anno trascorso, puoi già rispondere accedendo al 
+	singolo player. Se invece è il gioco con most/least wins ever, 
+	vai a lavorare sulla Collection dei match: alla collection dei 
+	match aggiungerei un campo "winner" con valore l'id del player 
+	vincitore > in questo modo per soddisfare la query dovrebbero 
+	bastare un group by winner & sort. 
+	
+- "Collaboratore: Maggior numero di vittorie cooperative." > 
+	Potresti aggiungere un campo "num_cooperative_wins" al doc 
+	Player 
+
+- "Fanalino di coda: Il giocatore che ha il maggior numero di ultimi posti." 
+	Aggiungerei un campo al doc Match "worst_score_player"
+	
+- - Le altre ok 
+
+//////// MATCHes Collection/Statistiche ////////
+- Non capisco perché l'array "players" ha questa logica associata: 
+	"// Lista di giocatori --> = 1 allora il gioco è competitivo, 
+	> 1 allora il gioco è cooperativo." Anche nel caso di gioco 
+	competitivo, non parteciperanno almeno 2 giocatori alla partita? 
+
+- Statistica "Percentuale di vittoria di un gioco cooperativo -> 
+	quante volte il gioco è stato "battuto". Per supportare questa 
+	query, aggiungere i campo "is_cooperative" e "game_name" anche 
+	ai documenti della Collection dei match: in questo modo puoi 
+	raggruppare per game_name (solo giochi coperativi) e calcolarti 
+	la percentuale di vittoria. 
+
+- "Giocatore con il punteggio più alto mai ottenuto" > per supportare 
+	facilmente questa forse potresti aggiugnere un campo al doc 
+	Game "record_score_by_player" con l'id del player che ha fatto 
+	il record per quel gioco (so far) (il costo è che l'operazione 
+	di scrittura dello score di ogni player deve prevedere il check 
+	sul current value del campo "record_score_by_player", ma secondo 
+	me può valerne la pena)
+
+- "Sfida epica: Partita con il punteggio complessivo più alto." > 
+	potresti aggiungere un campo "cumulative_score" al doc match. 
+
+- Le altre ok 
+

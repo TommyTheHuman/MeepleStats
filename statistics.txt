@@ -1,0 +1,50 @@
+Statistiche 
+
+-- STATISTICHE GLOBALI --
+* Ore di gioco complessive -> filtri su date
+* Partite giocate -> filtri su date
+
+-- STATISTICHE PER GIOCATORE --
+
+* Punteggio più alto mai ottenuto
+* Totale vittore
+* Win Rate -> da calcolare anche su un periodo di tempo ristretto
+* Punteggio Medio
+* Serie di vittorie più lunga 
+* Miglior giocatore del mese/anno -> win rate più alto nella finestra 
+* Gioco dove hai vinto di più e gioco dove hai vinto di meno 
+
+
+-- STATISTICHE PER GIOCO --
+
+* Percentuale di vittoria di un gioco cooperativo -> quante volte il gioco è stato "battuto"
+* Gioco più giocato e gioco meno giocato
+* Durata media delle partite
+* Uso del gioco base rispetto a con le espansioni
+* Miglior rapporto spesa/ore giocate 
+* Giocatore con il punteggio più alto mai ottenuto
+
+-- STATISTICHE SPECIFICHE PER GIOCO --
+
+* Root/Ahoy: win rate delle fazioni
+
+Achievements (tipo da asseganre in un recap annuale come il wrapped)
+<Si può anche pensare a degli achievements che vengono "sbloccati" one time>
+<da mostrare nel profilo tipo>
+
+-- GIOCATORE --
+
+* Stratega: Miglior punteggio medio in un gioco specifico.
+* Veterano: Partecipazione a un certo numero di partite.
+* Inarrestabile: Serie di vittorie consecutive più lunga.
+* Collaboratore: Maggior numero di vittorie cooperative.
+* Collector: Gioca ad almeno X giochi diversi
+* Re del tavolo: Il giocatore con più vittorie globali in un anno.
+* Fanalino di coda: Il giocatore che ha il maggior numero di ultimi posti.
+
+-- GIOCO --
+
+* Classico: Gioco più giocato in un anno.
+* Sfida epica: Partita con il punteggio complessivo più alto.
+* Più versatile: Gioco con il maggior numero di combinazioni base + espansioni.
+* Nuovo classico: Gioco introdotto durante l'anno e subito giocato più volte.
