@@ -6,10 +6,8 @@ Statistiche
 
 -- STATISTICHE PER GIOCATORE --
 
-* Punteggio più alto mai ottenuto
 * Totale vittore
 * Win Rate -> da calcolare anche su un periodo di tempo ristretto
-* Punteggio Medio
 * Serie di vittorie più lunga 
 * Miglior giocatore del mese/anno -> win rate più alto nella finestra 
 * Gioco dove hai vinto di più e gioco dove hai vinto di meno 
@@ -23,6 +21,7 @@ Statistiche
 * Uso del gioco base rispetto a con le espansioni
 * Miglior rapporto spesa/ore giocate 
 * Giocatore con il punteggio più alto mai ottenuto
+* Punteggio medio 
 
 -- STATISTICHE SPECIFICHE PER GIOCO --
 
@@ -45,6 +44,7 @@ Achievements (tipo da asseganre in un recap annuale come il wrapped)
 -- GIOCO --
 
 * Classico: Gioco più giocato in un anno.
-* Sfida epica: Partita con il punteggio complessivo più alto.
+* Sfida epica: Partita col minor distacco fra primo e secondo posto
+* Vittoria schiacciante: Partia col maggior distacco fra primo e secondo
 * Più versatile: Gioco con il maggior numero di combinazioni base + espansioni.
 * Nuovo classico: Gioco introdotto durante l'anno e subito giocato più volte.
