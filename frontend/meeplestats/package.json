@@ -11,6 +11,7 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.0.1",
     "react-scripts": "5.0.1",
+    "react-select": "^5.8.3",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

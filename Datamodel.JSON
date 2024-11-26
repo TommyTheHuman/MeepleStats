@@ -16,7 +16,9 @@
         "match_id": "match_id",
         "game_duration": 120
     }],
-    "record_score_by_player": "player_id"
+    "record_score_by_player": {"player_id": "player_id",
+                              "score": 100},
+    "average_score": 15  // Punteggio medio
 }
   
 
@@ -58,8 +60,6 @@
     "winstreak": 5,  // Numero di vittorie consecutive
     "losses": 5,  // Numero di sconfitte
     "toal_matches": 15,  // Numero totale di partite giocate
-    "highest_score": 20,  // Punteggio più alto
-    "average_score": 15,  // Punteggio medio
     "num_competitive_win": 5,  // Numero di vittorie in partite competitive
   }
   

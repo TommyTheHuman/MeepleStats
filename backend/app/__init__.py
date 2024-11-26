@@ -8,7 +8,10 @@ from datetime import timedelta
 def create_app():
     app = Flask(__name__)
     app.config['JWT_SECRET_KEY'] = 'super-secret'  #FIXME Change this!
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(weeks=4)
+    app.config['JWT_TOKEN_LOCATION'] = ['cookies']  # Indica che il JWT verrà letto dai cookie
+    app.config['JWT_COOKIE_SECURE'] = False  # True in produzione (richiede HTTPS)
+    app.config['JWT_ACCESS_COOKIE_NAME'] = 'jwt_token'  # Nome del cookie
 
     jwt = JWTManager(app)
 
@@ -16,10 +19,10 @@ def create_app():
 
     # Importa le route
     with app.app_context():
-        #from .routes import bp as main_blueprint
         from .routes import auth_bp as auth_blueprint
-        #app.register_blueprint(main_blueprint)
+        from .routes import data_bp as data_blueprint
         app.register_blueprint(auth_blueprint)
+        app.register_blueprint(data_blueprint)
 
     #bgg_import.import_games_from_bgg('ArcherMaster')
 

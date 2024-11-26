@@ -116,7 +116,8 @@ def request_games(game_ids, expansions):
                 'expansions': [],
                 'description': game.find('description').text,
                 'matches': [{}],
-                'record_score_by_player': ""
+                'record_score_by_player': {'player_id': "", 'score': 0},
+                'average_score': 0
             }
             #print(game_data)
             # Insert the game data in the database if not already present
