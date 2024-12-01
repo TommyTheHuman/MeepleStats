@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import LogGamePage from './pages/LogGamePage';
+import PrivateRoute from './components/PrivateRoute';
 
 function App() {
   return (
@@ -15,7 +16,7 @@ function App() {
           <Route path="/" element={<Homepage />} />
           <Route path="/auth" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/matches" element={<LogGamePage />} />
+          <Route path="/logmatch" element={<LogGamePage />} />
           {/* <Route path="/stats" element={<StatsPage />} />
           <Route path="/wishlist" element={<WishlistPage />} /> */}
         </Routes>

@@ -4,6 +4,7 @@ from .services import bgg_import
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from datetime import timedelta
+import os
 
 def create_app():
     app = Flask(__name__)
@@ -12,10 +13,24 @@ def create_app():
     app.config['JWT_TOKEN_LOCATION'] = ['cookies']  # Indica che il JWT verrà letto dai cookie
     app.config['JWT_COOKIE_SECURE'] = False  # True in produzione (richiede HTTPS)
     app.config['JWT_ACCESS_COOKIE_NAME'] = 'jwt_token'  # Nome del cookie
+    app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'uploads')
 
     jwt = JWTManager(app)
 
-    CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+    CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
+
+    @app.after_request
+    def add_cors_headers(response):
+        """
+        Aggiunge gli header necessari per supportare le richieste CORS e credenziali.
+        """
+        response.headers['Access-Control-Allow-Origin'] = 'http://localhost:3000'  # Frontend
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, PUT, DELETE'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
+    # Import games from BGG
+    #bgg_import.import_games_from_bgg('ArcherMaster')
 
     # Importa le route
     with app.app_context():

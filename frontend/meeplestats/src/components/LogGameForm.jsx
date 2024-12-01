@@ -9,16 +9,24 @@ function LogGameForm() {
     // const [selectedPlayers, setSelectedPlayers] = useState([]);
     const [formData, setFormData] = useState({
         game: "",
+        game_id: "",
         note: "",
         date: new Date().toISOString().split('T')[0],
         image: null,
         players: [], // Contiene { id, score }
         duration: "",
+        isCooperative: false,
       });
 
     useEffect(() => {
         // Fetch the games from the /games route
-        fetch("http://127.0.0.1:5000/games")
+        fetch("http://127.0.0.1:5000/games", {
+            method: "GET",
+            credentials: "include", 
+            headers: {
+                'Content-Type': 'application/json'
+              }
+        } )
           .then((response) => response.json())
           .then((data) => {
             const sortedGames = data.sort((a, b) => a.name.localeCompare(b.name));
@@ -39,9 +47,13 @@ function LogGameForm() {
     }, []); // The empty array ensures this runs only once
 
     const handleChange = (field, value) => {
+        const selectedGame = games.find(game => game.name === value);
+        //console.log(selectedGame);
         setFormData((prevState) => ({
           ...prevState,
           [field]: value,
+          game_id: field === "game" ? selectedGame.bgg_id : formData.game_id,
+          isCooperative: field === "game" ? selectedGame.is_cooperative : formData.isCooperative,
         }));
     };
 
@@ -64,6 +76,13 @@ function LogGameForm() {
         handleChange("players", updatedPlayers);
     };
 
+    const handleCheckboxChange = (e) => {
+        setFormData({
+          ...formData,
+          isWin: e.target.checked,
+        });
+    };
+
     const handleSubmit = async (event) => {
     event.preventDefault();
     console.log(formData.image);
@@ -74,10 +93,12 @@ function LogGameForm() {
 
     // Aggiungi i dati al FormData
     data.append("game", formData.game);
+    data.append("game_id", formData.game_id);
     data.append("note", formData.note);
     data.append("date", formData.date);
     data.append("image", formData.image);
     data.append("duration", formData.duration);
+    data.append("isWin", formData.isWin);
 
     formData.players.forEach((player, index) => {
       data.append(`players[${index}][id]`, player.id);
@@ -117,7 +138,7 @@ function LogGameForm() {
                 >
                     <option value="" disabled>-- Scegli un gioco --</option> {/* Placeholder */}
                     {games.map((game) => (
-                    <option key={game.id} value={game.id}>
+                    <option key={game.bgg_id} value={game.name}>
                         {game.name}
                     </option>
                     ))}
@@ -137,7 +158,7 @@ function LogGameForm() {
                     closeMenuOnSelect={false} // Non chiude il menu dopo la selezione
                 />
             </div>
-            <div>
+            {!formData.isCooperative && (<div>
                 {formData.players.map((player, index) => (
                     <div>
                     <label>
@@ -153,6 +174,19 @@ function LogGameForm() {
                     </div>
                 ))}
             </div>
+            )}
+            {formData.isCooperative && (
+            <div>
+                <label>
+                <input
+                    type="checkbox"
+                    checked={formData.isWin}
+                    onChange={handleCheckboxChange}
+                />
+                Partita vinta
+                </label>
+            </div>
+            )}
             <div>
                 <label htmlFor="duration">Duration:</label>
                 <input

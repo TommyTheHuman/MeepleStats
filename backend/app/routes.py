@@ -2,8 +2,12 @@ from datetime import datetime, timedelta
 from flask import Blueprint, jsonify, render_template, request
 from flask_jwt_extended import create_access_token, jwt_required
 from werkzeug.security import generate_password_hash, check_password_hash
+import os
+import uuid
+from bson import ObjectId
+from flask import current_app
 
-from .services.db import players_collection, games_collection
+from .services.db import players_collection, games_collection, matches_collection
 
 #bp = Blueprint('main', __name__)
 
@@ -45,7 +49,7 @@ def register():
     # Generate the JWT token and return it
     access_token = create_access_token(identity=username)
     response = jsonify({'message': 'Login successful'})
-    response.set_cookie('jwt_token', access_token, httponly=True, secure=True, samesite='Strict', max_age=timedelta(weeks=4))
+    response.set_cookie('jwt_token', access_token, httponly=True, secure=True, max_age=timedelta(weeks=4))
     return response, 201
 
 @auth_bp.route('/login', methods=['POST'])
@@ -65,7 +69,7 @@ def login():
     # Generate the JWT token and return it
     access_token = create_access_token(identity=username)
     response = jsonify({'message': 'Login successful'})
-    response.set_cookie('jwt_token', access_token, httponly=True, secure=True, samesite='Strict', max_age=timedelta(weeks=4))
+    response.set_cookie('jwt_token', access_token, httponly=True, secure=False, max_age=timedelta(weeks=4), samesite="Lax")
     return response, 200
 
 # FIXME: logout route
@@ -75,8 +79,9 @@ data_bp = Blueprint('games', __name__)
 # FIXME: use jwt_required decorator
 
 @data_bp.route('/games', methods=['GET'])
+#@jwt_required()
 def get_games():
-
+    print(request.cookies)
     try:
         games = games_collection.find()
         
@@ -107,17 +112,35 @@ def get_players():
         return jsonify({'error': str(e)}), 500
 
 @data_bp.route('/logmatch', methods=['POST'])
+@jwt_required()
 def log_match():
-    print(request.form)
+
+    # Create the upload folder if it doesn't exist
+    upload_folder = current_app.config['UPLOAD_FOLDER']
+    if not os.path.exists(upload_folder):
+        os.makedirs(upload_folder)
+    # Parse match data
     date = request.form.get('date')
     duration = request.form.get('duration')
-    gameName = request.form.get('game')
+    game_name = request.form.get('game')
+    game_id = request.form.get('game_id')
     note = request.form.get('note')
+    isWin = bool(request.form.get('isWin'))
 
     # Handle file upload
-    if 'image' not in request.files:
-        return jsonify({'error': 'No image part'}), 400
-    file = request.files['image']
+    image_path = None
+    if 'image' in request.files:
+        #return jsonify({'error': 'No image part'}), 400
+        file = request.files['image']
+
+        # Check if the file is empty
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+        # Create a unique filename
+        unique_file = f"{uuid.uuid4()}_{file.filename}"
+        image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_file)
+
+        file.save(image_path)
 
     # Parse player data
     players = []
@@ -128,68 +151,105 @@ def log_match():
         player_name = request.form.get(f'players[{index}][name]')
         if player_id is None:
             break
-        players.append({'id': player_id, 'name': player_name, 'score': player_score})
+        players.append({'id': player_id, 'name': player_name, 'score': int(player_score)})
         index += 1
+                                                  
 
-    print(players)                                                     
+    # Fill mongo collections
+
+    # Compute winner, worst_score_player, is_cooperative, total_score
+
+    game = games_collection.find_one({'bgg_id': game_id})
+    if not game:
+        return jsonify({'error': 'Game not found'}), 404
+    
+
+    game_highest_score = game['record_score_by_player']['score']
+
+    if (game['is_cooperative']):
+        # Check if the match is cooperative --> each player wins
+        winner = [player['id'] for player in players]
+        total_score = None
+        worst_score_player = None
+    else:
+        # Check if the match is not cooperative --> the player with the highest score wins
+        winner = max(players, key=lambda x: x['score'])['id']
+        total_score = sum([player['score'] for player in players])
+        worst_score_player = min(players, key=lambda x: x['score'])['id']
+
+    # Create the match
+    match_data = {
+        'game_id': game_id,
+        'game_name': game_name,
+        'date': date,
+        'players': [player['id'] for player in players],
+        'expansions_used': [],
+        'notes': note,
+        'image_path': image_path,
+        'game_duration': duration,
+        'winner': winner,
+        'worst_score_player': worst_score_player,
+        'is_cooperative': game['is_cooperative'],
+        'total_score': total_score,
+    }
+
+    #print(match_data)
+
+    result = matches_collection.insert_one(match_data)
+    match_id = result.inserted_id 
+
+    # Update players' stats
+
+
+    for player in players:
+        player_data = players_collection.find_one({'_id': ObjectId(player['id'])})
+        print(isWin)
+        player_data['total_matches'] += 1
+        if game['is_cooperative'] and isWin:
+            player_data['wins'] += 1
+        elif not game['is_cooperative'] and player['id'] == winner:
+            player_data['wins'] += 1
+            player_data['num_competitive_win'] += 1
+        else:
+            player_data['losses'] += 1
+        
+        # update player's match history
+        player_data['matches'].append({
+            'match_id': str(match_id),
+            'game_id': game_id,
+            'is_winner': player['id'] == winner,
+            'score': player['score'],
+            'date': date,
+        })
+
+        if player['score'] > game_highest_score:
+            game['record_score_by_player'] = {
+                'id': player['id'],
+                'score': player['score'],
+            }
+
+        # update player's Collection
+        players_collection.update_one({'_id': ObjectId(player['id'])}, {'$set': player_data})
+
+    # Update game match history
+    game['matches'].append({
+        'match_id': str(match_id),
+        'game_duration': duration,
+        'total_score': total_score,
+    })
+
+    print(game['matches'])
+
+    # Loop over matches and update average score
+    total_score = 0
+    for match in game['matches']:
+        total_score += match['total_score']
+    game['average_score'] = total_score / len(game['matches'])
+
+    # Update game's Collection
+    games_collection.update_one({'bgg_id': game_id}, {'$set': game})
 
     return jsonify({'message': 'Match logged successfully'}), 201
 
 
 
-
-
-
-#image
-#: 
-#File
-#lastModified
-#: 
-#1725828826650
-#lastModifiedDate
-#: 
-#Sun Sep 08 2024 22:53:46 GMT+0200 (Ora legale dell’Europa centrale) {}
-#name
-#: 
-#"herald.jpg"
-#size
-#: 
-#463000
-#type
-#: 
-#"image/jpeg"
-#webkitRelativePath
-#: 
-#""
-#[[Prototype]]
-#: 
-#File
-#note
-#: 
-#"ghe"
-#players
-#: 
-#Array(1)
-#0
-#: 
-#id
-#: 
-#"6742610b5474817ef25e712f"
-#name
-#: 
-#"aa"
-#score
-#: 
-#78
-#[[Prototype]]
-#: 
-#Object
-#length
-#: 
-#1
-#[[Prototype]]
-#: 
-#Array(0)
-#[[Prototype]]
-#: 
-#Object

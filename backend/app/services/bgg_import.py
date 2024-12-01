@@ -80,7 +80,7 @@ def request_games(game_ids, expansions):
                 'is_cooperative': False if expansion.find('link[@id=\'2023\']') is None else True,
                 'expansions': [],
                 'description': expansion.find('description').text,
-                'matches': [{}],
+                'matches': [],
                 'record_score_by_player': ""
             }
             # Insert the expansion data in the database if not already present
@@ -115,7 +115,7 @@ def request_games(game_ids, expansions):
                 'is_cooperative': False if game.find('link[@id=\'2023\']') is None else True,
                 'expansions': [],
                 'description': game.find('description').text,
-                'matches': [{}],
+                'matches': [],
                 'record_score_by_player': {'player_id': "", 'score': 0},
                 'average_score': 0
             }
