@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from flask import Blueprint, jsonify, render_template, request
-from flask_jwt_extended import create_access_token, jwt_required
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, decode_token
+from jwt.exceptions import InvalidTokenError
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import uuid
@@ -13,6 +14,17 @@ from .services.db import players_collection, games_collection, matches_collectio
 
 
 auth_bp = Blueprint('auth', __name__)
+
+@auth_bp.route('/check-auth', methods=['GET'])
+def check_auth():
+    token = request.cookies.get('jwt_token')
+    if not token:
+        return jsonify({'authenticated': False}), 401
+    try:
+        decode_token(token)
+        return jsonify({'authenticated': True}), 200
+    except InvalidTokenError:
+        return jsonify({'authenticated': False}), 401
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
@@ -69,19 +81,19 @@ def login():
     # Generate the JWT token and return it
     access_token = create_access_token(identity=username)
     response = jsonify({'message': 'Login successful'})
-    response.set_cookie('jwt_token', access_token, httponly=True, secure=False, max_age=timedelta(weeks=4), samesite="Lax")
+    response.set_cookie('jwt_token', access_token, httponly=True, secure=True, max_age=timedelta(weeks=4), samesite="None", partitioned=True)
     return response, 200
 
 # FIXME: logout route
 
 data_bp = Blueprint('games', __name__)
 
-# FIXME: use jwt_required decorator
 
 @data_bp.route('/games', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def get_games():
     print(request.cookies)
+    print(get_jwt_identity())
     try:
         games = games_collection.find()
         

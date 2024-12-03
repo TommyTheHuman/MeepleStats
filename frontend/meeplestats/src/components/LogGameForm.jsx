@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Select from "react-select";
+import axios from 'axios';
 
 function LogGameForm() {
 
@@ -110,8 +111,9 @@ function LogGameForm() {
 
     try {
         const response = await fetch('http://127.0.0.1:5000/logmatch', {
-          method: 'POST',
-          body: data,
+            credentials: "include",
+            method: 'POST',
+            body: data
         });
   
         if (response.ok) {

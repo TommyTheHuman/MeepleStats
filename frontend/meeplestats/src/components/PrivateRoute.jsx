@@ -1,11 +1,25 @@
 import { Navigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
+import { useEffect, useState } from 'react';
 
-const PrivateRoute = ({ element: Component, ...rest }) => {
-    console.log(Cookies.get('jwt_token'));
-    const isAuthenticated = !!Cookies.get('jwt_token');
+function PrivateRoute({ children }) {
+    const [isAuthenticated, setIsAuthenticated] = useState(null);
 
-    return isAuthenticated ? <Component {...rest} /> : <Navigate to="/auth" />;
-};
+    useEffect(() => {
+        fetch('http://127.0.0.1:5000/check-auth', { method: 'GET', credentials: 'include' })
+            .then((response) => {
+                if (response.ok) {
+                    setIsAuthenticated(true);
+                } else {
+                    setIsAuthenticated(false);
+                }
+            })
+            .catch(() => setIsAuthenticated(false));
+    }, []);
 
+    if (isAuthenticated === null) {
+        return <div>Loading...</div>; // Puoi mettere uno spinner qui.
+    }
+
+    return isAuthenticated ? children : <Navigate to="/auth" />;
+}
 export default PrivateRoute;
