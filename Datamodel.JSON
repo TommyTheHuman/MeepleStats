@@ -63,3 +63,20 @@
     "num_competitive_win": 5,  // Numero di vittorie in partite competitive
   }
   
+
+  // WISHLIST
+
+  {
+    "_id": "auto-generated",
+    "bgg_id": "NNN",
+    "game_name": "Game Name",
+    "thumbnail": "URL to thumbnail",
+    "added_at": "Date",
+    "added_by": "player_id",
+    "priority": 1,
+    "min_players": 3,
+    "max_players": 4,
+    "average_duration": 90,
+    "is_cooperative": false,
+    "notes": "Notes",
+  }

@@ -7,8 +7,9 @@ import os
 import uuid
 from bson import ObjectId
 from flask import current_app
+import requests
 
-from .services.db import players_collection, games_collection, matches_collection
+from .services.db import players_collection, games_collection, matches_collection, wishlists_collection
 
 #bp = Blueprint('main', __name__)
 
@@ -263,5 +264,70 @@ def log_match():
 
     return jsonify({'message': 'Match logged successfully'}), 201
 
+@data_bp.route('/wishlist', methods=['GET'])
+# @jwt_required()
+def get_wishlist():
+    try:
+        wishlists = wishlists_collection.find()
+        
+        wishlists_data = []
 
+        for wishlist in wishlists:
+            wishlist['_id'] = str(wishlist['_id'])
+            wishlists_data.append(wishlist)
 
+        return jsonify(wishlists_data), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@data_bp.route('/addwishlist', methods=['POST'])
+# @jwt_required()
+def add_wishlist():
+    data = request.get_json()
+    game_id = data.get('game_id')
+    notes = data.get('notes')
+
+    if not game_id:
+        return jsonify({'error': 'Missing username or game_id'}), 400
+
+    # Check if the game is already in the wishlist
+    game = wishlists_collection.find_one({'game_id': game_id})
+    if game:
+        return jsonify({'error': 'Game already in the wishlist'}), 400
+    
+    #username = get_jwt_identity() #FIXME: uncomment this line
+    username = "bb"
+
+    user = players_collection.find_one({'username': username})
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    # Get the game information from BGG API
+    bgg_api_url = f"https://www.boardgamegeek.com/xmlapi2/thing?id={game_id}"
+    response = requests.get(bgg_api_url)
+
+    if response.status_code != 200:
+        return jsonify({'error': 'Failed to fetch game information from BGG API'}), 500
+
+    # Parse the XML response (assuming the response is in XML format)
+    import xml.etree.ElementTree as ET
+    root = ET.fromstring(response.content)
+    game = root.find('item')
+
+    # Save the game in the wishlist
+    game_data = {
+        'username': username,
+        'game_id': game_id,
+        'game_name': game.find('name[@type=\'primary\']').attrib['value'],
+        'min_players': game.find('minplayers').attrib['value'],
+        'max_players': game.find('maxplayers').attrib['value'],
+        'average_duration': game.find('playingtime').attrib['value'],
+        'image': {'url': game.find('image').text,
+                  'thumbnail': game.find('thumbnail').text
+                },
+        'is_cooperative': False if game.find('link[@id=\'2023\']') is None else True,
+        'notes': notes,
+    }
+    wishlists_collection.insert_one(game_data)
+
+    return jsonify({'message': 'Game added to the wishlist'}), 201

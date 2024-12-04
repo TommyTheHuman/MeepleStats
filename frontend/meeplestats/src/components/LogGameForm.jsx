@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import Select from "react-select";
-import axios from 'axios';
 
 function LogGameForm() {
 
