@@ -37,8 +37,10 @@ def create_app():
     with app.app_context():
         from .routes import auth_bp as auth_blueprint
         from .routes import data_bp as data_blueprint
+        from .routes import statistic_bp as statistic_blueprint
         app.register_blueprint(auth_blueprint)
         app.register_blueprint(data_blueprint)
+        app.register_blueprint(statistic_blueprint)
 
     #bgg_import.import_games_from_bgg('ArcherMaster')
 

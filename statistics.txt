@@ -40,7 +40,7 @@ Achievements (tipo da asseganre in un recap annuale come il wrapped)
 * Collector: Gioca ad almeno X giochi diversi
 * Re del tavolo: Il giocatore con più vittorie globali in un anno.
 * Fanalino di coda: Il giocatore che ha il maggior numero di ultimi posti.
-
+* Balance God: in tutti i giochi hai lo stesso numero di vittorie
 -- GIOCO --
 
 * Classico: Gioco più giocato in un anno.

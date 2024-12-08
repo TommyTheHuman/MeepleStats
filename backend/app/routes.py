@@ -238,6 +238,7 @@ def log_match():
         if player['score'] > game_highest_score:
             game['record_score_by_player'] = {
                 'id': player['id'],
+                'name': player['username'],
                 'score': player['score'],
             }
 
@@ -249,6 +250,7 @@ def log_match():
         'match_id': str(match_id),
         'game_duration': duration,
         'total_score': total_score,
+        'winner': winner,
     })
 
     print(game['matches'])
@@ -327,7 +329,670 @@ def add_wishlist():
                 },
         'is_cooperative': False if game.find('link[@id=\'2023\']') is None else True,
         'notes': notes,
+        'added_at': datetime.now(),
     }
     wishlists_collection.insert_one(game_data)
 
     return jsonify({'message': 'Game added to the wishlist'}), 201
+
+statistic_bp = Blueprint('statistic', __name__)
+
+### GLOBAL STATS ###
+
+@statistic_bp.route('/totHours', methods=['GET'])
+#@jwt_required()
+def totHours():
+
+    # Get date filters from query string
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+
+    # Check if the date filters are provided and validate them
+    if start_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+        except ValueError:
+            return jsonify({'error': 'Invalid start_date format. Use YYYY-MM-DD'}), 400
+    else:
+        start_date = datetime(1970, 1, 1) # Default start date
+    if end_date_str:
+        try:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+        except ValueError:
+            return jsonify({'error': 'Invalid end_date format. Use YYYY-MM-DD'}), 400
+    else:
+        end_date = datetime.now()
+
+    try:
+        # Find matches in the date range
+        matches = matches_collection.find({
+            'date': {
+                '$gte': start_date,
+                '$lte': end_date
+            }
+        })
+        
+        total_hours = 0
+
+        for match in matches:
+            total_hours += match['game_duration']
+
+        return jsonify(total_hours), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@statistic_bp.route('/totMatches', methods=['GET'])
+#@jwt_required()
+def totMatches():
+    
+        # Get date filters from query string
+        start_date_str = request.args.get('start_date')
+        end_date_str = request.args.get('end_date')
+    
+        # Check if the date filters are provided and validate them
+        if start_date_str:
+            try:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+            except ValueError:
+                return jsonify({'error': 'Invalid start_date format. Use YYYY-MM-DD'}), 400
+        else:
+            start_date = datetime(1970, 1, 1) # Default start date
+        if end_date_str:
+            try:
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+            except ValueError:
+                return jsonify({'error': 'Invalid end_date format. Use YYYY-MM-DD'}), 400
+        else:
+            end_date = datetime.now()
+        
+        try:
+            # Find matches in the date range
+            matches = matches_collection.find({
+                'date': {
+                    '$gte': start_date,
+                    '$lte': end_date
+                }
+            })
+            
+            total_matches = 0
+    
+            for match in matches:
+                total_matches += 1
+    
+            return jsonify(total_matches), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        
+### PLAYER STATS ###
+
+@statistic_bp.route('/playerWins', methods=['GET'])
+#@jwt_required()
+def playerWins():
+        
+    # Get date filters from query string
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+
+    # Get player name from query string
+    player_name = request.args.get('username')
+
+    # Check if the player name is provided otherwise use the logged user
+    if not player_name:
+        player_name = get_jwt_identity()
+    
+    # Check if the date filters are provided and validate them
+    if start_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+        except ValueError:
+            return jsonify({'error': 'Invalid start_date format. Use YYYY-MM-DD'}), 400
+    if end_date_str:
+        try:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+        except ValueError:
+            return jsonify({'error': 'Invalid end_date format. Use YYYY-MM-DD'}), 400
+
+    player = players_collection.find_one({'username': player_name})
+    if start_date_str is None and end_date_str is None:
+        # Read from player's collection
+        return jsonify(player['wins']), 200
+    else:
+
+        # Set default values for start_date and end_date if not provided
+        if start_date_str is None:
+            start_date = datetime(1970, 1, 1)
+        if end_date_str is None:
+            end_date = datetime.now()
+
+        # Find matches in the date range from the player's collection where the player is the winner
+        pipeline = [
+            {
+                "$match": {
+                    "username": player_name
+                }
+            },
+            {
+                "$project": {
+                    "matches": {
+                        "$filter": {
+                            "input": "$matches",
+                            "as": "match",
+                            "cond": {
+                                "$and": [
+                                    {"$eq": ["$$match.is_winner", True]},
+                                    {"$gte": ["$$match.match_date", start_date]},
+                                    {"$lte": ["$$match.match_date", end_date]}
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "$unwind": "$matches"
+            },
+            {
+                "$count": "total_wins"
+            }
+        ]
+
+        result = list(players_collection.aggregate(pipeline))
+
+        if result:
+            total_wins = result[0]["total_wins"]
+        else:
+            total_wins = 0
+
+        return jsonify(total_wins), 200
+                
+
+@statistic_bp.route('/playerWinRate', methods=['GET'])
+#@jwt_required()
+def playerWinRate():
+
+    # Get date filters from query string
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+
+    # Get player name from query string
+    player_name = request.args.get('username')
+
+    # Check if the player name is provided otherwise use the logged user
+    if not player_name:
+        player_name = get_jwt_identity()
+    
+    # Check if the date filters are provided and validate them
+    if start_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+        except ValueError:
+            return jsonify({'error': 'Invalid start_date format. Use YYYY-MM-DD'}), 400
+    if end_date_str:
+        try:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+        except ValueError:
+            return jsonify({'error': 'Invalid end_date format. Use YYYY-MM-DD'}), 400
+
+    player = players_collection.find_one({'username': player_name})
+
+    if start_date_str is None and end_date_str is None:
+        # Read from player's collection
+        return jsonify(player['wins'] / player['total_matches']), 200
+    else:
+        
+        # Set default values for start_date and end_date if not provided
+        if start_date_str is None:
+            start_date = datetime(1970, 1, 1)
+        if end_date_str is None:
+            end_date = datetime.now()
+
+        # Calculate the win rate over a period of time from the player's collection
+
+        # Find matches in the date range from the player's collection
+
+        pipeline = [
+            # 1. Filter the player by username
+            {
+                "$match": {
+                    "username": player_name
+                }
+            },
+            # 2. Filter matches by date range
+            {
+                "$project": {
+                    "matches": {
+                        "$filter": {
+                            "input": "$matches",
+                            "as": "match",
+                            "cond": {
+                                "$and": [
+                                    {"$gte": ["$$match.match_date", start_date]},
+                                    {"$lte": ["$$match.match_date", end_date]}
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            # 3. Unwind the matches array
+            {
+                "$unwind": "$matches"
+            },
+            # 4. Group by the player (or any field, since we're calculating a total)
+            {
+                "$group": {
+                    "_id": None,  # We don't need a specific group key
+                    "total_matches": {"$sum": 1},
+                    "total_wins": {"$sum": {"$cond": [{"$eq": ["$matches.is_winner", True]}, 1, 0]}}
+                }
+            },
+            # 5. Calculate the winrate
+            {
+                "$project": {
+                    "total_matches": 1,
+                    "total_wins": 1,
+                    "winrate": {
+                        "$cond": [
+                            {"$gt": ["$total_matches", 0]},
+                            {"$multiply": [{"$divide": ["$total_wins", "$total_matches"]}, 100]},
+                            0  # If no matches, winrate is 0
+                        ]
+                    }
+                }
+            }
+        ]
+
+        result = players_collection.aggregate(pipeline)
+
+        if result:
+            winrate = result[0]["winrate"]
+            return jsonify(winrate), 200
+        else:
+            return jsonify(0), 200
+
+@statistic_bp.route('/playerLongWinstreak', methods=['GET'])
+#@jwt_required()
+def playerLongWinstreak():
+
+    # Get player name from query string
+    player_name = request.args.get('username')
+
+    # Check if the player name is provided otherwise use the logged user
+    if not player_name:
+        player_name = get_jwt_identity()
+
+    player = players_collection.find_one({'username': player_name})
+
+    return jsonify(player['winsteaks']), 200
+
+@statistic_bp.route('/playerHighestWinRate', methods=['GET'])
+#@jwt_required()
+def playerHighestWinRate():
+        
+    # Get month and year from query string
+    month = request.args.get('month')
+    year = request.args.get('year')
+
+    # Check if the month and year are provided and validate them
+    if month:
+        try:
+            month = int(month)
+        except ValueError:
+            return jsonify({'error': 'Invalid month format. Use an integer'}), 400
+    if year:
+        try:
+            year = int(year)
+        except ValueError:
+            return jsonify({'error': 'Invalid year format. Use an integer'}), 400
+    else:
+        year = datetime.now().year
+    
+    if month is not None and (month < 1 or month > 12):
+        return jsonify({'error': 'Invalid month. Use a number between 1 and 12'}), 400
+    
+    if year < 1970 or year > datetime.now().year:
+        return jsonify({'error': 'Invalid year. Use a number between 1970 and the current year'}), 400
+    
+    # Calculate the player with the highest win rate in a specific month and year from player collection
+
+    # Find matches in the date range from the player's collection
+
+    pipeline = [
+        # 1. Unwind the matches array
+        {
+            "$unwind": "$matches"
+        },
+        # 2. Filter matches by month and year
+        {
+            "$match": {
+                "$expr": {
+                    "$and": [
+                        {"$eq": [{"$year": "$matches.match_date"}, year]},
+                        {"$cond": {
+                            "if": {"$ne": [month, None]},
+                                "then": {"$eq": [{"$month": "$matches.match_date"}, month]},
+                            "else": True
+                        }}
+                    ]
+                }
+            }
+        },
+        # 3. Group by username
+        {
+            "$group": {
+                "_id": "$username",
+                "total_matches": {"$sum": 1},
+                "total_wins": {"$sum": {"$cond": [{"$eq": ["$matches.is_winner", True]}, 1, 0]}}
+            }
+        },
+        # 4. Calculate the winrate
+        {
+            "$project": {
+                "username": "$_id",
+                "total_matches": 1,
+                "total_wins": 1,
+                "winrate": {
+                    "$cond": [
+                        {"$gt": ["$total_matches", 0]},
+                        {"$multiply": [{"$divide": ["$total_wins", "$total_matches"]}, 100]},
+                        0
+                    ]
+                }
+            }
+        },
+        # 5. Sort by winrate in descending order
+        {
+            "$sort": {
+                "winrate": -1
+            }
+        },
+        # 6. Limit to the first result
+        {
+            "$limit": 1
+        }
+    ]
+
+
+    result = list(players_collection.aggregate(pipeline))
+
+    if result:
+        return jsonify(result[0]), 200
+    else:
+        return jsonify({'error': 'No matches found'}), 404
+
+@statistic_bp.route('/playerGameWins', methods=['GET'])
+#@jwt_required()
+def playerGameWins():
+
+    # Get player name from query string
+    player_name = request.args.get('username')
+
+    # Check if the player name is provided otherwise use the logged user
+    if not player_name:
+        player_name = get_jwt_identity()
+    
+    # Calculate the game with most wins and with least wins from player collection
+
+    pipeline = [
+        # 1. Filter the player by username
+        {
+            "$match": {
+                "username": player_name
+            }
+        },
+        # 2. Unwind the matches array
+        {
+            "$unwind": "$matches"
+        },
+        # 3. Group by game_id
+        {
+            "$group": {
+                "_id": "$matches.game_id",
+                "total_wins": {"$sum": {"$cond": [{"$eq": ["$matches.is_winner", True]}, 1, 0]}}
+            }
+        },
+        # 4. Sort by total_wins in descending order
+        {
+            "$sort": {
+                "total_wins": -1
+            }
+        }
+    ]
+
+    result = list(players_collection.aggregate(pipeline))
+
+    if result:
+        return jsonify(result[0], result[-1]), 200
+    
+### GAME STATS ###
+
+@statistic_bp.route('/gameCoopWinRate', methods=['GET'])
+#@jwt_required()
+def gameCoopWinRate():
+
+    # This route return the winrate of cooperative games for all the coop games in the collection
+    
+    # Calculate the win rate of cooperative matches for a specific game from game collection
+
+    pipeline = [
+        # 1. Filter the games by is_cooperative
+        {
+            "$match": {
+                "is_cooperative": True
+            }
+        },
+        # 2. Unwind the matches array
+        {
+            "$unwind": "$matches"
+        },
+        # 3. Group by game_id
+        {
+            "$group": {
+                "_id": "$bgg_id",
+                "total_matches": {"$sum": 1},
+                "total_wins": {"$sum": {"$cond": [ {"$gt": [{"$size": "$matches.winner"}, 0]},
+                        1,
+                        0]}}
+            }
+        },
+        # 4. Calculate the winrate
+        {
+            "$project": {
+                "game_id": "$_id",
+                "total_matches": 1,
+                "total_wins": 1,
+                "winrate": {
+                    "$cond": [
+                        {"$gt": ["$total_matches", 0]},
+                        {"$multiply": [{"$divide": ["$total_wins", "$total_matches"]}, 100]},
+                        0
+                    ]
+                }
+            }
+        },
+        # 5. Sort by winrate in descending order
+        {
+            "$sort": {
+                "winrate": -1
+            }
+        },
+        # 6. Limit to the top 5
+        {
+            "$limit": 5
+        }
+    ]
+
+    result = list(games_collection.aggregate(pipeline))
+
+    if result:
+        return jsonify(result), 200
+    else:
+        return jsonify({'error': 'No matches found'}), 404
+
+@statistic_bp.route('/gameNumMatch', methods=['GET'])
+#@jwt_required()
+def gameNumMatch():    
+        # Calculate the number of matches for a specific game from game collection
+    
+        pipeline = [
+            # 1. Unwind the matches array
+            {
+                "$unwind": "$matches"
+            },
+            # 2. Group by game_id
+            {
+                "$group": {
+                    "_id": "$bgg_id",
+                    "total_matches": {"$sum": 1}
+                }
+            },
+            # 3. Sort by total_matches in descending order
+            {
+                "$sort": {
+                    "total_matches": -1
+                }
+            }
+        ]
+    
+        result = list(games_collection.aggregate(pipeline))
+    
+        if result:
+            return jsonify(result[0], result[-1]), 200
+        else:
+            return jsonify({'error': 'No matches found'}), 404
+        
+@statistic_bp.route('/gameAvgDuration', methods=['GET'])
+#@jwt_required()
+def gameAvgDuration():
+
+    # Get game from query string
+    game_name = request.args.get('game_name')
+
+    if not game_name:
+        # Retourn the top 3 games with the highest average duration
+        pipeline = [
+            # 1. Unwind the matches array
+            {
+                "$unwind": "$matches"
+            },
+            # 2. Group by game_id
+            {
+                "$group": {
+                    "_id": "$bgg_id",
+                    "average_duration": {"$avg": "$matches.game_duration"}
+                }
+            },
+            # 3. Sort by average_duration in descending order
+            {
+                "$sort": {
+                    "average_duration": -1
+                }
+            },
+            # 4. Limit to the top 3
+            {
+                "$limit": 3
+            }
+        ]
+    else:
+        pipeline = [
+            # 1. Filter the games by game_name
+            {
+                "$match": {
+                    "name": game_name
+                }
+            },
+            # 2. Unwind the matches array
+            {
+                "$unwind": "$matches"
+            },
+            # 3. Group by game_id
+            {
+                "$group": {
+                    "_id": "$bgg_id",
+                    "average_duration": {"$avg": "$matches.game_duration"}
+                }
+            }
+        ]
+    
+    result = list(games_collection.aggregate(pipeline))
+
+    if result:
+        return jsonify(result), 200
+
+
+@statistic_bp.route('/gameBestValue', methods=['GET'])
+#@jwt_required()
+def gameBestValue():
+
+    # Get top 3 games with the best price/tot_hours_played ratio
+
+    pipeline = [
+        {
+            '$unwind': '$matches'
+        },
+        {
+            '$group': {
+                '_id': '$bgg_id',
+                'name': {'$first': '$name'},
+                'price': {'$first': '$price'},
+                'total_hours_played': {'$sum': '$matches.game_duration'}
+            }
+        },
+        {
+            '$project': {
+                'name': 1,
+                'price': 1,
+                'price_per_hour': {'$cond': [
+                    {'$gt': ['$total_hours_played', 0]}, 
+                    {'$divide': ['$price', '$total_hours_played']},
+                    0
+                ]}
+            }
+        },
+        {
+            '$sort': {'price_per_hour': 1}
+        },
+        {
+            '$limit': 3
+        }
+    ]
+
+    result = list(games_collection.aggregate(pipeline))
+
+    if result:
+        return jsonify(result), 200
+    
+@statistic_bp.route('/gameHighestScore', methods=['GET'])
+#@jwt_required()
+def gameHighestScore():
+    # Get the game name from query string
+    game_name = request.args.get('game_name')
+
+    # Check if the game name is provided
+    if not game_name:
+        return jsonify({'error': 'Missing game name'}), 400
+    
+    game = games_collection.find_one({'name': game_name})
+
+    if not game:
+        return jsonify({'error': 'Game not found'}), 404
+
+    return jsonify(game['record_score_by_player']), 200
+
+@statistic_bp.route('/gameAvgScore', methods=['GET'])
+#@jwt_required()
+def gameAvgScore():
+
+    # Get the game name from query string
+    game_name = request.args.get('game_name')
+
+    # Check if the game name is provided
+    if not game_name:
+        return jsonify({'error': 'Missing game name'}), 400
+
+    game = games_collection.find_one({'name': game_name})
+
+    if not game:
+        return jsonify({'error': 'Game not found'}), 404
+
+    return jsonify(game['average_score']), 200

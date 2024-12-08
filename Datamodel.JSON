@@ -10,7 +10,6 @@
     "is_cooperative": false,
     "expansions": ["expansion_id"],
     "image_path": "/path/to/image.png",
-    "metadata": {}, // import da BGG, capire che dati mettere
     "price": 30,
     "matches": [{
         "match_id": "match_id",

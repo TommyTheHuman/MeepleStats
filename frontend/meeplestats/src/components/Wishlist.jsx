@@ -136,7 +136,7 @@ function Wishlist() {
                         <h3>{game.game_name}</h3>
                         <img
                             src={game.image.thumbnail}
-                            alt={game.name}
+                            alt={game.game_name}
                             style={{ width: "100px" }}
                         />
                         <p>
@@ -144,10 +144,10 @@ function Wishlist() {
                             {game.max_players || 0}
                         </p>
                         <p>
-                            Playing Time: {game.playing_time || "unknown"}{" "}
+                            Playing Time: {game.average_duration || "unknown"}{" "}
                             minutes
                         </p>
-                        <p>Year Published: {game.year_published}</p>
+                        <p>Added at: {game.added_at}</p>
                         <p>Added by: {game.username}</p>
                         <p>Notes: {game.notes}</p>
                     </li>
