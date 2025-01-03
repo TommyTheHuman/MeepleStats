@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from "react-router";
 import { createTheme, MantineProvider } from "@mantine/core";
 import LoginPage from "./pages/LoginPage.tsx";
 import Layout from "./components/Layout.tsx";
+import RegisterPage from "./pages/RegisterPage.tsx";
 import { Notifications } from "@mantine/notifications";
 import { ModalsProvider } from "@mantine/modals";
 import AuthProvider from "./components/AuthProvider.tsx";
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
         path: "/login",
         element: <LoginPage />,
         loader: LoginPageLoader,
+      },
+      {
+        path: "/register",
+        element: <RegisterPage />,
       },
     ],
   },

@@ -5,7 +5,7 @@ export default function LoginPage() {
   return (
     <>
       <Text>Benvenuto in MeepleStats</Text>
-      <LoginForm />;
+      <LoginForm />
     </>
   );
 }
