@@ -13,6 +13,7 @@ import { ModalsProvider } from "@mantine/modals";
 import AuthProvider from "./components/AuthProvider.tsx";
 import { LoginPageLoader } from "./pages/LoginPageLoader.ts";
 import LogMatchPage from "./pages/LogMatchPage.tsx";
+import Wishlist from "./pages/WishListPage.tsx";
 
 
 const theme = createTheme({});
@@ -38,6 +39,10 @@ const router = createBrowserRouter([
       {
         path: "/logmatch",
         element: <LogMatchPage />,
+      },
+      {
+        path: "/wishlist",
+        element: <Wishlist />,
       }
     ],
   },
