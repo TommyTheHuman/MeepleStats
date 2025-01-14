@@ -1,32 +1,31 @@
-
 import { Box, Button, Group, LoadingOverlay, TextInput, Textarea, Select, Checkbox, NumberInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useEffect, useState } from "react";
 //import { notifications } from "@mantine/notifications";
 import { useNavigate } from "react-router";
-import { PillsInput, Pill, Combobox, CheckIcon, useCombobox } from '@mantine/core';
+import { PillsInput, Pill, Combobox, CheckIcon, useCombobox } from "@mantine/core";
+import { Game, Player } from "../model/Interfaces";
 
 const LogMatch = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [games, setGames] = useState<{ name: string; bgg_id: string, is_cooperative: boolean }[]>([]);
-  const [players, setPlayers] = useState<{ _id: string; username: string }[]>([]);
+  const [games, setGames] = useState<Game[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
 
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
-    onDropdownOpen: () => combobox.updateSelectedOptionIndex('active'),
+    onDropdownOpen: () => combobox.updateSelectedOptionIndex("active"),
   });
-
 
   const form = useForm({
     initialValues: {
       game: "",
       game_id: "",
       note: "",
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString().split("T")[0],
       image: null as File | null,
-      players: [] as { id: string; score: string; name: string }[],
+      players: [] as Player[],
       duration: "",
       isCooperative: false,
       isWin: false,
@@ -38,12 +37,12 @@ const LogMatch = () => {
       method: "GET",
       credentials: "include",
       headers: {
-        'Content-Type': 'application/json'
-      }
+        "Content-Type": "application/json",
+      },
     })
       .then((response) => response.json())
-      .then((data) => {
-        const sortedGames = data.sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
+      .then((data:Game[]) => {
+        const sortedGames = data.sort((a, b) => a.name.localeCompare(b.name));
         setGames(sortedGames);
       })
       .catch((error) => console.error("Error fetching games:", error));
@@ -52,26 +51,27 @@ const LogMatch = () => {
   useEffect(() => {
     fetch("http://127.0.0.1:5000/players")
       .then((response) => response.json())
-      .then((data) => {
-        const sortedPlayers = data.sort((a: { username: string }, b: { username: string }) => a.username.localeCompare(b.username));
+      .then((data:Player[]) => {
+        const sortedPlayers = data.sort((a, b) =>
+          a.username.localeCompare(b.username)
+        );
         setPlayers(sortedPlayers);
       })
       .catch((error) => console.error("Error fetching players:", error));
   }, []);
 
-
   const handleValueSelect = (username: string) => {
-    const selectedPlayer = players.find(player => player.username === username);
+    const selectedPlayer = players.find((player) => player.username === username);
     if (selectedPlayer) {
-      form.setFieldValue("players", [
+      form.setFieldValue("playewrs", [
         ...form.values.players,
-        { id: selectedPlayer._id, score: "", name: selectedPlayer.username }
+        { id: selectedPlayer.id, score: "", name: selectedPlayer.username },
       ]);
     }
   };
 
   const handleGameSelect = (gameName: string) => {
-    const selectedGame = games.find(game => game.name === gameName);
+    const selectedGame = games.find((game) => game.name === gameName);
     if (selectedGame) {
       form.setFieldValue("game", selectedGame.name);
       form.setFieldValue("game_id", selectedGame.bgg_id);
@@ -86,7 +86,10 @@ const LogMatch = () => {
   };
 
   const handleValueRemove = (username: string) => {
-    form.setFieldValue("players", form.values.players.filter(player => player.name !== username));
+    form.setFieldValue(
+      "players",
+      form.values.players.filter((player) => player.name !== username)
+    );
   };
 
   const values = form.values.players.map((player) => (
@@ -98,9 +101,13 @@ const LogMatch = () => {
   const options = players
     .filter((player) => player.username.toLowerCase().includes(search.trim().toLowerCase()))
     .map((player) => (
-      <Combobox.Option value={player.username} key={player.username} active={form.values.players.some(p => p.name === player.username)}>
+      <Combobox.Option
+        value={player.username}
+        key={player.username}
+        active={form.values.players.some((p) => p.name === player.username)}
+      >
         <Group gap="sm">
-          {form.values.players.some(p => p.name === player.username) ? <CheckIcon size={12} /> : null}
+          {form.values.players.some((p) => p.name === player.username) ? <CheckIcon size={12} /> : null}
           <span>{player.username}</span>
         </Group>
       </Combobox.Option>
@@ -129,21 +136,21 @@ const LogMatch = () => {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/logmatch', {
+      const response = await fetch("http://127.0.0.1:5000/logmatch", {
         credentials: "include",
-        method: 'POST',
-        body: data
+        method: "POST",
+        body: data,
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Success:', data);
+        console.log("Success:", data);
         navigate("/");
       } else {
-        console.error('Error:', response.statusText);
+        console.error("Error:", response.statusText);
       }
     } catch (error) {
-      console.error('Fetch Error:', error);
+      console.error("Fetch Error:", error);
     } finally {
       setLoading(false);
     }
@@ -184,7 +191,7 @@ const LogMatch = () => {
                       setSearch(event.currentTarget.value);
                     }}
                     onKeyDown={(event) => {
-                      if (event.key === 'Backspace' && search.length === 0) {
+                      if (event.key === "Backspace" && search.length === 0) {
                         event.preventDefault();
                         handleValueRemove(form.values.players[form.values.players.length - 1].name);
                       }
@@ -207,17 +214,8 @@ const LogMatch = () => {
           {...form.getInputProps("duration")}
           required
         />
-        <Textarea
-          label="Note"
-          placeholder="Enter notes"
-          {...form.getInputProps("note")}
-        />
-        <TextInput
-          label="Date"
-          type="date"
-          {...form.getInputProps("date")}
-          required
-        />
+        <Textarea label="Note" placeholder="Enter notes" {...form.getInputProps("note")} />
+        <TextInput label="Date" type="date" {...form.getInputProps("date")} required />
         <TextInput
           label="Upload Image"
           type="file"
@@ -228,10 +226,7 @@ const LogMatch = () => {
           accept="image/*"
         />
         {form.values.isCooperative && (
-          <Checkbox
-            label="Partita vinta"
-            {...form.getInputProps("isWin", { type: "checkbox" })}
-          />
+          <Checkbox label="Partita vinta" {...form.getInputProps("isWin", { type: "checkbox" })} />
         )}
         {!form.values.isCooperative && (
           <div>

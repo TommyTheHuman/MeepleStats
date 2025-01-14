@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "@mantine/core/styles.css";
+import '@mantine/notifications/styles.css';
 import IndexPage from "./pages/IndexPage.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import { createTheme, MantineProvider } from "@mantine/core";
