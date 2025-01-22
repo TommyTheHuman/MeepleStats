@@ -41,7 +41,7 @@ const LogMatch = () => {
       },
     })
       .then((response) => response.json())
-      .then((data:Game[]) => {
+      .then((data: Game[]) => {
         const sortedGames = data.sort((a, b) => a.name.localeCompare(b.name));
         setGames(sortedGames);
       })
@@ -51,7 +51,7 @@ const LogMatch = () => {
   useEffect(() => {
     fetch("http://127.0.0.1:5000/players")
       .then((response) => response.json())
-      .then((data:Player[]) => {
+      .then((data: Player[]) => {
         const sortedPlayers = data.sort((a, b) =>
           a.username.localeCompare(b.username)
         );
@@ -63,9 +63,9 @@ const LogMatch = () => {
   const handleValueSelect = (username: string) => {
     const selectedPlayer = players.find((player) => player.username === username);
     if (selectedPlayer) {
-      form.setFieldValue("playewrs", [
+      form.setFieldValue("players", [
         ...form.values.players,
-        { id: selectedPlayer.id, score: "", name: selectedPlayer.username },
+        { id: selectedPlayer.id, score: "", name: selectedPlayer.username, username: selectedPlayer.username },
       ]);
     }
   };
