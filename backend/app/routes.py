@@ -335,6 +335,43 @@ def add_wishlist():
 
     return jsonify({'message': 'Game added to the wishlist'}), 201
 
+@data_bp.route('/removewishlist', methods=['DELETE'])
+@jwt_required()
+def remove_wishlist():
+    # Get the bgg id from the query string
+    game_id = request.args.get('game_id')
+
+    if not game_id:
+        return jsonify({'error': 'Missing game_id'}), 400
+    
+    # Check if the game is in the wishlist
+    game = wishlists_collection.find_one({'game_id': game_id})
+    if not game:
+        return jsonify({'error': 'Game not found in the wishlist'}), 404
+    
+    # Remove the game from the wishlist
+    wishlists_collection.delete_one({'game_id': game_id})
+
+    return jsonify({'message': 'Game removed from the wishlist'}), 200
+
+
+@data_bp.route('/matchHistory', methods=['GET'])
+#@jwt_required()
+def matchHistory():
+    # Get all the matches from the database
+    try:
+        matches = matches_collection.find()
+        
+        matches_data = []
+
+        for match in matches:
+            match['_id'] = str(match['_id'])
+            matches_data.append(match)
+
+        return jsonify(matches_data), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 statistic_bp = Blueprint('statistic', __name__)
 
 ### GLOBAL STATS ###
