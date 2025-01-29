@@ -10,6 +10,7 @@ from flask import current_app
 import requests
 
 from .services.db import players_collection, games_collection, matches_collection, wishlists_collection
+from .services.bgg_import import import_games_from_bgg
 
 #bp = Blueprint('main', __name__)
 
@@ -1033,3 +1034,21 @@ def gameAvgScore():
         return jsonify({'error': 'Game not found'}), 404
 
     return jsonify(game['average_score']), 200
+
+utility_bp = Blueprint('utils', __name__)
+
+@utility_bp.route('/importGames', methods=['GET'])
+#@jwt_required()
+def importGames():
+    # Import games from BGG API using the bgg_import.py
+
+    # Get the username from the .env file
+    #username = os.getenv('BGG_USERNAME')
+    username = "ArcherMaster" # FIXME: Use the correct username from the .env file
+
+    # Check if the username is provided
+    if not username:
+        return jsonify({'error': 'Missing BGG username'}), 400
+    
+    import_games_from_bgg(username)
+    return jsonify({'message': 'Games imported successfully'}), 200
