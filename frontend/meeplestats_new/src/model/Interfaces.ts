@@ -16,3 +16,15 @@ export interface Game {
   yearPublished: string;
   notes: string;
 }
+
+export interface StatisticCardInterface {
+  endpoint: string;
+  title: string;
+  filters?: filterOption[];
+}
+
+export interface filterOption {
+  value: string;
+  label: string;
+  type: 'string' | 'date';
+}
