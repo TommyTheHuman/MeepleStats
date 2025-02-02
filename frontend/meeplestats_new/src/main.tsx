@@ -16,7 +16,7 @@ import { LoginPageLoader } from "./pages/LoginPageLoader.ts";
 import LogMatchPage from "./pages/LogMatchPage.tsx";
 import Wishlist from "./pages/WishListPage.tsx";
 import MatchHistoryPage from "./pages/MatchHistoryPage.tsx";
-
+import ProtectedRoute from "./components/ProtectedRoute.tsx";
 
 const theme = createTheme({});
 
@@ -27,7 +27,11 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <IndexPage />,
+        element: (
+          <ProtectedRoute>
+            <IndexPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/login",
