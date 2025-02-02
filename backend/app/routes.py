@@ -128,7 +128,6 @@ def get_players():
 @data_bp.route('/logmatch', methods=['POST'])
 @jwt_required()
 def log_match():
-
     # Create the upload folder if it doesn't exist
     upload_folder = current_app.config['UPLOAD_FOLDER']
     if not os.path.exists(upload_folder):
@@ -168,7 +167,6 @@ def log_match():
         players.append({'id': player_id, 'name': player_name, 'score': int(player_score)})
         index += 1
                                                   
-
     # Fill mongo collections
 
     # Compute winner, worst_score_player, is_cooperative, total_score
@@ -182,21 +180,22 @@ def log_match():
 
     if (game['is_cooperative']):
         # Check if the match is cooperative --> each player wins
-        winner = [player['id'] for player in players]
+        winner = [player for player in players]
         total_score = None
         worst_score_player = None
     else:
         # Check if the match is not cooperative --> the player with the highest score wins
-        winner = max(players, key=lambda x: x['score'])['id']
+        winner = max(players, key=lambda x: x['score'])
         total_score = sum([player['score'] for player in players])
-        worst_score_player = min(players, key=lambda x: x['score'])['id']
+        worst_score_player = min(players, key=lambda x: x['score'])
 
     # Create the match
     match_data = {
         'game_id': game_id,
         'game_name': game_name,
+        'game_image': game['image']['url'],
         'date': date,
-        'players': [player['id'] for player in players],
+        'players': [player for player in players],
         'expansions_used': [],
         'notes': note,
         'image_path': image_path,
@@ -239,7 +238,7 @@ def log_match():
         if player['score'] > game_highest_score:
             game['record_score_by_player'] = {
                 'id': player['id'],
-                'name': player['username'],
+                'name': player['name'],
                 'score': player['score'],
             }
 
@@ -268,7 +267,7 @@ def log_match():
     return jsonify({'message': 'Match logged successfully'}), 201
 
 @data_bp.route('/wishlist', methods=['GET'])
-# @jwt_required()
+@jwt_required()
 def get_wishlist():
     try:
         wishlists = wishlists_collection.find()
@@ -284,7 +283,7 @@ def get_wishlist():
         return jsonify({'error': str(e)}), 500
 
 @data_bp.route('/addwishlist', methods=['POST'])
-# @jwt_required()
+@jwt_required()
 def add_wishlist():
     data = request.get_json()
     game_id = data.get('game_id')
@@ -298,8 +297,8 @@ def add_wishlist():
     if game:
         return jsonify({'error': 'Game already in the wishlist'}), 400
     
-    #username = get_jwt_identity() #FIXME: uncomment this line
-    username = "bb"
+    username = get_jwt_identity() #FIXME: uncomment this line
+    #username = "bb"
 
     user = players_collection.find_one({'username': username})
     if not user:
@@ -357,7 +356,7 @@ def remove_wishlist():
 
 
 @data_bp.route('/matchHistory', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def matchHistory():
     # Get all the matches from the database
     try:
@@ -378,7 +377,7 @@ statistic_bp = Blueprint('statistic', __name__)
 ### GLOBAL STATS ###
 
 @statistic_bp.route('/totHours', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def totHours():
 
     # Get date filters from query string
@@ -420,7 +419,7 @@ def totHours():
         return jsonify({'error': str(e)}), 500
 
 @statistic_bp.route('/totMatches', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def totMatches():
     
         # Get date filters from query string
@@ -464,7 +463,7 @@ def totMatches():
 ### PLAYER STATS ###
 
 @statistic_bp.route('/playerWins', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def playerWins():
         
     # Get date filters from query string
@@ -545,7 +544,7 @@ def playerWins():
                 
 
 @statistic_bp.route('/playerWinRate', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def playerWinRate():
 
     # Get date filters from query string
@@ -649,7 +648,7 @@ def playerWinRate():
             return jsonify(0), 200
 
 @statistic_bp.route('/playerLongWinstreak', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def playerLongWinstreak():
 
     # Get player name from query string
@@ -664,7 +663,7 @@ def playerLongWinstreak():
     return jsonify(player['winsteaks']), 200
 
 @statistic_bp.route('/playerHighestWinRate', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def playerHighestWinRate():
         
     # Get month and year from query string
@@ -759,7 +758,7 @@ def playerHighestWinRate():
         return jsonify({'error': 'No matches found'}), 404
 
 @statistic_bp.route('/playerGameWins', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def playerGameWins():
 
     # Get player name from query string
@@ -805,7 +804,7 @@ def playerGameWins():
 ### GAME STATS ###
 
 @statistic_bp.route('/gameCoopWinRate', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def gameCoopWinRate():
 
     # This route return the winrate of cooperative games for all the coop games in the collection
@@ -868,7 +867,7 @@ def gameCoopWinRate():
         return jsonify({'error': 'No matches found'}), 404
 
 @statistic_bp.route('/gameNumMatch', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def gameNumMatch():    
         # Calculate the number of matches for a specific game from game collection
     
@@ -900,7 +899,7 @@ def gameNumMatch():
             return jsonify({'error': 'No matches found'}), 404
         
 @statistic_bp.route('/gameAvgDuration', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def gameAvgDuration():
 
     # Get game from query string
@@ -959,7 +958,7 @@ def gameAvgDuration():
 
 
 @statistic_bp.route('/gameBestValue', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def gameBestValue():
 
     # Get top 3 games with the best price/tot_hours_played ratio
@@ -1001,7 +1000,7 @@ def gameBestValue():
         return jsonify(result), 200
     
 @statistic_bp.route('/gameHighestScore', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def gameHighestScore():
     # Get the game name from query string
     game_name = request.args.get('game_name')
@@ -1018,7 +1017,7 @@ def gameHighestScore():
     return jsonify(game['record_score_by_player']), 200
 
 @statistic_bp.route('/gameAvgScore', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def gameAvgScore():
 
     # Get the game name from query string
@@ -1038,7 +1037,7 @@ def gameAvgScore():
 utility_bp = Blueprint('utils', __name__)
 
 @utility_bp.route('/importGames', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def importGames():
     # Import games from BGG API using the bgg_import.py
 

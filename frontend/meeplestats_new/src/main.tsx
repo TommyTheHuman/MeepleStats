@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "@mantine/core/styles.css";
 import '@mantine/notifications/styles.css';
+import '@mantine/dates/styles.css';
 import IndexPage from "./pages/IndexPage.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import { createTheme, MantineProvider } from "@mantine/core";
@@ -14,6 +15,7 @@ import AuthProvider from "./components/AuthProvider.tsx";
 import { LoginPageLoader } from "./pages/LoginPageLoader.ts";
 import LogMatchPage from "./pages/LogMatchPage.tsx";
 import Wishlist from "./pages/WishListPage.tsx";
+import MatchHistoryPage from "./pages/MatchHistoryPage.tsx";
 
 
 const theme = createTheme({});
@@ -43,6 +45,10 @@ const router = createBrowserRouter([
       {
         path: "/wishlist",
         element: <Wishlist />,
+      },
+      {
+        path: "/matchHistory",
+        element: <MatchHistoryPage />,
       }
     ],
   },

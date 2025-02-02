@@ -63,9 +63,10 @@ const LogMatch = () => {
   const handleValueSelect = (username: string) => {
     const selectedPlayer = players.find((player) => player.username === username);
     if (selectedPlayer) {
+      console.log("Selected player:", selectedPlayer);
       form.setFieldValue("players", [
         ...form.values.players,
-        { id: selectedPlayer.id, score: "", name: selectedPlayer.username, username: selectedPlayer.username },
+        { _id: selectedPlayer._id, score: "", name: selectedPlayer.username, username: selectedPlayer.username },
       ]);
     }
   };
@@ -129,12 +130,12 @@ const LogMatch = () => {
 
     if (Array.isArray(values.players)) {
       values.players.forEach((player, index) => {
-        data.append(`players[${index}][id]`, player.id);
+        data.append(`players[${index}][id]`, player._id);
         data.append(`players[${index}][score]`, player.score);
         data.append(`players[${index}][name]`, player.name);
       });
     }
-
+    console.log("Data:", values);
     try {
       const response = await fetch("http://127.0.0.1:5000/logmatch", {
         credentials: "include",
@@ -231,7 +232,7 @@ const LogMatch = () => {
         {!form.values.isCooperative && (
           <div>
             {form.values.players.map((player, index) => (
-              <div key={player.id}>
+              <div key={player._id}>
                 <NumberInput
                   label={`${player.name} score`}
                   value={parseInt(player.score)}

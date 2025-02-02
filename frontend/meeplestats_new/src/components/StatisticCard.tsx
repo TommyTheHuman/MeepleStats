@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { StatisticCardInterface } from "../model/Interfaces";
 import { fetchStatistics } from "../api/statisticApi";
 import { Card, Loader, Text, TextInput } from "@mantine/core";
-import { DateInput, DateValue } from "@mantine/dates";
+import { DateInput, DateValue, MonthPickerInput, YearPickerInput } from "@mantine/dates";
+import { FilterTypes } from "../model/Constants";
 
 
 const StatisticCard = ({ endpoint, title, filters }: StatisticCardInterface) => {
@@ -16,6 +17,8 @@ const StatisticCard = ({ endpoint, title, filters }: StatisticCardInterface) => 
     const loadData = async () => {
       setLoading(true);
       try {
+        // Filter out any empty values from the filterValues object
+        Object.keys(filterValues).forEach((key) => (filterValues[key] === "" && delete filterValues[key]));
         const result = await fetchStatistics(endpoint, filterValues);
         setData(result);
         setError(null);
@@ -83,7 +86,7 @@ const StatisticCard = ({ endpoint, title, filters }: StatisticCardInterface) => 
   const renderFilters = () => {
     return filters?.map((filter) => {
       // FIXME: add more types of filters --> year, month ecc.
-      if (filter.type === 'string') {
+      if (filter.type === FilterTypes.string) {
         // return a text input for the player name
         return (
           <TextInput
@@ -93,15 +96,37 @@ const StatisticCard = ({ endpoint, title, filters }: StatisticCardInterface) => 
             value={filterValues[filter.value] || ''} // Set the value of the input to the value in the state
           />
         );
-      } else if (filter.type === 'date') {
+      } else if (filter.type === FilterTypes.date) {
         // return a date picker
         return (
           <DateInput
             label={filter.label}
             key={filter.value}
-            size="sm"
             value={filterValues[filter.value] ? new Date(filterValues[filter.value]) : null}
             onChange={(date) => handleFilterChange(filter.value, formatDate(date))}
+          />
+        );
+      } else if (filter.type === FilterTypes.month) {
+        return (
+          <MonthPickerInput
+            label={filter.label}
+            key={filter.value}
+            valueFormat="MMMM"
+            clearable
+            value={filterValues[filter.value] ? new Date(new Date().getFullYear(), parseInt(filterValues[filter.value]), 1) : null}
+            minDate={new Date(new Date().getFullYear(), 0, 1)} // Restrict to current year
+            maxDate={new Date(new Date().getFullYear(), 11, 31)} // Restrict to current year
+            onChange={(date) => handleFilterChange(filter.value, date?.getMonth().toString() || '')}
+          />
+        );
+      } else if (filter.type === FilterTypes.year) {
+        return (
+          <YearPickerInput
+            label={filter.label}
+            key={filter.value}
+            clearable
+            value={filterValues[filter.value] ? new Date(filterValues[filter.value]) : null}
+            onChange={(date) => handleFilterChange(filter.value, date?.getFullYear().toString() || '')}
           />
         );
       }

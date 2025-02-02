@@ -1,5 +1,7 @@
+import { FilterTypes } from "./Constants";
+
 export interface Player {
-  id: string;
+  _id: string;
   score: string;
   name: string;
   username: string;
@@ -26,5 +28,14 @@ export interface StatisticCardInterface {
 export interface filterOption {
   value: string;
   label: string;
-  type: 'string' | 'date';
+  type: keyof typeof FilterTypes;
+}
+
+export interface MatchCardInterface {
+  game_name: string;
+  date: string;
+  game_duration: string;
+  players: { id: string, name: string, score: string }[];
+  winner: { id: string, name: string, score: string };
+  game_image: string;
 }
