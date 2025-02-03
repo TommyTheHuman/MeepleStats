@@ -1,8 +1,12 @@
 from pymongo import MongoClient
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # MongoDB connection
-MONGO_URI = "mongodb://localhost:27017"  # update with your MongoDB URI
-DB_NAME = "meeple_stats"
+MONGO_URI = os.getenv("MONGO_URI")
+DB_NAME = os.getenv("DB_NAME")
 
 # Connectron to MongoDB
 client = MongoClient(MONGO_URI)

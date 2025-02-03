@@ -1042,8 +1042,7 @@ def importGames():
     # Import games from BGG API using the bgg_import.py
 
     # Get the username from the .env file
-    #username = os.getenv('BGG_USERNAME')
-    username = "ArcherMaster" # FIXME: Use the correct username from the .env file
+    username = os.getenv('BGG_USERNAME')
 
     # Check if the username is provided
     if not username:

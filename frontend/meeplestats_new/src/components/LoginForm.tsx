@@ -6,6 +6,8 @@ import { useNavigate } from "react-router";
 import { Constants } from "../model/Constants";
 import { AuthContext } from "./AuthContext";
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
 const LoginForm = () => {
   const navigate = useNavigate();
 
@@ -46,7 +48,7 @@ const LoginForm = () => {
     let response = null as Response | null;
 
     try {
-      response = await fetch("http://127.0.0.1:5000/login", {
+      response = await fetch(`${API_BASE_URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
