@@ -20,7 +20,7 @@ export default function Layout() {
     setAuthStatus("Anonymous");
   }
 
-  const handleImportGames = () => {
+  const handleImportGames = async () => {
     try {
       const respose = await fetch(`${process.env.REACT_APP_API_URL}/importGames`, {
         method: "GET",
@@ -34,57 +34,58 @@ export default function Layout() {
     } catch (error) {
       console.error(error);
     }
+  }
 
-    return (
-      <AppShell
-        header={{ height: 60 }}
-        navbar={{
-          width: 300,
-          breakpoint: "sm",
-          collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
-        }}
-        padding="md"
-      >
-        <AppShell.Header>
-          <Group h="100%" px="md">
-            <Burger opened={mobileOpened} onClick={toggleMobile} hiddenFrom="sm" size="sm" />
-            <Burger opened={desktopOpened} onClick={toggleDesktop} visibleFrom="sm" size="sm" />
-            <Text fw={500}>Logo</Text>
-          </Group>
-        </AppShell.Header>
-        <AppShell.Navbar p="md">
-          <Avatar color="cyan" radius="xl">
-            {savedUsername?.charAt(0).toUpperCase()}
-          </Avatar>
-          <Text mt="md">{authStatus === "LoggedIn" ? "Utente loggato" : "Utente anonimo"}</Text>
-          <NavLink component={Link} to="/" label="Home" />
-          {!isLoggedIn && (
-            <>
-              <NavLink component={Link} to="/login" label="Login" />
-              <NavLink component={Link} to="/register" label="Register" />
-            </>
-          )}
-          {isLoggedIn && (
-            <>
-              <NavLink label="Logout" onClick={handleLogout} />
-              <NavLink component={Link} to="/wishlist" label="Wishlist" />
-              <NavLink component={Link} to="/matchHistory" label="Match History" />
-              <NavLink component={Link} to="/logmatch" label="Log Match" />
-              <Button onClick={handleImportGames}>Import Games</Button>
-            </>
+  return (
+    <AppShell
+      header={{ height: 60 }}
+      navbar={{
+        width: 300,
+        breakpoint: "sm",
+        collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
+      }}
+      padding="md"
+    >
+      <AppShell.Header>
+        <Group h="100%" px="md">
+          <Burger opened={mobileOpened} onClick={toggleMobile} hiddenFrom="sm" size="sm" />
+          <Burger opened={desktopOpened} onClick={toggleDesktop} visibleFrom="sm" size="sm" />
+          <Text fw={500}>Logo</Text>
+        </Group>
+      </AppShell.Header>
+      <AppShell.Navbar p="md">
+        <Avatar color="cyan" radius="xl">
+          {savedUsername?.charAt(0).toUpperCase()}
+        </Avatar>
+        <Text mt="md">{authStatus === "LoggedIn" ? "Utente loggato" : "Utente anonimo"}</Text>
+        <NavLink component={Link} to="/" label="Home" />
+        {!isLoggedIn && (
+          <>
+            <NavLink component={Link} to="/login" label="Login" />
+            <NavLink component={Link} to="/register" label="Register" />
+          </>
+        )}
+        {isLoggedIn && (
+          <>
+            <NavLink label="Logout" onClick={handleLogout} />
+            <NavLink component={Link} to="/wishlist" label="Wishlist" />
+            <NavLink component={Link} to="/matchHistory" label="Match History" />
+            <NavLink component={Link} to="/logmatch" label="Log Match" />
+            <Button onClick={handleImportGames}>Import Games</Button>
+          </>
 
-          )}
-          {/* {Array(15)
+        )}
+        {/* {Array(15)
           .fill(0)
           .map((_, index) => (
             <Skeleton key={index} h={28} mt="sm" animate={false} />
           ))} */}
-        </AppShell.Navbar>
-        <AppShell.Main>
-          <Container size={"xxl"}>
-            <Outlet />
-          </Container>
-        </AppShell.Main>
-      </AppShell>
-    );
-  }
+      </AppShell.Navbar>
+      <AppShell.Main>
+        <Container size={"xxl"}>
+          <Outlet />
+        </Container>
+      </AppShell.Main>
+    </AppShell>
+  );
+}
