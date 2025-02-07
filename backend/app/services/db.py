@@ -5,8 +5,8 @@ import os
 load_dotenv()
 
 # MongoDB connection
-MONGO_URI = os.getenv("MONGO_URI")
-DB_NAME = os.getenv("DB_NAME")
+MONGO_URI = os.getenv('MONGO_URI')
+DB_NAME = os.getenv('DB_NAME')
 
 # Connectron to MongoDB
 client = MongoClient(MONGO_URI)

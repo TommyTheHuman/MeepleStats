@@ -5,11 +5,16 @@ from flask_cors import CORS
 from datetime import timedelta
 from dotenv import load_dotenv
 import os
+from dotenv import find_dotenv
 
 def create_app():
     app = Flask(__name__)
 
-    load_dotenv()
+    dotenv_path = find_dotenv()
+    if dotenv_path:
+        load_dotenv(dotenv_path, override=True)
+    else:
+        print("File .env non trovato")
 
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES', 28)))
