@@ -92,7 +92,7 @@ const Wishlist = () => {
   const addToWishlist = async () => {
     if (!selectedGame) return;
     setLoading(true);
-    const response = await fetch('http://127.0.0.1:5000/addwishlist', {
+    const response = await fetch('/api/addwishlist', {
       credentials: "include",
       method: "POST",
       headers: {
@@ -110,7 +110,7 @@ const Wishlist = () => {
   };
 
   const fetchWishlist = async () => {
-    const response = await fetch('http://127.0.0.1:5000/wishlist', { credentials: "include" });
+    const response = await fetch('/api/wishlist', { credentials: "include" });
     const data: ApiResponseItem[] = await response.json();
     // map data into Game objects
 

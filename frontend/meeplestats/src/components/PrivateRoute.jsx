@@ -5,7 +5,7 @@ function PrivateRoute({ children }) {
     const [isAuthenticated, setIsAuthenticated] = useState(null);
 
     useEffect(() => {
-        fetch('http://127.0.0.1:5000/check-auth', { method: 'GET', credentials: 'include' })
+        fetch('/api/check-auth', { method: 'GET', credentials: 'include' })
             .then((response) => {
                 if (response.ok) {
                     setIsAuthenticated(true);

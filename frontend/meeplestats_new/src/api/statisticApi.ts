@@ -1,6 +1,6 @@
 export const fetchStatistics = async (endpoint: string, params: Record<string, string> = {}) => {
   const queryString = new URLSearchParams(params).toString();
-  const response = await fetch(`http://127.0.0.1:5000/${endpoint}?${queryString}`, {
+  const response = await fetch(`/api/${endpoint}?${queryString}`, {
     method: "GET",
     credentials: "include",
   });

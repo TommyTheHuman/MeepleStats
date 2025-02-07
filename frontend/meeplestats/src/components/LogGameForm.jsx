@@ -20,7 +20,7 @@ function LogGameForm() {
 
     useEffect(() => {
         // Fetch the games from the /games route
-        fetch("http://127.0.0.1:5000/games", {
+        fetch("/api/games", {
             method: "GET",
             credentials: "include", 
             headers: {
@@ -37,7 +37,7 @@ function LogGameForm() {
 
     useEffect(() => {
         // Fetch the players from the /players route
-        fetch("http://127.0.0.1:5000/players")
+        fetch("/api/players")
             .then((response) => response.json())
             .then((data) => {
                 const sortedPlayers = data.sort((a, b) => a.username.localeCompare(b.username));
@@ -109,7 +109,7 @@ function LogGameForm() {
     console.log(data);
 
     try {
-        const response = await fetch('http://127.0.0.1:5000/logmatch', {
+        const response = await fetch('/api/logmatch', {
             credentials: "include",
             method: 'POST',
             body: data

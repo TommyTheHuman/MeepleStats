@@ -56,7 +56,7 @@ function Wishlist() {
 
     // add selected game to wishlist
     const addToWishlist = () => {
-        const response = fetch("http://127.0.0.1:5000/addwishlist", {
+        const response = fetch("/api/addwishlist", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -71,7 +71,7 @@ function Wishlist() {
 
     // fetch wishlist from the backend
     const fetchWishlist = async () => {
-        await fetch("http://127.0.0.1:5000/wishlist")
+        await fetch("/api/wishlist")
             .then((response) => response.json())
             .then((data) => setWishlist(data))
             .catch((error) => console.error("Error fetching wishlist:", error));

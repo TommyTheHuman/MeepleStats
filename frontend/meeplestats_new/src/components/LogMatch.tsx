@@ -34,7 +34,7 @@ const LogMatch = () => {
   });
 
   useEffect(() => {
-    fetch('http://127.0.0.1:5000/games', {
+    fetch('/api/games', {
       method: "GET",
       credentials: "include",
       headers: {
@@ -50,7 +50,7 @@ const LogMatch = () => {
   }, []);
 
   useEffect(() => {
-    fetch('http://127.0.0.1:5000/players')
+    fetch('/api/players')
       .then((response) => response.json())
       .then((data: Player[]) => {
         const sortedPlayers = data.sort((a, b) =>
@@ -138,7 +138,7 @@ const LogMatch = () => {
     }
     console.log("Data:", values);
     try {
-      const response = await fetch('http://127.0.0.1:5000/logmatch', {
+      const response = await fetch('/api/logmatch', {
         credentials: "include",
         method: "POST",
         body: data,

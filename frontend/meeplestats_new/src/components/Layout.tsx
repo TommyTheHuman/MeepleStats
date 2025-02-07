@@ -22,7 +22,7 @@ export default function Layout() {
 
   const handleImportGames = async () => {
     try {
-      const respose = await fetch('http://127.0.0.1:5000/importGames', {
+      const respose = await fetch('/api/importGames', {
         method: "GET",
         credentials: "include",
       });
