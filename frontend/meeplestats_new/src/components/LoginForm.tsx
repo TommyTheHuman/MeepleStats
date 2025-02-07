@@ -47,7 +47,7 @@ const LoginForm = () => {
     let response = null as Response | null;
 
     try {
-      response = await fetch('http://127.0.0.1:5000/login', {
+      response = await fetch('/api/login', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -26,8 +26,8 @@ def create_app():
     
     jwt = JWTManager(app)
 
-    cors_origin = os.getenv('CORS_ORIGIN')
-    CORS(app, resources={r"/*": {"origins": cors_origin}}, supports_credentials=True)
+    #cors_origin = os.getenv('CORS_ORIGIN')
+    #CORS(app, resources={r"/*": {"origins": cors_origin}}, supports_credentials=True)
 
     # route imports
     with app.app_context():
