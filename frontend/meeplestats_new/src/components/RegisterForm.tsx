@@ -6,7 +6,6 @@ import { notifications } from "@mantine/notifications";
 import { Constants } from "../model/Constants";
 import { AuthContext } from "./AuthContext";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const RegisterForm = () => {
   const navigate = useNavigate();
@@ -46,7 +45,7 @@ const RegisterForm = () => {
     let response = null as Response | null;
 
     try {
-      response = await fetch(`${API_BASE_URL}/register`, {
+      response = await fetch('http://127.0.0.1:5000/register', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

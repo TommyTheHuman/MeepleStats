@@ -1,7 +1,6 @@
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 export const fetchStatistics = async (endpoint: string, params: Record<string, string> = {}) => {
   const queryString = new URLSearchParams(params).toString();
-  const response = await fetch(`${API_BASE_URL}/${endpoint}?${queryString}`, {
+  const response = await fetch(`http://127.0.0.1:5000/${endpoint}?${queryString}`, {
     method: "GET",
     credentials: "include",
   });

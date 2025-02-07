@@ -22,7 +22,7 @@ export default function Layout() {
 
   const handleImportGames = async () => {
     try {
-      const respose = await fetch(`${process.env.REACT_APP_API_URL}/importGames`, {
+      const respose = await fetch('http://127.0.0.1:5000/importGames', {
         method: "GET",
         credentials: "include",
       });

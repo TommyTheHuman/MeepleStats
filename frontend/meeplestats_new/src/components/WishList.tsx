@@ -3,7 +3,6 @@ import { Box, Button, LoadingOverlay, Textarea, Autocomplete, Card, Image, Title
 //import { useForm } from "@mantine/form";
 import { Game } from "../model/Interfaces";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 interface ApiResponseItem {
   game_id: string;
@@ -93,7 +92,7 @@ const Wishlist = () => {
   const addToWishlist = async () => {
     if (!selectedGame) return;
     setLoading(true);
-    const response = await fetch(`${API_BASE_URL}/addwishlist`, {
+    const response = await fetch('http://127.0.0.1:5000/addwishlist', {
       credentials: "include",
       method: "POST",
       headers: {
@@ -111,7 +110,7 @@ const Wishlist = () => {
   };
 
   const fetchWishlist = async () => {
-    const response = await fetch(`${API_BASE_URL}/wishlist`, { credentials: "include" });
+    const response = await fetch('http://127.0.0.1:5000/wishlist', { credentials: "include" });
     const data: ApiResponseItem[] = await response.json();
     // map data into Game objects
 
