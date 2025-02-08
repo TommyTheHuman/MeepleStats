@@ -576,8 +576,11 @@ def playerWinRate():
     player = players_collection.find_one({'username': player_name})
 
     if start_date_str is None and end_date_str is None:
-        # Read from player's collection
-        return jsonify(player['wins'] / player['total_matches']), 200
+        # Read from player's collection, prevent division by zero
+        if player['total_matches'] > 0:
+            winrate = (player['wins'] / player['total_matches']) * 100
+        else:
+            winrate = 0
     else:
         
         # Set default values for start_date and end_date if not provided
@@ -958,6 +961,8 @@ def gameAvgDuration():
 
     if result:
         return jsonify(result), 200
+    else:
+        return jsonify({'error': 'No matches found'}), 404  
 
 
 @statistic_bp.route('/gameBestValue', methods=['GET'])
@@ -1001,6 +1006,8 @@ def gameBestValue():
 
     if result:
         return jsonify(result), 200
+    else:
+        return jsonify({'error': 'No matches found'}), 404
     
 @statistic_bp.route('/gameHighestScore', methods=['GET'])
 @jwt_required()
