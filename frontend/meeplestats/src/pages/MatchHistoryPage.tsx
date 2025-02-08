@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { MatchCardInterface } from '../model/Interfaces';
 import MatchCard from '../components/MatchCards';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const MatchHistoryPage = () => {
 
@@ -15,7 +14,7 @@ const MatchHistoryPage = () => {
     const loadMatchHistory = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${API_BASE_URL}/matchHistory`, {
+        const response = await fetch('/api/matchHistory', {
           method: "GET",
           credentials: "include",
         });

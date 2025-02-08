@@ -4,7 +4,7 @@ import LoginForm from "../components/LoginForm";
 export default function LoginPage() {
   return (
     <>
-      <Text>Benvenuto in MeepleStats</Text>
+      <Text>Welcome to MeepleStats</Text>
       <LoginForm />
     </>
   );

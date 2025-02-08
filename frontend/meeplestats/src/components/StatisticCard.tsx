@@ -85,7 +85,6 @@ const StatisticCard = ({ endpoint, title, filters }: StatisticCardInterface) => 
 
   const renderFilters = () => {
     return filters?.map((filter) => {
-      // FIXME: add more types of filters --> year, month ecc.
       if (filter.type === FilterTypes.string) {
         // return a text input for the player name
         return (

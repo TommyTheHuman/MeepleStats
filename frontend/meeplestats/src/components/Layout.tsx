@@ -57,7 +57,7 @@ export default function Layout() {
         <Avatar color="cyan" radius="xl">
           {savedUsername?.charAt(0).toUpperCase()}
         </Avatar>
-        <Text mt="md">{authStatus === "LoggedIn" ? "Utente loggato" : "Utente anonimo"}</Text>
+        <Text mt="md">{authStatus === "LoggedIn" ? "User Logges" : "Anonymous User"}</Text>
         <NavLink component={Link} to="/" label="Home" />
         {!isLoggedIn && (
           <>

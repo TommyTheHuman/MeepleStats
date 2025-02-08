@@ -24,24 +24,19 @@ const Wishlist = () => {
   const [wishlist, setWishlist] = useState<Game[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // const form = useForm({
-  //   initialValues: {
-  //     notes: "",
-  //   },
-  // });
 
   useEffect(() => {
     if (query.length >= 3) {
-      setSuggestions([]); // Pulisci i suggerimenti
-      searchGames(query); // Avvia una nuova richiesta
+      setSuggestions([]); // Clear suggestions
+      searchGames(query); // Search for games
     } else {
-      setSuggestions([]); // Pulisci i suggerimenti
-      setSelectedGame(null); // Pulisci il gioco selezionato
+      setSuggestions([]); // Clear suggestions
+      setSelectedGame(null); // Clear selected game
     }
   }, [query]);
 
   const searchGames = async (query: string) => {
-    if (query.length < 3) return; // Invia la richiesta solo se la query ha almeno 3 caratteri
+    if (query.length < 3) return; // Minimum 3 characters for search query
     const response = await fetch(`https://boardgamegeek.com/xmlapi2/search?query=${query}`);
     const text = await response.text();
     const parser = new DOMParser();
@@ -121,7 +116,7 @@ const Wishlist = () => {
       maxPlayers: item.max_players,
       playingTime: item.average_duration,
       thumbnail: item.image.thumbnail,
-      yearPublished: "Unknown", // Se non è presente nella risposta dell'API
+      yearPublished: "Unknown",
       is_cooperative: item.is_cooperative,
       notes: item.notes,
     }));

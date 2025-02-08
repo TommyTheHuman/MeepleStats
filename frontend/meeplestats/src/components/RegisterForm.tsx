@@ -24,17 +24,17 @@ const RegisterForm = () => {
 
     validate: {
       username: (value) => {
-        return value.length > 0 ? null : "Username non valido";
+        return value.length > 0 ? null : "Invalid username";
       },
       mail: (value) => {
-        return value.length > 0 ? null : "Mail non valida";
+        return value.length > 0 ? null : "Invalid mail";
       },
       password: (value) => {
-        return value.length > 0 ? null : "Password non valida";
+        return value.length > 0 ? null : "Invalid password";
       },
       confirmPassword: (value, values): string | null => {
         // Check if the password is the same as the confirmPassword
-        return value === values.password ? null : "Le password non coincide";
+        return value === values.password ? null : "Passwords do not match";
       }
     },
   });
@@ -72,8 +72,8 @@ const RegisterForm = () => {
     } else {
       notifications.show({
         color: "red",
-        title: "Errore",
-        message: "Credenziali non valide",
+        title: "Error",
+        message: "Invalid credentials",
       });
     }
   };
@@ -106,7 +106,7 @@ const RegisterForm = () => {
         />
         <TextInput
           withAsterisk
-          label="Conferma Password"
+          label="Confirm Password"
           type="password"
           key={form.key("confirmPassword")}
           {...form.getInputProps("confirmPassword")}

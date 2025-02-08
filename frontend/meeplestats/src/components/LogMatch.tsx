@@ -228,7 +228,7 @@ const LogMatch = () => {
           accept="image/*"
         />
         {form.values.isCooperative && (
-          <Checkbox label="Partita vinta" {...form.getInputProps("isWin", { type: "checkbox" })} />
+          <Checkbox label="Match won" {...form.getInputProps("isWin", { type: "checkbox" })} />
         )}
         {!form.values.isCooperative && (
           <div>

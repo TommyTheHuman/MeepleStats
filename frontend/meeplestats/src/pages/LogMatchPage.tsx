@@ -4,7 +4,7 @@ import LogMatch from "../components/LogMatch";
 export default function LoginPage() {
   return (
     <>
-      <Text>Registra una Partita</Text>
+      <Text>Log a match</Text>
       <LogMatch />
     </>
   );

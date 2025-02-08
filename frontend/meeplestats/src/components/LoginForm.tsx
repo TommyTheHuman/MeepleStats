@@ -24,10 +24,10 @@ const LoginForm = () => {
 
     validate: {
       username: (value) => {
-        return value.length > 0 ? null : "Username non valido";
+        return value.length > 0 ? null : "Username is not valid";
       },
       password: (value) => {
-        return value.length > 0 ? null : "Password non valida";
+        return value.length > 0 ? null : "Password is not valid";
       },
     },
   });
@@ -58,8 +58,8 @@ const LoginForm = () => {
     } catch (error) {
       notifications.show({
         color: "red",
-        title: "Errore",
-        message: "Errore di rete: " + error,
+        title: "Error",
+        message: "Network error: " + error,
       });
     } finally {
       setLoading(false);
@@ -74,8 +74,8 @@ const LoginForm = () => {
     } else {
       notifications.show({
         color: "red",
-        title: "Errore",
-        message: "Credenziali non valide",
+        title: "Error",
+        message: "Invalid credentials",
       });
     }
   };
