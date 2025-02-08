@@ -581,6 +581,8 @@ def playerWinRate():
             winrate = (player['wins'] / player['total_matches']) * 100
         else:
             winrate = 0
+        
+        return jsonify(winrate), 200
     else:
         
         # Set default values for start_date and end_date if not provided
