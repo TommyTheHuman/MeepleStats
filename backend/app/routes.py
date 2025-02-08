@@ -90,6 +90,12 @@ def login():
     return response, 200
 
 # FIXME: logout route
+@auth_bp.route('/logout', methods=['GET'])
+@jwt_required()
+def logout():
+    response = jsonify({'message': 'Logout successful'})
+    response.set_cookie('jwt_token', '', expires=0)
+    return response, 200
 
 data_bp = Blueprint('games', __name__)
 

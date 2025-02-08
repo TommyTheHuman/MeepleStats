@@ -15,6 +15,15 @@ export default function Layout() {
   const savedUsername = localStorage.getItem(Constants.username);
 
   const handleLogout = () => {
+    try {
+      fetch('/api/logout', {
+        method: "GET",
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error(error);
+      return;
+    }
     localStorage.setItem("loggedIn", "false");
     localStorage.setItem("username", "");
     setAuthStatus("Anonymous");
