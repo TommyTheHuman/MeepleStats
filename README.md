@@ -1,6 +1,6 @@
 # MeepleStats
 
-MeepleStats is a web application designed to track board game statistics. It allows users to log their game sessions, track player performance, and manage a wishlist of games. The application is built with a Flask backend and a React frontend.
+MeepleStats is a self hosted web application designed to track board game statistics of your group of friends. It allows users to log their game sessions, track player performance, and manage a wishlist of games. The application is built with a Flask backend and a React frontend.
 
 ## Table of Contents
 
