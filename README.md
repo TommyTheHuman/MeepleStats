@@ -148,3 +148,4 @@ Contributions are welcome! Please open an issue or submit a pull request.
 - [ ] Open matches to show saved images
 - [ ] New logic to handle team games
 - [ ] Add achievements logic
+- [ ] Multilingual support
