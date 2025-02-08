@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from dotenv import find_dotenv, load_dotenv
 from flask import Blueprint, jsonify, render_template, request
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, decode_token
 from jwt.exceptions import InvalidTokenError
@@ -63,7 +64,8 @@ def register():
     # Generate the JWT token and return it
     access_token = create_access_token(identity=username)
     response = jsonify({'message': 'Login successful'})
-    response.set_cookie('jwt_token', access_token, httponly=True, secure=True, max_age=timedelta(weeks=4))
+    #response.set_cookie('jwt_token', access_token, httponly=True, secure=True, max_age=timedelta(weeks=4)) # FIXME: use this in HTTPS environment
+    response.set_cookie('jwt_token', access_token, httponly=True, secure=False, max_age=timedelta(weeks=4))    
     return response, 201
 
 @auth_bp.route('/login', methods=['POST'])
@@ -83,7 +85,8 @@ def login():
     # Generate the JWT token and return it
     access_token = create_access_token(identity=username)
     response = jsonify({'message': 'Login successful'})
-    response.set_cookie('jwt_token', access_token, httponly=True, secure=True, max_age=timedelta(weeks=4), samesite="None", partitioned=True)
+    #response.set_cookie('jwt_token', access_token, httponly=True, secure=True, max_age=timedelta(weeks=4), samesite="None", partitioned=True) # FIXME: use this in HTTPS environment
+    response.set_cookie('jwt_token', access_token, httponly=True, secure=False, max_age=timedelta(weeks=4), samesite="Lax")
     return response, 200
 
 # FIXME: logout route
@@ -1040,6 +1043,12 @@ utility_bp = Blueprint('utils', __name__)
 @jwt_required()
 def importGames():
     # Import games from BGG API using the bgg_import.py
+
+    dotenv_path = find_dotenv()
+    if dotenv_path:
+        load_dotenv(dotenv_path, override=True)
+    else:
+        print("File .env non trovato")
 
     # Get the username from the .env file
     username = os.getenv('BGG_USERNAME')
