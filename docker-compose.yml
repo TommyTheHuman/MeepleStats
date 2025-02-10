@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:4.4
+    container_name: meeple_stats_mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: meeple_stats
+    volumes:
+      - mongo-data:/data/db
+
+  # mongo-express:
+  #   image: mongo-express
+  #   restart: always
+  #   ports:
+  #     - "8081:8081"
+  #   environment:
+  #     ME_CONFIG_MONGODB_ADMINUSERNAME: root
+  #     ME_CONFIG_MONGODB_ADMINPASSWORD: root
+  #     ME_CONFIG_MONGODB_URL: mongodb://root:root@mongo:27017/
+  #     ME_CONFIG_BASICAUTH: false
+  #   depends_on:
+  #     - mongo
+
+  backend:
+    build: ./backend
+    container_name: meeple_stats_backend
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - MONGO_URI=mongodb://root:root@mongo:27017/meeple_stats?authSource=admin
+      - BGG_USERNAME=XXXXXXX
+      - UPLOAD_FOLDER=/data
+      - DB_NAME=meeple_stats
+      - SECRET_KEY=meeple_stats
+    volumes:
+      - ./backend:/app
+      - frontend-data:/data
+    depends_on:
+      - mongo
+
+  frontend:
+    build: ./frontend/meeplestats
+    container_name: meeple_stats_frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./frontend/meeplestats:/app
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
+  frontend-data:
