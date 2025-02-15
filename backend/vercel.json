@@ -1,0 +1,11 @@
+{
+  "builds": [
+      {
+          "src": "./run.py",
+          "use": "@vercel/python"
+      }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/run.py" }
+  ]
+}
