@@ -1,4 +1,4 @@
-import { Box, Button, Group, LoadingOverlay, TextInput } from "@mantine/core";
+import { Box, Button, Group, LoadingOverlay, TextInput, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useContext, useRef, useState } from "react";
 import { notifications } from "@mantine/notifications";
@@ -46,6 +46,8 @@ const LoginForm = () => {
 
     let response = null as Response | null;
 
+    console.log(`${API_URL}`);
+
     try {
       response = await fetch(`${API_URL}/login`, {
         method: "POST",
@@ -84,6 +86,9 @@ const LoginForm = () => {
     <Box pos="relative" w={320} mx="auto">
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
+        <Text>
+          API ULR: {API_URL}
+        </Text>
         <TextInput
           withAsterisk
           label="Username"
