@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Box, Button, LoadingOverlay, Textarea, Autocomplete, Card, Image, Title, Text, Grid } from "@mantine/core";
 //import { useForm } from "@mantine/form";
 import { Game } from "../model/Interfaces";
+import { API_URL } from "../model/Constants";
 
 
 interface ApiResponseItem {
@@ -11,7 +12,7 @@ interface ApiResponseItem {
   max_players: string;
   average_duration: string;
   image: {
-    thumbnail: string;
+    url: string;
   };
   is_cooperative: boolean;
   notes: string;
@@ -87,7 +88,7 @@ const Wishlist = () => {
   const addToWishlist = async () => {
     if (!selectedGame) return;
     setLoading(true);
-    const response = await fetch('/api/addwishlist', {
+    const response = await fetch(`${API_URL}/addwishlist`, {
       credentials: "include",
       method: "POST",
       headers: {
@@ -105,7 +106,7 @@ const Wishlist = () => {
   };
 
   const fetchWishlist = async () => {
-    const response = await fetch('/api/wishlist', { credentials: "include" });
+    const response = await fetch(`${API_URL}/wishlist`, { credentials: "include" });
     const data: ApiResponseItem[] = await response.json();
     // map data into Game objects
 
@@ -115,7 +116,7 @@ const Wishlist = () => {
       minPlayers: item.min_players,
       maxPlayers: item.max_players,
       playingTime: item.average_duration,
-      thumbnail: item.image.thumbnail,
+      thumbnail: item.image.url,
       yearPublished: "Unknown",
       is_cooperative: item.is_cooperative,
       notes: item.notes,
@@ -129,65 +130,70 @@ const Wishlist = () => {
   }, []);
 
   return (
-    <Box pos="relative" w={320} mx="auto">
-      <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
-      <h1>Wishlist</h1>
-      <Autocomplete
-        clearable
-        label="Search for games"
-        placeholder="Search for games"
-        value={query}
-        onChange={(value) => {
-          setQuery(value);
-          searchGames(value);
-        }}
-        onOptionSubmit={(item) => {
-          const selected = suggestions.find((game) => game.name.toLowerCase() === item.toLowerCase());
-          if (selected) {
-            selectGame(selected.bgg_id);
-          } else {
-            console.log("Game not found in suggestions");
-          }
-        }}
-        data={suggestions.map((game: Game) => ({
-          value: game.name,
-          label: `${game.name} (${game.yearPublished})`,
-          id: game.bgg_id,
-        }))}
-      />
-      {selectedGame && (
-        <Box>
-          <Title order={2}>{selectedGame.name}</Title>
-          <Image src={selectedGame.thumbnail} alt={selectedGame.name} />
-          <Text>
-            Players: {selectedGame.minPlayers} - {selectedGame.maxPlayers}
-          </Text>
-          <Text>Playing Time: {selectedGame.playingTime} minutes</Text>
-          <Textarea
-            label="Notes"
-            placeholder="Notes"
-            value={selectedGame.notes}
-            onChange={handleNotesChange}
-          />
-          <Button onClick={addToWishlist} mt="md">Add to Wishlist</Button>
-        </Box>
-      )}
-      <h2>Current Wishlist</h2>
-      <Grid>
-        {wishlist.map((game) => (
-          <Grid.Col span={4} key={game.bgg_id}>
-            <Card shadow="sm" padding="lg">
-              <Card.Section>
-                <Image src={game.thumbnail} alt={game.name} height={160} />
-              </Card.Section>
-              <Title order={4}>{game.name}</Title>
-              <Text>Players: {game.minPlayers} - {game.maxPlayers}</Text>
-              <Text>Playing Time: {game.playingTime} minutes</Text>
-              <Text>{game.notes}</Text>
-            </Card>
-          </Grid.Col>
-        ))}
-      </Grid>
+    <Box>
+      <Box pos="relative" w={320} mx="auto">
+        <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
+        <h1>Wishlist</h1>
+        <Autocomplete
+          clearable
+          label="Search for games"
+          placeholder="Search for games"
+          value={query}
+          onChange={(value) => {
+            setQuery(value);
+            searchGames(value);
+          }}
+          onOptionSubmit={(item) => {
+            const selected = suggestions.find((game) => game.name.toLowerCase() === item.toLowerCase());
+            if (selected) {
+              selectGame(selected.bgg_id);
+            } else {
+              console.log("Game not found in suggestions");
+            }
+          }}
+          data={suggestions.map((game: Game) => ({
+            value: game.name,
+            label: `${game.name} (${game.yearPublished})`,
+            id: game.bgg_id,
+          }))}
+        />
+        {selectedGame && (
+          <Box>
+            <Title order={2}>{selectedGame.name}</Title>
+            <Image src={selectedGame.thumbnail} alt={selectedGame.name} />
+            <Text>
+              Players: {selectedGame.minPlayers} - {selectedGame.maxPlayers}
+            </Text>
+            <Text>Playing Time: {selectedGame.playingTime} minutes</Text>
+            <Textarea
+              label="Notes"
+              placeholder="Notes"
+              value={selectedGame.notes}
+              onChange={handleNotesChange}
+            />
+            <Button onClick={addToWishlist} mt="md">Add to Wishlist</Button>
+          </Box>
+        )}
+
+      </Box>
+      <Box>
+        <h2>Current Wishlist</h2>
+        <Grid gutter="md">
+          {wishlist.map((game) => (
+            <Grid.Col span={4} key={game.bgg_id}>
+              <Card shadow="sm" padding="lg">
+                <Card.Section>
+                  <Image src={game.thumbnail} alt={game.name} height={160} />
+                </Card.Section>
+                <Title order={4}>{game.name}</Title>
+                <Text>Players: {game.minPlayers} - {game.maxPlayers}</Text>
+                <Text>Playing Time: {game.playingTime} minutes</Text>
+                <Text>{game.notes}</Text>
+              </Card>
+            </Grid.Col>
+          ))}
+        </Grid>
+      </Box>
     </Box>
   );
 };

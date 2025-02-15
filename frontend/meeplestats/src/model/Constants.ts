@@ -9,3 +9,5 @@ export const FilterTypes = {
   year: "year" as const,
   month: "month" as const,
 };
+
+export const API_URL = process.env.REACT_APP_API_URL;

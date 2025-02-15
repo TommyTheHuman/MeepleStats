@@ -3,7 +3,7 @@ import { useForm } from "@mantine/form";
 import { useContext, useRef, useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { useNavigate } from "react-router";
-import { Constants } from "../model/Constants";
+import { API_URL, Constants } from "../model/Constants";
 import { AuthContext } from "./AuthContext";
 
 
@@ -47,7 +47,7 @@ const LoginForm = () => {
     let response = null as Response | null;
 
     try {
-      response = await fetch('/api/login', {
+      response = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -3,7 +3,7 @@ import { useForm } from "@mantine/form";
 import { useContext, useState } from "react";
 import { Box, Button, Group, LoadingOverlay, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { Constants } from "../model/Constants";
+import { API_URL, Constants } from "../model/Constants";
 import { AuthContext } from "./AuthContext";
 
 
@@ -45,7 +45,7 @@ const RegisterForm = () => {
     let response = null as Response | null;
 
     try {
-      response = await fetch('/api/register', {
+      response = await fetch(`${API_URL}/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -3,10 +3,10 @@ import { useDisclosure } from "@mantine/hooks";
 import { useContext } from "react";
 import { Link, Outlet } from "react-router";
 import { AuthContext } from "./AuthContext";
-import { Constants } from "../model/Constants";
+import { API_URL, Constants } from "../model/Constants";
 
 export default function Layout() {
-  const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
+  const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
   const { authStatus, setAuthStatus } = useContext(AuthContext);
 
@@ -16,7 +16,7 @@ export default function Layout() {
 
   const handleLogout = () => {
     try {
-      fetch('/api/logout', {
+      fetch(`${API_URL}/logout`, {
         method: "GET",
         credentials: "include",
       });
@@ -31,7 +31,7 @@ export default function Layout() {
 
   const handleImportGames = async () => {
     try {
-      const respose = await fetch('/api/importGames', {
+      const respose = await fetch(`${API_URL}/importGames`, {
         method: "GET",
         credentials: "include",
       });
@@ -67,19 +67,19 @@ export default function Layout() {
           {savedUsername?.charAt(0).toUpperCase()}
         </Avatar>
         <Text mt="md">{authStatus === "LoggedIn" ? "User Logges" : "Anonymous User"}</Text>
-        <NavLink component={Link} to="/" label="Home" />
+        <NavLink component={Link} to="/" label="Home" onClick={closeMobile} />
         {!isLoggedIn && (
           <>
-            <NavLink component={Link} to="/login" label="Login" />
-            <NavLink component={Link} to="/register" label="Register" />
+            <NavLink component={Link} to="/login" label="Login" onClick={closeMobile} />
+            <NavLink component={Link} to="/register" label="Register" onClick={closeMobile} />
           </>
         )}
         {isLoggedIn && (
           <>
-            <NavLink label="Logout" onClick={handleLogout} />
-            <NavLink component={Link} to="/wishlist" label="Wishlist" />
-            <NavLink component={Link} to="/matchHistory" label="Match History" />
-            <NavLink component={Link} to="/logmatch" label="Log Match" />
+            <NavLink label="Logout" onClick={() => { handleLogout(); closeMobile(); }} />
+            <NavLink component={Link} to="/wishlist" label="Wishlist" onClick={closeMobile} />
+            <NavLink component={Link} to="/matchHistory" label="Match History" onClick={closeMobile} />
+            <NavLink component={Link} to="/logmatch" label="Log Match" onClick={closeMobile} />
             <Button onClick={handleImportGames}>Import Games</Button>
           </>
 

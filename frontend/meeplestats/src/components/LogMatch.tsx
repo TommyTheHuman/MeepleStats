@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { PillsInput, Pill, Combobox, CheckIcon, useCombobox } from "@mantine/core";
 import { Game, Player } from "../model/Interfaces";
+import { API_URL } from "../model/Constants";
 
 
 const LogMatch = () => {
@@ -34,7 +35,7 @@ const LogMatch = () => {
   });
 
   useEffect(() => {
-    fetch('/api/games', {
+    fetch(`${API_URL}/games`, {
       method: "GET",
       credentials: "include",
       headers: {
@@ -50,7 +51,7 @@ const LogMatch = () => {
   }, []);
 
   useEffect(() => {
-    fetch('/api/players')
+    fetch(`${API_URL}/players`)
       .then((response) => response.json())
       .then((data: Player[]) => {
         const sortedPlayers = data.sort((a, b) =>
@@ -138,7 +139,7 @@ const LogMatch = () => {
     }
     console.log("Data:", values);
     try {
-      const response = await fetch('/api/logmatch', {
+      const response = await fetch(`${API_URL}/logmatch`, {
         credentials: "include",
         method: "POST",
         body: data,
