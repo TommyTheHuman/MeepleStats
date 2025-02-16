@@ -169,7 +169,8 @@ def log_match():
     index = 0
     while True:
         player_id = request.form.get(f'players[{index}][id]')
-        player_score = request.form.get(f'players[{index}][score]')
+        # Check if the score is set, if not, assign null
+        player_score = request.form.get(f'players[{index}][score]') or 0
         player_name = request.form.get(f'players[{index}][name]')
         if player_id is None:
             break
