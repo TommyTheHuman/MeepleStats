@@ -139,8 +139,8 @@ def get_players():
 def log_match():
     # Create the upload folder if it doesn't exist
     upload_folder = current_app.config['UPLOAD_FOLDER']
-    if not os.path.exists(upload_folder):
-        os.makedirs(upload_folder)
+    #if not os.path.exists(upload_folder):
+    #    os.makedirs(upload_folder)
     # Parse match data
     date = request.form.get('date')
     duration = request.form.get('duration')
