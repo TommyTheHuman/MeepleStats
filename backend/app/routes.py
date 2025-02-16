@@ -168,7 +168,7 @@ def log_match():
     players = []
     index = 0
     while True:
-        player_id = request.form.get(f'players[{index}][_id]')
+        player_id = request.form.get(f'players[{index}][id]')
         player_score = request.form.get(f'players[{index}][score]')
         player_name = request.form.get(f'players[{index}][name]')
         if player_id is None:
@@ -261,7 +261,7 @@ def log_match():
         'winner': winner,
     })
 
-    print(game['matches'])
+    #print(game['matches'])
 
     # Loop over matches and update average score
     total_score = 0
