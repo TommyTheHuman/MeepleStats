@@ -1059,12 +1059,6 @@ utility_bp = Blueprint('utils', __name__)
 def importGames():
     # Import games from BGG API using the bgg_import.py
 
-    dotenv_path = find_dotenv()
-    if dotenv_path:
-        load_dotenv(dotenv_path, override=True)
-    else:
-        print("File .env non trovato")
-
     # Get the username from the .env file
     username = os.getenv('BGG_USERNAME')
 
