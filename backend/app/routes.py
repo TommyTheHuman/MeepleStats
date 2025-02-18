@@ -89,14 +89,14 @@ def login():
 
     # Generate the JWT token and return it
     access_token = create_access_token(identity=username)
-    response = jsonify({'message': 'Login successful'})
+    
     jwt_storage = os.getenv('JWT_STORAGE')
-
     if jwt_storage == 'cookie':
+        response = jsonify({'message': 'Login successful'})
         response.set_cookie('jwt_token', access_token, httponly=True, secure=True, max_age=timedelta(weeks=4), samesite="None", partitioned=True) # FIXME: use this in HTTPS environment
         #response.set_cookie('jwt_token', access_token, httponly=True, secure=False, max_age=timedelta(weeks=4), samesite="Lax")
     elif jwt_storage == 'localstorage':
-        response.json['jwt_token'] = access_token
+        response = jsonify({'message': 'Login successful', 'jwt_token': access_token}) 
     return response, 200
 
 # FIXME: logout route
