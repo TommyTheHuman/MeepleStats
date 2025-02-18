@@ -64,8 +64,13 @@ def register():
     # Generate the JWT token and return it
     access_token = create_access_token(identity=username)
     response = jsonify({'message': 'Login successful'})
-    response.set_cookie('jwt_token', access_token, httponly=True, secure=True, max_age=timedelta(weeks=4)) # FIXME: use this in HTTPS environment
-    #response.set_cookie('jwt_token', access_token, httponly=True, secure=False, max_age=timedelta(weeks=4))    
+    jwt_storage = os.getenv('JWT_STORAGE', 'cookie')
+
+    if jwt_storage == 'cookie':
+        response.set_cookie('jwt_token', access_token, httponly=True, secure=True, max_age=timedelta(weeks=4)) # FIXME: use this in HTTPS environment
+        #response.set_cookie('jwt_token', access_token, httponly=True, secure=False, max_age=timedelta(weeks=4))    
+    else:
+        response.json['jwt_token'] = access_token
     return response, 201
 
 @auth_bp.route('/login', methods=['POST'])
@@ -85,8 +90,13 @@ def login():
     # Generate the JWT token and return it
     access_token = create_access_token(identity=username)
     response = jsonify({'message': 'Login successful'})
-    response.set_cookie('jwt_token', access_token, httponly=True, secure=True, max_age=timedelta(weeks=4), samesite="None", partitioned=True) # FIXME: use this in HTTPS environment
-    #response.set_cookie('jwt_token', access_token, httponly=True, secure=False, max_age=timedelta(weeks=4), samesite="Lax")
+    jwt_storage = os.getenv('JWT_STORAGE', 'cookie')
+
+    if jwt_storage == 'cookie':
+        response.set_cookie('jwt_token', access_token, httponly=True, secure=True, max_age=timedelta(weeks=4), samesite="None", partitioned=True) # FIXME: use this in HTTPS environment
+        #response.set_cookie('jwt_token', access_token, httponly=True, secure=False, max_age=timedelta(weeks=4), samesite="Lax")
+    else:
+        response.json['jwt_token'] = access_token
     return response, 200
 
 # FIXME: logout route

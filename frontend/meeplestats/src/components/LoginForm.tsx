@@ -66,7 +66,14 @@ const LoginForm = () => {
     }
 
     if (response != null && response.ok) {
-      //const data = await response.json();
+      const data = await response.json();
+
+      const jwtStorage = process.env.VITE_JWT_STORAGE || 'cookie';
+
+      if (jwtStorage === 'localstorage') {
+        localStorage.setItem('jwt_token', data.jwt_token);
+      }
+
       localStorage.setItem(Constants.username, values.username);
       localStorage.setItem(Constants.loggedIn, "true");
       setAuthStatus("LoggedIn");
