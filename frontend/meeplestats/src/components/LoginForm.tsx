@@ -3,7 +3,7 @@ import { useForm } from "@mantine/form";
 import { useContext, useRef, useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { useNavigate } from "react-router";
-import { API_URL, Constants } from "../model/Constants";
+import { API_URL, Constants, JWT_STORAGE } from "../model/Constants";
 import { AuthContext } from "./AuthContext";
 
 
@@ -68,9 +68,7 @@ const LoginForm = () => {
     if (response != null && response.ok) {
       const data = await response.json();
 
-      const jwtStorage = process.env.VITE_JWT_STORAGE || 'cookie';
-
-      if (jwtStorage === 'localstorage') {
+      if (JWT_STORAGE === 'localstorage') {
         localStorage.setItem('jwt_token', data.jwt_token);
       }
 
