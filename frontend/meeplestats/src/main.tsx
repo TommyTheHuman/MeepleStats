@@ -4,7 +4,7 @@ import "@mantine/core/styles.css";
 import '@mantine/notifications/styles.css';
 import '@mantine/dates/styles.css';
 import IndexPage from "./pages/IndexPage.tsx";
-import { createBrowserRouter, RouterProvider } from "react-router";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
 import { createTheme, MantineProvider } from "@mantine/core";
 import LoginPage from "./pages/LoginPage.tsx";
 import Layout from "./components/Layout.tsx";
@@ -53,7 +53,11 @@ const router = createBrowserRouter([
       {
         path: "/matchHistory",
         element: <MatchHistoryPage />,
-      }
+      },
+      {
+        path: "*", // Aggiungi questa route catch-all
+        element: <Navigate to="/" replace />,
+      },
     ],
   },
 ]);

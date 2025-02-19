@@ -18,7 +18,7 @@ def create_app():
 
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES', 28)))
-    app.config['JWT_TOKEN_LOCATION'] = ['cookies']  # Indica che il JWT verrà letto dai cookie
+    app.config['JWT_TOKEN_LOCATION'] = os.getenv('JWT_TOKEN_LOCATION')  # Indica che il JWT verrà letto dai cookie
     app.config['JWT_COOKIE_SECURE'] = os.getenv('JWT_COOKIE_SECURE', 'True').lower() in ['true', '1', 't']
     app.config['JWT_ACCESS_COOKIE_NAME'] = os.getenv('JWT_ACCESS_COOKIE_NAME', 'jwt_token')
     app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, os.getenv('UPLOAD_FOLDER', 'uploads'))
@@ -27,6 +27,7 @@ def create_app():
     jwt = JWTManager(app)
 
     cors_origin = os.getenv('CORS_ORIGIN')
+    print(cors_origin)
     CORS(app, resources={r"/*": {"origins": cors_origin}}, supports_credentials=True)
 
     # route imports

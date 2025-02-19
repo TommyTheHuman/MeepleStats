@@ -33,7 +33,15 @@ auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/check-auth', methods=['GET'])
 def check_auth():
-    token = request.cookies.get('jwt_token')
+    jwt_storage = os.getenv('JWT_STORAGE', 'cookie')
+    
+    token = None
+    if jwt_storage == 'cookie':
+        token = request.cookies.get('jwt_token')
+    elif jwt_storage == 'localstorage':
+        token = request.headers.get('Authorization')
+        if token and token.startswith('Bearer '):
+            token = token.split(' ')[1]
     if not token:
         return jsonify({'authenticated': False}), 401
     try:
@@ -76,14 +84,17 @@ def register():
 
     # Generate the JWT token and return it
     access_token = create_access_token(identity=username)
-    response = jsonify({'message': 'Login successful'})
+    
     jwt_storage = os.getenv('JWT_STORAGE', 'cookie')
 
+    print("jwt_storage: ", jwt_storage)
+
     if jwt_storage == 'cookie':
+        response = jsonify({'message': 'Register successful'})
         response.set_cookie('jwt_token', access_token, httponly=True, secure=True, max_age=timedelta(weeks=4)) # FIXME: use this in HTTPS environment
         #response.set_cookie('jwt_token', access_token, httponly=True, secure=False, max_age=timedelta(weeks=4))    
     else:
-        response.json['jwt_token'] = access_token
+        response = jsonify({'message': 'Register successful', 'jwt_token': access_token})
     return response, 201
 
 @auth_bp.route('/login', methods=['POST'])
@@ -126,7 +137,6 @@ data_bp = Blueprint('games', __name__)
 @data_bp.route('/games', methods=['GET'])
 @jwt_required()
 def get_games():
-    print(request.cookies)
     print(get_jwt_identity())
     try:
         games = games_collection.find()

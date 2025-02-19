@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Box, Button, LoadingOverlay, Textarea, Autocomplete, Card, Image, Title, Text, Grid } from "@mantine/core";
 //import { useForm } from "@mantine/form";
 import { Game } from "../model/Interfaces";
-import { API_URL } from "../model/Constants";
+import { API_URL, JWT_STORAGE } from "../model/Constants";
 
 
 interface ApiResponseItem {
@@ -88,17 +88,30 @@ const Wishlist = () => {
   const addToWishlist = async () => {
     if (!selectedGame) return;
     setLoading(true);
-    const response = await fetch(`${API_URL}/addwishlist`, {
-      credentials: "include",
+
+    const requestOptions: RequestInit = {
       method: "POST",
-      headers: {
+    };
+
+    // Check the JWT_STORAGE value and set credentials or headers accordingly
+    if (JWT_STORAGE === "cookie") {
+      requestOptions.credentials = "include";
+      requestOptions.headers = {
         "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        game_id: selectedGame.bgg_id,
-        notes: selectedGame.notes,
-      }),
+      };
+    } else if (JWT_STORAGE === "localstorage") {
+      requestOptions.headers = {
+        Authorization: `Bearer ${localStorage.getItem("jwt_token")}`,
+        "Content-Type": "application/json"
+      };
+    }
+
+    requestOptions.body = JSON.stringify({
+      game_id: selectedGame.bgg_id,
+      notes: selectedGame.notes,
     });
+
+    const response = await fetch(`${API_URL}/addwishlist`, requestOptions);
     if (response.ok) {
       fetchWishlist();
     }
@@ -106,7 +119,21 @@ const Wishlist = () => {
   };
 
   const fetchWishlist = async () => {
-    const response = await fetch(`${API_URL}/wishlist`, { credentials: "include" });
+
+    const requestOptions: RequestInit = {
+      method: "GET",
+    };
+
+    // Check the JWT_STORAGE value and set credentials or headers accordingly
+    if (JWT_STORAGE === "cookie") {
+      requestOptions.credentials = "include";
+    } else if (JWT_STORAGE === "localstorage") {
+      requestOptions.headers = {
+        Authorization: `Bearer ${localStorage.getItem("jwt_token")}`
+      };
+    }
+
+    const response = await fetch(`${API_URL}/wishlist`, requestOptions);
     const data: ApiResponseItem[] = await response.json();
     // map data into Game objects
 

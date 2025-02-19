@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { PillsInput, Pill, Combobox, CheckIcon, useCombobox } from "@mantine/core";
 import { Game, Player } from "../model/Interfaces";
-import { API_URL } from "../model/Constants";
+import { API_URL, JWT_STORAGE } from "../model/Constants";
 
 
 const LogMatch = () => {
@@ -35,13 +35,19 @@ const LogMatch = () => {
   });
 
   useEffect(() => {
-    fetch(`${API_URL}/games`, {
+    const requestOptions: RequestInit = {
       method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
+    };
+    // Check the JWT_STORAGE value and set credentials or headers accordingly
+    if (JWT_STORAGE === "cookie") {
+      requestOptions.credentials = "include";
+    } else if (JWT_STORAGE === "localstorage") {
+      requestOptions.headers = {
+        Authorization: `Bearer ${localStorage.getItem("jwt_token")}`,
+      };
+    }
+
+    fetch(`${API_URL}/games`, requestOptions)
       .then((response) => response.json())
       .then((data: Game[]) => {
         const sortedGames = data.sort((a, b) => a.name.localeCompare(b.name));
@@ -139,11 +145,23 @@ const LogMatch = () => {
     }
     console.log("Data:", values);
     try {
-      const response = await fetch(`${API_URL}/logmatch`, {
-        credentials: "include",
+
+      const requestOptions: RequestInit = {
         method: "POST",
-        body: data,
-      });
+      };
+
+      // Check the JWT_STORAGE value and set credentials or headers accordingly
+      if (JWT_STORAGE === "cookie") {
+        requestOptions.credentials = "include";
+      } else if (JWT_STORAGE === "localstorage") {
+        requestOptions.headers = {
+          Authorization: `Bearer ${localStorage.getItem("jwt_token")}`,
+        };
+      }
+
+      requestOptions.body = data;
+
+      const response = await fetch(`${API_URL}/logmatch`, requestOptions);
 
       if (response.ok) {
         const data = await response.json();

@@ -3,7 +3,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { useContext } from "react";
 import { Link, Outlet } from "react-router";
 import { AuthContext } from "./AuthContext";
-import { API_URL, Constants } from "../model/Constants";
+import { API_URL, Constants, JWT_STORAGE } from "../model/Constants";
 
 export default function Layout() {
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure();
@@ -26,15 +26,26 @@ export default function Layout() {
     }
     localStorage.setItem("loggedIn", "false");
     localStorage.setItem("username", "");
+    localStorage.setItem("jwt_token", "");
     setAuthStatus("Anonymous");
   }
 
   const handleImportGames = async () => {
     try {
-      const respose = await fetch(`${API_URL}/importGames`, {
+      const requestOptions: RequestInit = {
         method: "GET",
-        credentials: "include",
-      });
+      };
+      // Check the JWT_STORAGE value and set credentials or headers accordingly
+      if (JWT_STORAGE === "cookie") {
+        requestOptions.credentials = "include";
+      } else if (JWT_STORAGE === "localstorage") {
+        requestOptions.headers = {
+          Authorization: `Bearer ${localStorage.getItem("jwt_token")}`,
+        };
+      }
+
+      const respose = await fetch(`${API_URL}/importGames`, requestOptions);
+
       if (respose.ok) {
         console.log("Games imported");
       } else {
