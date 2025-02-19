@@ -13,8 +13,21 @@ import requests
 from .services.db import players_collection, games_collection, matches_collection, wishlists_collection
 from .services.bgg_import import import_games_from_bgg
 
+from .services.s3 import S3Client
+
 #bp = Blueprint('main', __name__)
 
+STORAGE_TYPE = os.getenv('STORAGE_TYPE')#'local'#'s3'
+
+upload_folder = None
+
+if STORAGE_TYPE in ['s3']:
+    minio_client = S3Client.get_client()
+elif STORAGE_TYPE in ['local']:
+    # Create the upload folder if it doesn't exist
+    upload_folder = current_app.config['UPLOAD_FOLDER']
+    if not os.path.exists(upload_folder):
+        os.makedirs(upload_folder)
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -137,10 +150,6 @@ def get_players():
 @data_bp.route('/logmatch', methods=['POST'])
 @jwt_required()
 def log_match():
-    # Create the upload folder if it doesn't exist
-    upload_folder = current_app.config['UPLOAD_FOLDER']
-    if not os.path.exists(upload_folder):
-        os.makedirs(upload_folder)
     # Parse match data
     date = request.form.get('date')
     duration = request.form.get('duration')
@@ -150,9 +159,9 @@ def log_match():
     isWin = bool(request.form.get('isWin'))
 
     # Handle file upload
-    image_path = None
+    image_file_name = None
+
     if 'image' in request.files:
-        #return jsonify({'error': 'No image part'}), 400
         file = request.files['image']
 
         # Check if the file is empty
@@ -160,9 +169,15 @@ def log_match():
             return jsonify({'error': 'No selected file'}), 400
         # Create a unique filename
         unique_file = f"{uuid.uuid4()}_{file.filename}"
-        image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_file)
-
-        file.save(image_path)
+        if STORAGE_TYPE in ['local']:
+            image_file_name = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_file)
+            file.save(image_file_name)
+        elif STORAGE_TYPE in ['s3']:
+             image_file_name = S3Client.put(
+                file,
+                unique_file,
+                content_type=file.content_type
+            )
 
     # Parse player data
     players = []
@@ -207,13 +222,18 @@ def log_match():
         'players': [player for player in players],
         'expansions_used': [],
         'notes': note,
-        'image_path': image_path,
         'game_duration': duration,
         'winner': winner,
         'worst_score_player': worst_score_player,
         'is_cooperative': game['is_cooperative'],
         'total_score': total_score,
     }
+
+    if image_file_name is not None:
+        match_data['image'] = {
+            'type' : STORAGE_TYPE,
+            'filename' : image_file_name
+        }
 
     #print(match_data)
 
@@ -375,6 +395,14 @@ def matchHistory():
 
         for match in matches:
             match['_id'] = str(match['_id'])
+            if 'image' in match.keys():
+                if match['image']['type'] in ['s3']:
+                    match['image-url'] = S3Client.get_url_from_filename(match['image']['filename'])
+                elif match['image']['type'] in ['local']:
+                    match['image-url'] = match['image']['filename']
+
+                del match['image']
+                    
             matches_data.append(match)
 
         return jsonify(matches_data), 200

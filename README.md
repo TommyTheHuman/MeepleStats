@@ -152,6 +152,11 @@ CORS_ORIGIN=allowed_origins
 MONGO_URI=your_mongo_connection_uri
 DB_NAME=your_database_name
 VITE_API_URL=your_backend_url
+STORAGE_TYPE='s3'#local
+S3_ENDPOINT =your_s3_server_url
+S3_ACCESS_KEY =your_s3_access_key
+S3_SECRET_KEY =your_s3_secret_key
+S3_BUCKET_NAME =your_s3_bucket_name
 ```
 
 ---
