@@ -2,7 +2,7 @@ import { Grid, Text } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { MatchCardInterface } from '../model/Interfaces';
 import MatchCard from '../components/MatchCards';
-import { API_URL } from '../model/Constants';
+import { API_URL, JWT_STORAGE } from '../model/Constants';
 
 
 const MatchHistoryPage = () => {
@@ -15,10 +15,21 @@ const MatchHistoryPage = () => {
     const loadMatchHistory = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${API_URL}/matchHistory`, {
+
+        const requestOptions: RequestInit = {
           method: "GET",
-          credentials: "include",
-        });
+        };
+
+        // Check the JWT_STORAGE value and set credentials or headers accordingly
+        if (JWT_STORAGE === "cookie") {
+          requestOptions.credentials = "include";
+        } else if (JWT_STORAGE === "localstorage") {
+          requestOptions.headers = {
+            Authorization: `Bearer ${localStorage.getItem("jwt_token")}`,
+          };
+        }
+
+        const response = await fetch(`${API_URL}/matchHistory`, requestOptions);
         const data: MatchCardInterface[] = await response.json();
         setMatches(data);
         setError(null);
