@@ -77,8 +77,13 @@ def register():
     # Generate the JWT token and return it
     access_token = create_access_token(identity=username)
     response = jsonify({'message': 'Login successful'})
-    response.set_cookie('jwt_token', access_token, httponly=True, secure=True, max_age=timedelta(weeks=4)) # FIXME: use this in HTTPS environment
-    #response.set_cookie('jwt_token', access_token, httponly=True, secure=False, max_age=timedelta(weeks=4))    
+    jwt_storage = os.getenv('JWT_STORAGE', 'cookie')
+
+    if jwt_storage == 'cookie':
+        response.set_cookie('jwt_token', access_token, httponly=True, secure=True, max_age=timedelta(weeks=4)) # FIXME: use this in HTTPS environment
+        #response.set_cookie('jwt_token', access_token, httponly=True, secure=False, max_age=timedelta(weeks=4))    
+    else:
+        response.json['jwt_token'] = access_token
     return response, 201
 
 @auth_bp.route('/login', methods=['POST'])
@@ -97,9 +102,14 @@ def login():
 
     # Generate the JWT token and return it
     access_token = create_access_token(identity=username)
-    response = jsonify({'message': 'Login successful'})
-    response.set_cookie('jwt_token', access_token, httponly=True, secure=True, max_age=timedelta(weeks=4), samesite="None", partitioned=True) # FIXME: use this in HTTPS environment
-    #response.set_cookie('jwt_token', access_token, httponly=True, secure=False, max_age=timedelta(weeks=4), samesite="Lax")
+    
+    jwt_storage = os.getenv('JWT_STORAGE')
+    if jwt_storage == 'cookie':
+        response = jsonify({'message': 'Login successful'})
+        response.set_cookie('jwt_token', access_token, httponly=True, secure=True, max_age=timedelta(weeks=4), samesite="None", partitioned=True) # FIXME: use this in HTTPS environment
+        #response.set_cookie('jwt_token', access_token, httponly=True, secure=False, max_age=timedelta(weeks=4), samesite="Lax")
+    elif jwt_storage == 'localstorage':
+        response = jsonify({'message': 'Login successful', 'jwt_token': access_token}) 
     return response, 200
 
 # FIXME: logout route
@@ -150,7 +160,6 @@ def get_players():
 @data_bp.route('/logmatch', methods=['POST'])
 @jwt_required()
 def log_match():
-    # Parse match data
     date = request.form.get('date')
     duration = request.form.get('duration')
     game_name = request.form.get('game')
@@ -184,7 +193,8 @@ def log_match():
     index = 0
     while True:
         player_id = request.form.get(f'players[{index}][id]')
-        player_score = request.form.get(f'players[{index}][score]')
+        # Check if the score is set, if not, assign null
+        player_score = request.form.get(f'players[{index}][score]') or 0
         player_name = request.form.get(f'players[{index}][name]')
         if player_id is None:
             break
@@ -245,7 +255,6 @@ def log_match():
 
     for player in players:
         player_data = players_collection.find_one({'_id': ObjectId(player['id'])})
-        print(isWin)
         player_data['total_matches'] += 1
         if game['is_cooperative'] and isWin:
             player_data['wins'] += 1
@@ -282,12 +291,13 @@ def log_match():
         'winner': winner,
     })
 
-    print(game['matches'])
+    #print(game['matches'])
 
     # Loop over matches and update average score
     total_score = 0
     for match in game['matches']:
-        total_score += match['total_score']
+        if match['total_score'] is not None:
+            total_score += match['total_score']
     game['average_score'] = total_score / len(game['matches'])
 
     # Update game's Collection
@@ -1083,12 +1093,12 @@ def gameAvgScore():
 utility_bp = Blueprint('utils', __name__)
 
 @utility_bp.route('/importGames', methods=['GET'])
-@jwt_required()
+#@jwt_required()
 def importGames():
     # Import games from BGG API using the bgg_import.py
 
     # Get the username from the .env file
-    username = os.getenv('BGG_USERNAME')
+    username = "ArcherMaster"
 
     # Check if the username is provided
     if not username:

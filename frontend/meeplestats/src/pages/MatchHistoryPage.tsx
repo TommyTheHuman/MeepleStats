@@ -2,6 +2,7 @@ import { Grid, Text } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { MatchCardInterface } from '../model/Interfaces';
 import MatchCard from '../components/MatchCards';
+import { API_URL } from '../model/Constants';
 
 
 const MatchHistoryPage = () => {
@@ -14,7 +15,7 @@ const MatchHistoryPage = () => {
     const loadMatchHistory = async () => {
       setLoading(true);
       try {
-        const response = await fetch('/api/matchHistory', {
+        const response = await fetch(`${API_URL}/matchHistory`, {
           method: "GET",
           credentials: "include",
         });

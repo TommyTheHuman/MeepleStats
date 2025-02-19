@@ -3,7 +3,7 @@ import { useForm } from "@mantine/form";
 import { useContext, useState } from "react";
 import { Box, Button, Group, LoadingOverlay, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { API_URL, Constants } from "../model/Constants";
+import { API_URL, Constants, JWT_STORAGE } from "../model/Constants";
 import { AuthContext } from "./AuthContext";
 
 
@@ -64,7 +64,11 @@ const RegisterForm = () => {
     }
 
     if (response != null && response.ok) {
-      //const data = await response.json();
+      const data = await response.json();
+
+      if (JWT_STORAGE === 'localstorage') {
+        localStorage.setItem('jwt_token', data.jwt_token);
+      }
       localStorage.setItem(Constants.username, values.username);
       localStorage.setItem(Constants.loggedIn, "true");
       setAuthStatus("LoggedIn");
