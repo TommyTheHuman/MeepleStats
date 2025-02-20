@@ -186,7 +186,7 @@ Want to improve MeepleStats? Contributions are welcome! Feel free to open an iss
 - Introduce multilingual support
 - Create user profile page
 - Develop a game collection page
-~~- Add support to upload images on Google Drive~~
+- ~~Add support to upload images on Google Drive~~
 
 ---
 
