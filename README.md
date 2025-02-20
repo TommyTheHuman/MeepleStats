@@ -29,6 +29,7 @@
 - Manage a Wishlist of board games
 - Import Games from BoardGameGeek (BGG) API
 - View Global & Player-Specific Statistics
+- Local or Remote image storage
 
 ---
 
@@ -95,6 +96,8 @@ Just create two different projects in **Vercel** and do the correct environment 
 
 Open your browser and navigate to the provided URL to access the frontend.
 Use the provided API endpoints to interact with the backend.
+Decide where to store the `JWT Token`: you can use either cookies or your browser's local storage. Make sure to set up the [Environment Variables](#-environment-variables) correclty.
+Additionally, you can choose where to store images from your game nights. You can either save them locally or use Amazon Simple Storage Service (S3). In either case, ensure that the relevant variables are configured correctly.
 
 ---
 
@@ -137,7 +140,7 @@ Use the provided API endpoints to interact with the backend.
 
 ## 🌍 Environment Variables
 
-Create a `.env` file and define the following:
+Create a `.env` file and define the following for the backend:
 
 ```ini
 BGG_USERNAME=your_boardgamegeek_username
@@ -147,16 +150,23 @@ JWT_TOKEN_LOCATION=your_token_location
 JWT_COOKIE_SECURE=True/False
 JWT_ACCESS_COOKIE_NAME=your_cookie_name
 JWT_COOKIE_CSRF_PROTECT=True/False
+JWT_STORAGE='localstorage' or 'cookie'
 UPLOAD_FOLDER=your_upload_folder_path
 CORS_ORIGIN=allowed_origins
 MONGO_URI=your_mongo_connection_uri
 DB_NAME=your_database_name
+STORAGE_TYPE='s3' or 'local'
+S3_ENDPOINT=your_s3_server_url
+S3_ACCESS_KEY=your_s3_access_key
+S3_SECRET_KEY=your_s3_secret_key
+S3_BUCKET_NAME=your_s3_bucket_name
+```
+
+Create a `.env` file and define the following for the frontend:
+
+```ini
 VITE_API_URL=your_backend_url
-STORAGE_TYPE='s3'#local
-S3_ENDPOINT =your_s3_server_url
-S3_ACCESS_KEY =your_s3_access_key
-S3_SECRET_KEY =your_s3_secret_key
-S3_BUCKET_NAME =your_s3_bucket_name
+VITE_JWT_STORAGE='localstorage' or 'cookie' 
 ```
 
 ---
@@ -176,7 +186,7 @@ Want to improve MeepleStats? Contributions are welcome! Feel free to open an iss
 - Introduce multilingual support
 - Create user profile page
 - Develop a game collection page
-- Add support to upload images on Google Drive
+~~- Add support to upload images on Google Drive~~
 
 ---
 
