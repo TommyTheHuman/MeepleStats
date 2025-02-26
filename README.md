@@ -181,7 +181,7 @@ Want to improve MeepleStats? Contributions are welcome! Feel free to open an iss
 
 - Improve UI/UX and Dark Mode
 - Show images for open matches
-- Implement team-based game tracking
+- ~~Implement team-based game tracking~~
 - Add achievements system
 - Introduce multilingual support
 - Create user profile page

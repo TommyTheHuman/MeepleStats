@@ -176,6 +176,8 @@ def log_match():
     game_id = request.form.get('game_id')
     note = request.form.get('note')
     isWin = bool(request.form.get('isWin'))
+    isTeamMatch = bool(request.form.get('isTeamMatch'))
+    winning_team = request.form.get('winningTeam')
 
     # Handle file upload
     image_file_name = None
@@ -206,9 +208,10 @@ def log_match():
         # Check if the score is set, if not, assign null
         player_score = request.form.get(f'players[{index}][score]') or 0
         player_name = request.form.get(f'players[{index}][name]')
+        player_team = request.form.get(f'players[{index}][team]') or None
         if player_id is None:
             break
-        players.append({'id': player_id, 'name': player_name, 'score': int(player_score)})
+        players.append({'id': player_id, 'name': player_name, 'score': int(player_score), 'team': player_team})
         index += 1
                                                   
     # Fill mongo collections
@@ -225,6 +228,11 @@ def log_match():
     if (game['is_cooperative']):
         # Check if the match is cooperative --> each player wins
         winner = [player for player in players]
+        total_score = None
+        worst_score_player = None
+    elif isTeamMatch and winning_team is not None:
+        # Check if the match is a team match --> the team with the highest score wins
+        winner = [player for player in players if player['team'] == winning_team]  # All players in the winning team
         total_score = None
         worst_score_player = None
     else:
@@ -246,7 +254,9 @@ def log_match():
         'winner': winner,
         'worst_score_player': worst_score_player,
         'is_cooperative': game['is_cooperative'],
+        'is_team_match': isTeamMatch,
         'total_score': total_score,
+        'winning_team': winning_team,
     }
 
     if image_file_name is not None:
@@ -271,6 +281,8 @@ def log_match():
         elif not game['is_cooperative'] and player['id'] == winner:
             player_data['wins'] += 1
             player_data['num_competitive_win'] += 1
+        elif isTeamMatch and winning_team is not None and player['team'] == winning_team:
+            player_data['wins'] += 1
         else:
             player_data['losses'] += 1
         
@@ -278,7 +290,7 @@ def log_match():
         player_data['matches'].append({
             'match_id': str(match_id),
             'game_id': game_id,
-            'is_winner': player['id'] == winner,
+            'is_winner': (player['id'] == winner) or (player['team'] == winning_team),
             'score': player['score'],
             'date': date,
         })

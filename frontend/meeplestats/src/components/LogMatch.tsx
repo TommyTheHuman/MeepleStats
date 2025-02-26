@@ -13,6 +13,7 @@ const LogMatch = () => {
   const [loading, setLoading] = useState(false);
   const [games, setGames] = useState<Game[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
+  const [teams, setTeams] = useState<string[]>([]);
 
   const [search, setSearch] = useState("");
   const combobox = useCombobox({
@@ -31,6 +32,8 @@ const LogMatch = () => {
       duration: "",
       isCooperative: false,
       isWin: false,
+      isTeamMatch: false,
+      winningTeam: "",
     },
   });
 
@@ -68,13 +71,28 @@ const LogMatch = () => {
       .catch((error) => console.error("Error fetching players:", error));
   }, []);
 
+  useEffect(() => {
+    if (!form.values.isTeamMatch) {
+      // Clear the teams array if the match is not a team match
+      setTeams([]);
+      // Clear the winning team if the match is not a team match
+      form.setFieldValue("winningTeam", "");
+      // Clear the team field for each player if the match is not a team match
+      const updatedPlayers = form.values.players.map((player) => ({
+        ...player,
+        team: ""
+      }));
+      form.setFieldValue("players", updatedPlayers);
+    }
+  }, [form, form.values.isTeamMatch]);
+
   const handleValueSelect = (username: string) => {
     const selectedPlayer = players.find((player) => player.username === username);
     if (selectedPlayer) {
       console.log("Selected player:", selectedPlayer);
       form.setFieldValue("players", [
         ...form.values.players,
-        { _id: selectedPlayer._id, score: "", name: selectedPlayer.username, username: selectedPlayer.username },
+        { _id: selectedPlayer._id, score: "", name: selectedPlayer.username, username: selectedPlayer.username, team: "" },
       ]);
     }
   };
@@ -94,11 +112,23 @@ const LogMatch = () => {
     form.setFieldValue("players", updatedPlayers);
   };
 
+  const handleTeamChange = (index: number, team: string) => {
+    const updatedPlayers = [...form.values.players];
+    updatedPlayers[index].team = team;
+    form.setFieldValue("players", updatedPlayers);
+  }
+
   const handleValueRemove = (username: string) => {
     form.setFieldValue(
       "players",
       form.values.players.filter((player) => player.name !== username)
     );
+  };
+
+  const handleAddTeam = (teamName: string) => {
+    if (teamName && !teams.includes(teamName)) {
+      setTeams([...teams, teamName]);
+    }
   };
 
   const values = form.values.players.map((player) => (
@@ -135,15 +165,18 @@ const LogMatch = () => {
     }
     data.append("duration", values.duration);
     data.append("isWin", values.isWin.toString());
+    data.append("isTeamMatch", values.isTeamMatch.toString());
+    data.append("winningTeam", values.winningTeam);
 
     if (Array.isArray(values.players)) {
       values.players.forEach((player, index) => {
         data.append(`players[${index}][id]`, player._id);
         data.append(`players[${index}][score]`, player.score);
         data.append(`players[${index}][name]`, player.name);
+        data.append(`players[${index}][team]`, player.team);
       });
     }
-    console.log("Data:", values);
+    //console.log("Data:", values);
     try {
 
       const requestOptions: RequestInit = {
@@ -196,6 +229,10 @@ const LogMatch = () => {
           value={form.values.game}
           required
         />
+        {!form.values.isCooperative && (
+          <Checkbox label="Team match" {...form.getInputProps("isTeamMatch", { type: "checkbox" })} />
+        )}
+
         <Combobox store={combobox} onOptionSubmit={handleValueSelect}>
           <Combobox.DropdownTarget>
             <PillsInput label="Players" onClick={() => combobox.openDropdown()}>
@@ -228,6 +265,41 @@ const LogMatch = () => {
             </Combobox.Options>
           </Combobox.Dropdown>
         </Combobox>
+
+        {form.values.isTeamMatch && (
+          <>
+            <TextInput
+              label="Add Team"
+              placeholder="Enter a team name"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddTeam(e.currentTarget.value)
+                  e.currentTarget.value = ""
+                }
+              }}
+            />
+
+            {form.values.players.map((player, index) => (
+              <Select
+                key={player._id}
+                label={`Select team for ${player.name}`}
+                placeholder="Select a team"
+                data={teams.map((team) => ({ value: team, label: team }))}
+                onChange={(value) => { handleTeamChange(index, value || "") }}
+                required
+              />
+            ))}
+            <Select
+              label="Winning Team"
+              placeholder="Select a team"
+              data={teams.map((team) => ({ value: team, label: team }))}
+              onChange={(value) => form.setFieldValue("winningTeam", value || "")}
+              required
+            />
+          </>
+        )}
+
         <TextInput
           label="Duration"
           type="number"
@@ -249,7 +321,7 @@ const LogMatch = () => {
         {form.values.isCooperative && (
           <Checkbox label="Match won" {...form.getInputProps("isWin", { type: "checkbox" })} />
         )}
-        {!form.values.isCooperative && (
+        {!form.values.isCooperative && !form.values.isTeamMatch && (
           <div>
             {form.values.players.map((player, index) => (
               <div key={player._id}>

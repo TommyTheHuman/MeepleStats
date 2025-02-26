@@ -5,6 +5,7 @@ export interface Player {
   score: string;
   name: string;
   username: string;
+  team: string;
 }
 
 export interface Game {
