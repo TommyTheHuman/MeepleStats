@@ -1,0 +1,37 @@
+name: Create and publish a Docker image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build the Docker frontend image
+        env:
+          DOCKER_CLI_EXPERIMENTAL: enabled
+        run: docker build -t ghcr.io/${{ github.repository }}-frontend:latest -f frontend/meeplestats/Dockerfile
+
+      - name: Build the Docker backend image
+        env:
+          DOCKER_CLI_EXPERIMENTAL: enabled
+        run: docker build -t ghcr.io/${{ github.repository }}-backend:latest -f backend/Dockerfile
+
+      - name: Push the frontend image
+        run: docker push ghcr.io/${{ github.repository }}-frontend:latest
+
+      - name: Push the backend image
+        run: docker push ghcr.io/${{ github.repository }}-backend:latest
