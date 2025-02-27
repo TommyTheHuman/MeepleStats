@@ -28,12 +28,12 @@ jobs:
       - name: Build the Docker frontend image
         env:
           DOCKER_CLI_EXPERIMENTAL: enabled
-        run: docker build -t ghcr.io/${{ env.IMAGE_NAME }}/frontend:latest frontend/meeplestats/Dockerfile
+        run: docker build -t ghcr.io/${{ env.IMAGE_NAME }}/frontend:latest ./frontend/meeplestats
 
       - name: Build the Docker backend image
         env:
           DOCKER_CLI_EXPERIMENTAL: enabled
-        run: docker build -t ghcr.io/${{ env.IMAGE_NAME }}/backend:latest backend/Dockerfile
+        run: docker build -t ghcr.io/${{ env.IMAGE_NAME }}/backend:latest ./backend
 
       - name: Push the frontend image
         run: docker push ghcr.io/${{ env.IMAGE_NAME }}/frontend:latest
