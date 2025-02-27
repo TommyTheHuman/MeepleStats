@@ -21,18 +21,22 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Lowercase github.repository
+        run: |
+          echo "IMAGE_NAME=${GITHUB_REPOSITORY@L}" >> ${GITHUB_ENV}
+
       - name: Build the Docker frontend image
         env:
           DOCKER_CLI_EXPERIMENTAL: enabled
-        run: docker build -t ghcr.io/${{ github.repository }}-frontend:latest frontend/meeplestats/Dockerfile
+        run: docker build -t ghcr.io/${{ env.IMAGE_NAME }}/frontend:latest frontend/meeplestats/Dockerfile
 
       - name: Build the Docker backend image
         env:
           DOCKER_CLI_EXPERIMENTAL: enabled
-        run: docker build -t ghcr.io/${{ github.repository }}-backend:latest backend/Dockerfile
+        run: docker build -t ghcr.io/${{ env.IMAGE_NAME }}/backend:latest backend/Dockerfile
 
       - name: Push the frontend image
-        run: docker push ghcr.io/${{ github.repository }}-frontend:latest
+        run: docker push ghcr.io/${{ env.IMAGE_NAME }}/frontend:latest
 
       - name: Push the backend image
-        run: docker push ghcr.io/${{ github.repository }}-backend:latest
+        run: docker push ghcr.io/${{ env.IMAGE_NAME }}/backend:latest
