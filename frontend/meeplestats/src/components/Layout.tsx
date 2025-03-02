@@ -91,6 +91,7 @@ export default function Layout() {
             <NavLink component={Link} to="/wishlist" label="Wishlist" onClick={closeMobile} />
             <NavLink component={Link} to="/matchHistory" label="Match History" onClick={closeMobile} />
             <NavLink component={Link} to="/logmatch" label="Log Match" onClick={closeMobile} />
+            <NavLink component={Link} to="/gameCollection" label="Games Collection" onClick={closeMobile} />
             <Button onClick={handleImportGames}>Import Games</Button>
           </>
 

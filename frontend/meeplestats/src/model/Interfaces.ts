@@ -18,6 +18,8 @@ export interface Game {
   thumbnail: string;
   yearPublished: string;
   notes: string;
+  price: string;
+  isGifted: boolean;
 }
 
 export interface StatisticCardInterface {

@@ -53,6 +53,8 @@ const Wishlist = () => {
         "Unknown",
       is_cooperative: false,
       notes: "",
+      price: "0",
+      isGifted: false,
     }));
 
     // Rimuovi duplicati
@@ -81,6 +83,8 @@ const Wishlist = () => {
       yearPublished: item?.querySelector("yearpublished")?.getAttribute("value") || "Unknown",
       is_cooperative: false,
       notes: "",
+      price: "0",
+      isGifted: false,
     };
     setSelectedGame({ bgg_id: id, ...details });
   };
@@ -147,6 +151,8 @@ const Wishlist = () => {
       yearPublished: "Unknown",
       is_cooperative: item.is_cooperative,
       notes: item.notes,
+      price: "0",
+      isGifted: false,
     }));
 
     setWishlist(mappedData);

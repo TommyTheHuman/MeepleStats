@@ -15,7 +15,6 @@ from .services.bgg_import import import_games_from_bgg
 
 from .services.s3 import S3Client
 
-#bp = Blueprint('main', __name__)
 
 STORAGE_TYPE = os.getenv('STORAGE_TYPE')#'local'#'s3'
 
@@ -87,7 +86,6 @@ def register():
     
     jwt_storage = os.getenv('JWT_STORAGE', 'cookie')
 
-    print("jwt_storage: ", jwt_storage)
 
     if jwt_storage == 'cookie':
         response = jsonify({'message': 'Register successful'})
@@ -137,7 +135,6 @@ data_bp = Blueprint('games', __name__)
 @data_bp.route('/games', methods=['GET'])
 @jwt_required()
 def get_games():
-    print(get_jwt_identity())
     try:
         games = games_collection.find()
         
@@ -150,6 +147,25 @@ def get_games():
         return jsonify(games_data), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+@data_bp.route('/updateGames', methods=['POST'])
+@jwt_required()
+def update_games():
+    data = request.get_json()
+    game_id = data.get('game_id')
+    isGifted = data.get('isGifted')
+    game_price = data.get('price')
+
+    if game_id:
+        # Update the game in the database
+        res = games_collection.update_one({'bgg_id': game_id}, {'$set': {'isGifted': isGifted, 'price': game_price}})
+        if res.modified_count:
+            return jsonify({'message': 'Game updated successfully'}), 200
+        else:
+            return jsonify({'error': 'No modification applied'}), 400
+    return jsonify({'error': 'Input not valid'}), 400
+
+
 
 @data_bp.route('/players', methods=['GET'])
 def get_players():
@@ -265,8 +281,6 @@ def log_match():
             'filename' : image_file_name
         }
 
-    #print(match_data)
-
     result = matches_collection.insert_one(match_data)
     match_id = result.inserted_id 
 
@@ -312,8 +326,6 @@ def log_match():
         'total_score': total_score,
         'winner': winner,
     })
-
-    #print(game['matches'])
 
     # Loop over matches and update average score
     total_score = 0

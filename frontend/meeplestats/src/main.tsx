@@ -17,6 +17,7 @@ import LogMatchPage from "./pages/LogMatchPage.tsx";
 import Wishlist from "./pages/WishListPage.tsx";
 import MatchHistoryPage from "./pages/MatchHistoryPage.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
+import GamesPage from "./pages/GamesPage.tsx";
 
 const theme = createTheme({});
 
@@ -55,7 +56,11 @@ const router = createBrowserRouter([
         element: <MatchHistoryPage />,
       },
       {
-        path: "*", // Aggiungi questa route catch-all
+        path: "/gameCollection",
+        element: <GamesPage />,
+      },
+      {
+        path: "*",
         element: <Navigate to="/" replace />,
       },
     ],
