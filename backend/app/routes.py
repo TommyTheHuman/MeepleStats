@@ -12,6 +12,8 @@ import requests
 
 from .services.db import players_collection, games_collection, matches_collection, wishlists_collection
 from .services.bgg_import import import_games_from_bgg
+from .services.achievements_management import check_update_achievements
+from .services.achievements_setup import create_achievements
 
 from .services.s3 import S3Client
 
@@ -72,9 +74,10 @@ def register():
         'image': "",
         'created_at': datetime.now(),
         'achievements': [],
-        'matches': [{}],
+        'matches': [],
         'wins': 0,
-        'winsteaks': 0,
+        'winstreak': 0,
+        'longest_winstreak': 0,
         'losses': 0,
         'total_matches': 0,
         'num_competitive_win': 0,
@@ -191,8 +194,8 @@ def log_match():
     game_name = request.form.get('game')
     game_id = request.form.get('game_id')
     note = request.form.get('note')
-    isWin = bool(request.form.get('isWin'))
-    isTeamMatch = bool(request.form.get('isTeamMatch'))
+    isWin = request.form.get('isWin', '').strip().lower() in ['true', '1', 'yes']
+    isTeamMatch = request.form.get('isTeamMatch', '').strip().lower() in ['true', '1', 'yes']
     winning_team = request.form.get('winningTeam')
 
     # Handle file upload
@@ -292,19 +295,27 @@ def log_match():
         player_data['total_matches'] += 1
         if game['is_cooperative'] and isWin:
             player_data['wins'] += 1
-        elif not game['is_cooperative'] and player['id'] == winner:
+            player_data['winstreak'] += 1
+        elif not game['is_cooperative'] and player['id'] == winner['id']:
             player_data['wins'] += 1
             player_data['num_competitive_win'] += 1
+            player_data['winstreak'] += 1
         elif isTeamMatch and winning_team is not None and player['team'] == winning_team:
             player_data['wins'] += 1
+            player_data['winstreak'] += 1
         else:
             player_data['losses'] += 1
+            player_data['winstreak'] = 0
         
+        # Update player's longest winstreak
+        if player_data['winstreak'] > player_data['longest_winstreak']:
+            player_data['longest_winstreak'] = player_data['winstreak']
+
         # update player's match history
         player_data['matches'].append({
             'match_id': str(match_id),
             'game_id': game_id,
-            'is_winner': (player['id'] == winner) or (player['team'] == winning_team),
+            'is_winner': (player['id'] == winner['id']) or (player['team'] == winning_team),
             'score': player['score'],
             'date': date,
         })
@@ -336,6 +347,10 @@ def log_match():
 
     # Update game's Collection
     games_collection.update_one({'bgg_id': game_id}, {'$set': game})
+
+    # Check and update achievements
+    player_ids = [player['id'] for player in players]
+    check_update_achievements(player_ids, match_data)
 
     return jsonify({'message': 'Match logged successfully'}), 201
 
@@ -746,7 +761,8 @@ def playerLongWinstreak():
 
     player = players_collection.find_one({'username': player_name})
 
-    return jsonify(player['winsteaks']), 200
+    # FIXME: implement the logic to calculate the longest win streak of a player
+    return jsonify(player['longest_winstreak']), 200
 
 @statistic_bp.route('/playerHighestWinRate', methods=['GET'])
 @jwt_required()
@@ -1127,12 +1143,12 @@ def gameAvgScore():
 utility_bp = Blueprint('utils', __name__)
 
 @utility_bp.route('/importGames', methods=['GET'])
-#@jwt_required()
+@jwt_required()
 def importGames():
     # Import games from BGG API using the bgg_import.py
 
     # Get the username from the .env file
-    username = "ArcherMaster"
+    username = os.getenv('BGG_USERNAME')
 
     # Check if the username is provided
     if not username:
@@ -1140,3 +1156,9 @@ def importGames():
     
     import_games_from_bgg(username)
     return jsonify({'message': 'Games imported successfully'}), 200
+
+@utility_bp.route('/setupAchievements', methods=['GET'])
+@jwt_required()
+def setupAchievements():
+    create_achievements()
+    return jsonify({'message': 'Achievements created successfully'}), 200

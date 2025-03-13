@@ -12,6 +12,7 @@
   - [🚀 Backend Setup](#-backend-setup)
   - [🎨 Frontend Setup](#-frontend-setup)
   - [▲ Vercel Setup](#-vercel-installation)
+  - [🐳 Docker Deployment](#-docker-deployment-pre-built-images)
 - [🛠️ Usage](#-usage)
 - [🔗 API Endpoints](#-api-endpoints)
 - [🌍 Environment Variables](#-environment-variables)
@@ -30,6 +31,8 @@
 - Import Games from BoardGameGeek (BGG) API
 - View Global & Player-Specific Statistics
 - Local or Remote image storage
+- Achievement system
+- Explore match history
 
 ---
 
@@ -89,6 +92,43 @@ Ensure you have the following installed:
 
 ### ▲ Vercel Installation
 Just create two different projects in **Vercel** and do the correct environment variables setup, the `.JSON` config files for Vercel are provided
+
+### 🐳 Docker Deployment (Pre-built Images)
+
+The project now includes a GitHub Actions workflow that builds and publishes Docker images for both the backend and frontend to GitHub Container Registry (GHCR). This allows you to deploy the application without building the images locally.
+
+#### Prerequisites
+
+- Docker and Docker Compose must be installed on your deployment system.
+- Ensure your `.env` file is configured properly and placed in the project root.
+
+#### Deployment Instructions
+
+1. **Clone the repository to your server (or pull the latest changes):**
+   ```sh
+   git clone https://github.com/TommyTheHuman/MeepleStats.git
+   cd MeepleStats
+   ```
+
+2. **Configure environment variables:**
+   - Create a `.env` file in the project root with all required settings (see [Environment Variables](#-environment-variables) below).
+
+3. **Deploy using Docker Compose:**
+
+   The provided `docker-compose.yml` uses the pre-built images from GHCR. 
+   
+   To deploy, simply run:
+   ```sh
+   docker-compose up -d
+   ```
+
+4. **Access the Application:**
+   - The backend will be available on port 5000.
+   - The frontend will be accessible on port 5173.
+
+### Notes
+
+- If changes are made to the code, the GitHub workflow will automatically build and push updated images to GHCR upon merges or pushes to `main`.
 
 ---
 
@@ -179,14 +219,16 @@ Want to improve MeepleStats? Contributions are welcome! Feel free to open an iss
 
 ## 📌 To-Do
 
-- Improve UI/UX and Dark Mode
-- Show images for open matches
-- ~~Implement team-based game tracking~~
-- Add achievements system
-- Introduce multilingual support
-- Create user profile page
-- Develop a game collection page
-- ~~Add support to upload images on Google Drive~~
+- [ ] Improve UI/UX and Dark Mode
+- [ ] Show images for open matches
+- [x] Implement team-based game tracking
+- [x] Add achievements system
+- [ ] Introduce multilingual support
+- [ ] Create user profile page
+- [x] Develop a game collection page
+- [x] Add support to upload images on Google Drive
+- [ ] Create a page to randomly select a game and a timer to track the play time
+- [ ] Implement a RAG pipeline to retirve information about game rules
 
 ---
 

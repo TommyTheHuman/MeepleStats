@@ -56,6 +56,32 @@ export default function Layout() {
     }
   }
 
+  const handleAchievementsSetup = async () => {
+    try {
+      const requestOptions: RequestInit = {
+        method: "GET",
+      };
+      // Check the JWT_STORAGE value and set credentials or headers accordingly
+      if (JWT_STORAGE === "cookie") {
+        requestOptions.credentials = "include";
+      } else if (JWT_STORAGE === "localstorage") {
+        requestOptions.headers = {
+          Authorization: `Bearer ${localStorage.getItem("jwt_token")}`,
+        };
+      }
+
+      const respose = await fetch(`${API_URL}/setupAchievements`, requestOptions);
+
+      if (respose.ok) {
+        console.log("Achievements setup");
+      } else {
+        console.error("Error setting up achievements");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
     <AppShell
       header={{ height: 60 }}
@@ -93,6 +119,7 @@ export default function Layout() {
             <NavLink component={Link} to="/logmatch" label="Log Match" onClick={closeMobile} />
             <NavLink component={Link} to="/gameCollection" label="Games Collection" onClick={closeMobile} />
             <Button onClick={handleImportGames}>Import Games</Button>
+            <Button onClick={handleAchievementsSetup}>Setup Achievements</Button>
           </>
 
         )}
