@@ -1,10 +1,8 @@
-import { Text } from "@mantine/core";
 import Wishlist from "../components/WishList";
 
-export default function LoginPage() {
+export default function WishlistPage() {
   return (
     <>
-      <Text>WishList</Text>
       <Wishlist />
     </>
   );

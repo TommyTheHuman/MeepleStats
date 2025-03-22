@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Game } from "../model/Interfaces";
 import { API_URL, JWT_STORAGE } from "../model/Constants";
-import { Grid } from "@mantine/core";
+import { Container, Grid } from "@mantine/core";
 import GameCard from "../components/GameCard";
 
 interface ApiResponseItem {
@@ -17,6 +17,7 @@ interface ApiResponseItem {
   notes: string;
   price: string;
   isGifted: boolean;
+  username: string;
 }
 
 const GamesPage = () => {
@@ -51,6 +52,7 @@ const GamesPage = () => {
         notes: game.notes,
         price: game.price || "", // Ensure price field is included
         isGifted: game.isGifted || false, // Ensure isGift field is included
+        username: game.username || "", // Get username from local storage
       }));
 
       setGames(mappedGames);
@@ -59,13 +61,18 @@ const GamesPage = () => {
   }, []);
 
   return (
-    <Grid>
-      {games.map((game) => (
-        <Grid.Col key={game.bgg_id} span={4}>
-          <GameCard game={game} />
-        </Grid.Col>
-      ))}
-    </Grid>
+    <Container size="xl" className="!px-4 md:!px-6">
+      <Grid gutter="md">
+        {games.map((game) => (
+          <Grid.Col
+            key={game.bgg_id}
+            span={{ base: 12, xs: 6, sm: 4, md: 3, lg: 2.4 }}
+          >
+            <GameCard game={game} />
+          </Grid.Col>
+        ))}
+      </Grid>
+    </Container>
   );
 
 };

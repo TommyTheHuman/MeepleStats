@@ -20,6 +20,7 @@ export interface Game {
   notes: string;
   price: string;
   isGifted: boolean;
+  username: string;
 }
 
 export interface StatisticCardInterface {
@@ -41,4 +42,23 @@ export interface MatchCardInterface {
   players: { id: string, name: string, score: string }[];
   winner: { id: string, name: string, score: string };
   game_image: string;
+}
+
+
+export interface WishListCardInterface {
+  name: string;
+  minPlayers: string;
+  maxPlayers: string;
+  playingTime: string;
+  thumbnail: string;
+  notes: string;
+  username: string;
+}
+
+export interface StaticResponse {
+  title: string;
+  type: 'number' | 'percentage' | 'list' | 'comparison';
+  value: number | object | Array<unknown>;
+  unit?: string;
+  description?: string;
 }

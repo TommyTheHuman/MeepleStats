@@ -1,4 +1,4 @@
-import { Box, Button, Group, LoadingOverlay, TextInput, Textarea, Select, Checkbox, NumberInput } from "@mantine/core";
+import { Box, Button, Group, LoadingOverlay, TextInput, Textarea, Select, Checkbox, NumberInput, Divider, Grid, Paper, Stack, Title, Text as MantineText } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useEffect, useState } from "react";
 //import { notifications } from "@mantine/notifications";
@@ -132,7 +132,7 @@ const LogMatch = () => {
   };
 
   const values = form.values.players.map((player) => (
-    <Pill key={player.name} withRemoveButton onRemove={() => handleValueRemove(player.name)}>
+    <Pill key={player.name} withRemoveButton onRemove={() => handleValueRemove(player.name)} className="!bg-blue-50 !text-blue-600 !font-medium">
       {player.name}
     </Pill>
   ));
@@ -199,7 +199,6 @@ const LogMatch = () => {
       if (response.ok) {
         const data = await response.json();
         console.log("Success:", data);
-        navigate("/");
       } else {
         console.error("Error:", response.statusText);
       }
@@ -211,137 +210,283 @@ const LogMatch = () => {
   };
 
   return (
-    <Box pos="relative" w={320} mx="auto">
-      <form onSubmit={form.onSubmit(handleSubmit)}>
-        <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
-        <Select
-          label="Game"
-          placeholder="Select a game"
-          data={games.map((game) => ({ value: game.name, label: game.name }))}
-          onChange={(value) => {
-            if (value) {
-              handleGameSelect(value);
-            }
-            if (value !== null) {
-              form.setFieldValue("game", value);
-            }
-          }}
-          value={form.values.game}
-          required
-        />
-        {!form.values.isCooperative && (
-          <Checkbox label="Team match" {...form.getInputProps("isTeamMatch", { type: "checkbox" })} />
-        )}
+    <Box className="!mx-auto !max-w-2xl">
+      <Paper p="xl" radius="lg" className="!bg-white !shadow-sm !border !border-gray-100">
+        <form onSubmit={form.onSubmit(handleSubmit)}>
+          <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: "lg", blur: 2 }} />
 
-        <Combobox store={combobox} onOptionSubmit={handleValueSelect}>
-          <Combobox.DropdownTarget>
-            <PillsInput label="Players" onClick={() => combobox.openDropdown()}>
-              <Pill.Group>
-                {values}
-                <Combobox.EventsTarget>
-                  <PillsInput.Field
-                    onFocus={() => combobox.openDropdown()}
-                    onBlur={() => combobox.closeDropdown()}
-                    value={search}
-                    placeholder="Search values"
-                    onChange={(event) => {
-                      combobox.updateSelectedOptionIndex();
-                      setSearch(event.currentTarget.value);
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === "Backspace" && search.length === 0) {
-                        event.preventDefault();
-                        handleValueRemove(form.values.players[form.values.players.length - 1].name);
+          <Title order={2} ta="center" className="!font-semibold !tracking-tight !mb-6">
+            Log Match
+          </Title>
+
+          {/* Game Selection Section */}
+          <Box className="!mb-8">
+            <MantineText className="!text-xs !uppercase !font-medium !tracking-wide !text-gray-500 mb-2">
+              Game
+            </MantineText>
+            <Paper className="!bg-gray-50 !p-4 !rounded-xl !border !border-gray-100">
+              <Select
+                placeholder="Select a game"
+                data={games.map((game) => ({ value: game.name, label: game.name }))}
+                onChange={(value) => {
+                  if (value) {
+                    handleGameSelect(value);
+                  }
+                  if (value !== null) {
+                    form.setFieldValue("game", value);
+                  }
+                }}
+                value={form.values.game}
+                required
+                searchable
+                className="mb-2"
+                styles={{ input: { border: "none", backgroundColor: "white", borderRadius: "0.75rem" } }}
+              />
+
+              {!form.values.isCooperative && (
+                <Checkbox
+                  label="Team match"
+                  {...form.getInputProps("isTeamMatch", { type: "checkbox" })}
+                  className="mt-3"
+                  styles={{
+                    input: { cursor: "pointer" },
+                    label: { fontWeight: 500 }
+                  }}
+                />
+              )}
+            </Paper>
+          </Box>
+
+          {/* Players Section */}
+          <Box className="!mb-8">
+            <MantineText className="!text-xs !uppercase !font-medium !tracking-wide !text-gray-500 !mb-2">
+              Players
+            </MantineText>
+            <Paper className="!bg-gray-50 !p-4 !rounded-xl !border !border-gray-100">
+              <Combobox store={combobox} onOptionSubmit={handleValueSelect}>
+                <Combobox.DropdownTarget>
+                  <PillsInput onClick={() => combobox.openDropdown()} className="!border-0 !bg-white !rounded-xl">
+                    <Pill.Group>
+                      {values}
+                      <Combobox.EventsTarget>
+                        <PillsInput.Field
+                          onFocus={() => combobox.openDropdown()}
+                          onBlur={() => combobox.closeDropdown()}
+                          value={search}
+                          placeholder="Search players"
+                          onChange={(event) => {
+                            combobox.updateSelectedOptionIndex();
+                            setSearch(event.currentTarget.value);
+                          }}
+                          onKeyDown={(event) => {
+                            if (event.key === "Backspace" && search.length === 0) {
+                              event.preventDefault();
+                              handleValueRemove(form.values.players[form.values.players.length - 1]?.name);
+                            }
+                          }}
+                        />
+                      </Combobox.EventsTarget>
+                    </Pill.Group>
+                  </PillsInput>
+                </Combobox.DropdownTarget>
+                <Combobox.Dropdown>
+                  <Combobox.Options>
+                    {options.length > 0 ? options : <Combobox.Empty>Nothing found...</Combobox.Empty>}
+                  </Combobox.Options>
+                </Combobox.Dropdown>
+              </Combobox>
+
+              {/* Team Match Options */}
+              {form.values.isTeamMatch && (
+                <Box className="!mt-6">
+                  <Divider label="Team Setup" labelPosition="center" className="!mb-4 !opacity-60" />
+
+                  <TextInput
+                    placeholder="Enter team name and press Enter"
+                    className="!mb-4"
+                    styles={{ input: { borderRadius: "0.75rem" } }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddTeam(e.currentTarget.value);
+                        e.currentTarget.value = "";
                       }
                     }}
                   />
-                </Combobox.EventsTarget>
-              </Pill.Group>
-            </PillsInput>
-          </Combobox.DropdownTarget>
-          <Combobox.Dropdown>
-            <Combobox.Options>
-              {options.length > 0 ? options : <Combobox.Empty>Nothing found...</Combobox.Empty>}
-            </Combobox.Options>
-          </Combobox.Dropdown>
-        </Combobox>
 
-        {form.values.isTeamMatch && (
-          <>
-            <TextInput
-              label="Add Team"
-              placeholder="Enter a team name"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleAddTeam(e.currentTarget.value)
-                  e.currentTarget.value = ""
-                }
-              }}
-            />
+                  {teams.length > 0 && (
+                    <Stack className="!mb-4">
+                      <MantineText size="sm" fw={500} c="dimmed">Current Teams</MantineText>
+                      <Group>
+                        {teams.map((team) => (
+                          <Pill
+                            key={team}
+                            className="!bg-blue-50 !text-blue-600 !font-medium"
+                          >
+                            {team}
+                          </Pill>
+                        ))}
+                      </Group>
+                    </Stack>
+                  )}
 
-            {form.values.players.map((player, index) => (
-              <Select
-                key={player._id}
-                label={`Select team for ${player.name}`}
-                placeholder="Select a team"
-                data={teams.map((team) => ({ value: team, label: team }))}
-                onChange={(value) => { handleTeamChange(index, value || "") }}
-                required
-              />
-            ))}
-            <Select
-              label="Winning Team"
-              placeholder="Select a team"
-              data={teams.map((team) => ({ value: team, label: team }))}
-              onChange={(value) => form.setFieldValue("winningTeam", value || "")}
-              required
-            />
-          </>
-        )}
+                  {form.values.players.length > 0 && (
+                    <Grid>
+                      {form.values.players.map((player, index) => (
+                        <Grid.Col span={6} key={player._id}>
+                          <Select
+                            label={`${player.name}`}
+                            placeholder="Select team"
+                            data={teams.map((team) => ({ value: team, label: team }))}
+                            onChange={(value) => { handleTeamChange(index, value || "") }}
+                            required
+                            styles={{
+                              input: { borderRadius: "0.75rem" },
+                              label: { fontWeight: 500, fontSize: "0.875rem" }
+                            }}
+                          />
+                        </Grid.Col>
+                      ))}
+                    </Grid>
+                  )}
 
-        <TextInput
-          label="Duration"
-          type="number"
-          placeholder="Enter duration in minutes"
-          {...form.getInputProps("duration")}
-          required
-        />
-        <Textarea label="Note" placeholder="Enter notes" {...form.getInputProps("note")} />
-        <TextInput label="Date" type="date" {...form.getInputProps("date")} required />
-        <TextInput
-          label="Upload Image"
-          type="file"
-          onChange={(event) => {
-            const file = event.currentTarget.files ? event.currentTarget.files[0] : null;
-            form.setFieldValue("image", file);
-          }}
-          accept="image/*"
-        />
-        {form.values.isCooperative && (
-          <Checkbox label="Match won" {...form.getInputProps("isWin", { type: "checkbox" })} />
-        )}
-        {!form.values.isCooperative && !form.values.isTeamMatch && (
-          <div>
-            {form.values.players.map((player, index) => (
-              <div key={player._id}>
-                <NumberInput
-                  label={`${player.name} score`}
-                  value={parseInt(player.score)}
-                  onChange={(value) => handleScoreChange(index, value.toString())}
-                  min={0}
-                  required
+                  {teams.length > 0 && (
+                    <Select
+                      label="Winning Team"
+                      placeholder="Select winning team"
+                      data={teams.map((team) => ({ value: team, label: team }))}
+                      onChange={(value) => form.setFieldValue("winningTeam", value || "")}
+                      required
+                      className="!mt-4"
+                      styles={{
+                        input: { borderRadius: "0.75rem" },
+                        label: { fontWeight: 500, fontSize: "0.875rem" }
+                      }}
+                    />
+                  )}
+                </Box>
+              )}
+
+              {/* Player Scores */}
+              {!form.values.isCooperative && !form.values.isTeamMatch && form.values.players.length > 0 && (
+                <Box className="!mt-6">
+                  <Divider label="Player Scores" labelPosition="center" className="!mb-4 !opacity-60" />
+                  <Grid>
+                    {form.values.players.map((player, index) => (
+                      <Grid.Col span={6} key={player._id}>
+                        <NumberInput
+                          label={player.name}
+                          value={parseInt(player.score) || 0}
+                          onChange={(value) => handleScoreChange(index, value?.toString() || "0")}
+                          min={0}
+                          required
+                          styles={{
+                            input: { borderRadius: "0.75rem" },
+                            label: { fontWeight: 500, fontSize: "0.875rem" }
+                          }}
+                        />
+                      </Grid.Col>
+                    ))}
+                  </Grid>
+                </Box>
+              )}
+            </Paper>
+          </Box>
+
+          {/* Match Details Section */}
+          <Box className="!mb-8">
+            <MantineText className="!text-xs !uppercase !font-medium !tracking-wide !text-gray-500 mb-2">
+              Match Details
+            </MantineText>
+            <Paper className="!bg-gray-50 !p-4 !rounded-xl !border !border-gray-100">
+              <Grid>
+                <Grid.Col span={6}>
+                  <TextInput
+                    label="Duration"
+                    type="number"
+                    placeholder="Minutes"
+                    {...form.getInputProps("duration")}
+                    required
+                    styles={{
+                      input: { borderRadius: "0.75rem" },
+                      label: { fontWeight: 500, fontSize: "0.875rem" }
+                    }}
+                  />
+                </Grid.Col>
+                <Grid.Col span={6}>
+                  <TextInput
+                    label="Date"
+                    type="date"
+                    {...form.getInputProps("date")}
+                    required
+                    styles={{
+                      input: { borderRadius: "0.75rem" },
+                      label: { fontWeight: 500, fontSize: "0.875rem" }
+                    }}
+                  />
+                </Grid.Col>
+              </Grid>
+
+              {form.values.isCooperative && (
+                <Checkbox
+                  label="Match won"
+                  {...form.getInputProps("isWin", { type: "checkbox" })}
+                  className="!mt-4"
+                  styles={{
+                    input: { cursor: "pointer" },
+                    label: { fontWeight: 500 }
+                  }}
                 />
-              </div>
-            ))}
-          </div>
-        )}
-        <Group justify="space-between" mt="md">
-          <Button type="submit" disabled={loading}>
-            Log Game
-          </Button>
-        </Group>
-      </form>
+              )}
+
+              <TextInput
+                label="Photo"
+                type="file"
+                onChange={(event) => {
+                  const file = event.currentTarget.files ? event.currentTarget.files[0] : null;
+                  form.setFieldValue("image", file);
+                }}
+                accept="image/*"
+                className="!mt-4"
+                styles={{
+                  input: { borderRadius: "0.75rem" },
+                  label: { fontWeight: 500, fontSize: "0.875rem" }
+                }}
+              />
+
+              <Textarea
+                label="Notes"
+                placeholder="Any details about this match..."
+                minRows={3}
+                {...form.getInputProps("note")}
+                className="!mt-4"
+                styles={{
+                  input: { borderRadius: "0.75rem" },
+                  label: { fontWeight: 500, fontSize: "0.875rem" }
+                }}
+              />
+            </Paper>
+          </Box>
+
+          <Group justify="center" className="!mt-8">
+            <Button
+              type="submit"
+              size="lg"
+              disabled={loading}
+              fullWidth
+              className="!bg-blue-600 !hover:bg-blue-700 !rounded-xl !h-11 !font-medium"
+            >
+              Log Match
+            </Button>
+          </Group>
+        </form>
+        <Button
+          onClick={() => navigate("/matchHistory")}
+          className="!mt-4 !bg-gray-200"
+        >
+          Test Navigation
+        </Button>
+      </Paper>
     </Box>
   );
 };

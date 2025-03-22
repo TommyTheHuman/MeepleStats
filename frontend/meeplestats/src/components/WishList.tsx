@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Box, Button, LoadingOverlay, Textarea, Autocomplete, Card, Image, Title, Text, Grid } from "@mantine/core";
+import { Box, Button, LoadingOverlay, Textarea, Autocomplete, Image, Title, Text, Grid, Container, Paper } from "@mantine/core";
 //import { useForm } from "@mantine/form";
 import { Game } from "../model/Interfaces";
 import { API_URL, JWT_STORAGE } from "../model/Constants";
+import WishListCard from "./WishListCard";
 
 
 interface ApiResponseItem {
@@ -16,6 +17,7 @@ interface ApiResponseItem {
   };
   is_cooperative: boolean;
   notes: string;
+  username: string;
 }
 
 const Wishlist = () => {
@@ -55,6 +57,7 @@ const Wishlist = () => {
       notes: "",
       price: "0",
       isGifted: false,
+      username: "",
     }));
 
     // Rimuovi duplicati
@@ -85,6 +88,7 @@ const Wishlist = () => {
       notes: "",
       price: "0",
       isGifted: false,
+      username: "",
     };
     setSelectedGame({ bgg_id: id, ...details });
   };
@@ -153,6 +157,7 @@ const Wishlist = () => {
       notes: item.notes,
       price: "0",
       isGifted: false,
+      username: item.username,
     }));
 
     setWishlist(mappedData);
@@ -163,71 +168,129 @@ const Wishlist = () => {
   }, []);
 
   return (
-    <Box>
-      <Box pos="relative" w={320} mx="auto">
-        <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
-        <h1>Wishlist</h1>
-        <Autocomplete
-          clearable
-          label="Search for games"
-          placeholder="Search for games"
-          value={query}
-          onChange={(value) => {
-            setQuery(value);
-            searchGames(value);
-          }}
-          onOptionSubmit={(item) => {
-            const selected = suggestions.find((game) => game.name.toLowerCase() === item.toLowerCase());
-            if (selected) {
-              selectGame(selected.bgg_id);
-            } else {
-              console.log("Game not found in suggestions");
-            }
-          }}
-          data={suggestions.map((game: Game) => ({
-            value: game.name,
-            label: `${game.name} (${game.yearPublished})`,
-            id: game.bgg_id,
-          }))}
-        />
-        {selectedGame && (
-          <Box>
-            <Title order={2}>{selectedGame.name}</Title>
-            <Image src={selectedGame.thumbnail} alt={selectedGame.name} />
-            <Text>
-              Players: {selectedGame.minPlayers} - {selectedGame.maxPlayers}
-            </Text>
-            <Text>Playing Time: {selectedGame.playingTime} minutes</Text>
-            <Textarea
-              label="Notes"
-              placeholder="Notes"
-              value={selectedGame.notes}
-              onChange={handleNotesChange}
-            />
-            <Button onClick={addToWishlist} mt="md">Add to Wishlist</Button>
-          </Box>
-        )}
+    <Container size="xl" className="!px-4 md:!px-6">
+      <Grid gutter="md">
+        {/* Search Column - Full width on mobile, 1/3 on desktop */}
+        <Grid.Col span={{ base: 12, md: 4 }}>
+          <Paper shadow="xs" p="md" radius="md" className="!bg-white !mb-6 !sticky !top-4">
+            <Title order={2} className="!mb-4 !text-gray-800 !text-xl !font-semibold">
+              Add to Wishlist
+            </Title>
 
-      </Box>
-      <Box>
-        <h2>Current Wishlist</h2>
-        <Grid gutter="md">
-          {wishlist.map((game) => (
-            <Grid.Col span={4} key={game.bgg_id}>
-              <Card shadow="sm" padding="lg">
-                <Card.Section>
-                  <Image src={game.thumbnail} alt={game.name} height={160} />
-                </Card.Section>
-                <Title order={4}>{game.name}</Title>
-                <Text>Players: {game.minPlayers} - {game.maxPlayers}</Text>
-                <Text>Playing Time: {game.playingTime} minutes</Text>
-                <Text>{game.notes}</Text>
-              </Card>
-            </Grid.Col>
-          ))}
-        </Grid>
-      </Box>
-    </Box>
+            <Box pos="relative">
+              <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: "md", blur: 2 }} />
+
+              <Autocomplete
+                clearable
+                label="Search for games"
+                placeholder="Type at least 3 characters"
+                value={query}
+                onChange={(value) => {
+                  setQuery(value);
+                  searchGames(value);
+                }}
+                onOptionSubmit={(item) => {
+                  const selected = suggestions.find((game) => game.name.toLowerCase() === item.toLowerCase());
+                  if (selected) {
+                    selectGame(selected.bgg_id);
+                  }
+                }}
+                data={suggestions.map((game: Game) => ({
+                  value: game.name,
+                  label: `${game.name} (${game.yearPublished})`,
+                  id: game.bgg_id,
+                }))}
+                className="!mb-4"
+                styles={{
+                  input: { borderRadius: '0.5rem', height: '2.5rem' },
+                  label: { fontSize: '0.875rem', fontWeight: 500, marginBottom: '4px' }
+                }}
+              />
+
+              {selectedGame && (
+                <Paper p="md" withBorder radius="md" className="!mt-4 !bg-gray-50">
+                  <Title order={3} className="!mb-3 !text-lg !font-medium">
+                    {selectedGame.name}
+                  </Title>
+
+                  <div className="!flex !items-center !gap-4 !mb-4">
+                    <Image
+                      src={selectedGame.thumbnail}
+                      alt={selectedGame.name}
+                      radius="md"
+                      width={100}
+                      height={100}
+                      fit="cover"
+                      className="!rounded-md !shadow-sm"
+                    />
+
+                    <div>
+                      <Text size="sm" className="!text-gray-700 !mb-1">
+                        Players: {selectedGame.minPlayers} - {selectedGame.maxPlayers}
+                      </Text>
+                      <Text size="sm" className="!text-gray-700">
+                        Playing Time: {selectedGame.playingTime} minutes
+                      </Text>
+                    </div>
+                  </div>
+
+                  <Textarea
+                    label="Notes"
+                    placeholder="Add notes about this game"
+                    value={selectedGame.notes}
+                    onChange={handleNotesChange}
+                    minRows={3}
+                    styles={{
+                      input: { borderRadius: '0.5rem' },
+                      label: { fontSize: '0.875rem', fontWeight: 500, marginBottom: '4px' }
+                    }}
+                  />
+
+                  <Button
+                    onClick={addToWishlist}
+                    fullWidth
+                    mt="md"
+                    className="!bg-blue-600 hover:!bg-blue-700 !transition-colors"
+                    radius="md"
+                  >
+                    Add to Wishlist
+                  </Button>
+                </Paper>
+              )}
+            </Box>
+          </Paper>
+        </Grid.Col>
+
+        {/* Wishlist Column - Full width on mobile, 2/3 on desktop */}
+        <Grid.Col span={{ base: 12, md: 8 }}>
+          <Title order={2} className="!mb-4 !text-gray-800 !text-xl !font-semibold">
+            My Wishlist
+          </Title>
+
+          {wishlist.length === 0 ? (
+            <Paper p="xl" radius="md" className="!bg-gray-50 !border !border-gray-200 !text-center">
+              <Text className="!text-gray-600">Your wishlist is empty. Search for games to add them.</Text>
+            </Paper>
+          ) : (
+            <Grid gutter="md">
+              {wishlist.map((game) => (
+                <Grid.Col span={{ base: 12, xs: 6, sm: 6, lg: 4 }} key={game.bgg_id}>
+                  <WishListCard
+                    name={game.name}
+                    thumbnail={game.thumbnail}
+                    minPlayers={game.minPlayers}
+                    maxPlayers={game.maxPlayers}
+                    playingTime={game.playingTime}
+                    notes={game.notes}
+                    username={game.username}
+                  />
+                </Grid.Col>
+              ))}
+            </Grid>
+          )}
+        </Grid.Col>
+      </Grid>
+    </Container>
   );
 };
 

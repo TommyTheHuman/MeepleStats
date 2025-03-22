@@ -510,7 +510,12 @@ def totHours():
         for match in matches:
             total_hours += match['game_duration']
 
-        return jsonify(total_hours), 200
+        return jsonify({
+            "type": "number",
+            "value": total_hours,
+            "unit": "hours",
+            "description": "Total hours played between " + start_date.strftime('%Y-%m-%d') + " and " + end_date.strftime('%Y-%m-%d')
+        }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -552,7 +557,12 @@ def totMatches():
             for match in matches:
                 total_matches += 1
     
-            return jsonify(total_matches), 200
+            return jsonify({
+                "type": "number",
+                "value": total_matches,
+                "unit": "matches",
+                "description": "Total matches played between " + start_date.strftime('%Y-%m-%d') + " and " + end_date.strftime('%Y-%m-%d')
+            }), 200
         except Exception as e:
             return jsonify({'error': str(e)}), 500
         
@@ -588,7 +598,12 @@ def playerWins():
     player = players_collection.find_one({'username': player_name})
     if start_date_str is None and end_date_str is None:
         # Read from player's collection
-        return jsonify(player['wins']), 200
+        return jsonify({
+            "type": "number",
+            "value": player['wins'],
+            "unit": "wins",
+            "description": "Total wins of player " + player_name
+        }), 200
     else:
 
         # Set default values for start_date and end_date if not provided
@@ -636,7 +651,12 @@ def playerWins():
         else:
             total_wins = 0
 
-        return jsonify(total_wins), 200
+        return jsonify({
+            "type": "number",
+            "value": total_wins,
+            "unit": "wins",
+            "description": "Total wins of player " + player_name + " between " + start_date.strftime('%Y-%m-%d') + " and " + end_date.strftime('%Y-%m-%d')
+        }), 200
                 
 
 @statistic_bp.route('/playerWinRate', methods=['GET'])
@@ -675,7 +695,12 @@ def playerWinRate():
         else:
             winrate = 0
         
-        return jsonify(winrate), 200
+        return jsonify({
+            "type": "percentage",
+            "value": winrate,
+            "unit": "%",
+            "description": "Winrate of player " + player_name
+        }), 200
     else:
         
         # Set default values for start_date and end_date if not provided
@@ -744,9 +769,19 @@ def playerWinRate():
 
         if result:
             winrate = result[0]["winrate"]
-            return jsonify(winrate), 200
+            return jsonify({
+                "type": "percentage",
+                "value": winrate,
+                "unit": "%",
+                "description": "Winrate of player " + player_name + " between " + start_date.strftime('%Y-%m-%d') + " and " + end_date.strftime('%Y-%m-%d')
+            }), 200
         else:
-            return jsonify(0), 200
+            return jsonify({
+                "type": "percentage",
+                "value": 0,
+                "unit": "%",
+                "description": "Winrate of player " + player_name + " between " + start_date.strftime('%Y-%m-%d') + " and " + end_date.strftime('%Y-%m-%d')
+            }), 200
 
 @statistic_bp.route('/playerLongWinstreak', methods=['GET'])
 @jwt_required()
@@ -761,8 +796,12 @@ def playerLongWinstreak():
 
     player = players_collection.find_one({'username': player_name})
 
-    # FIXME: implement the logic to calculate the longest win streak of a player
-    return jsonify(player['longest_winstreak']), 200
+    return jsonify({
+        "type": "number",
+        "value": player['longest_winstreak'],
+        "unit": "matches",
+        "description": "Longest win streak of player " + player_name
+    }), 200
 
 @statistic_bp.route('/playerHighestWinRate', methods=['GET'])
 @jwt_required()
@@ -855,9 +894,25 @@ def playerHighestWinRate():
     result = list(players_collection.aggregate(pipeline))
 
     if result:
-        return jsonify(result[0]), 200
+        return jsonify({
+            "type": "percentage",
+            "value": result[0]['winrate'],
+            "unit": "%",
+            "description": "Player with the highest winrate in " + str(month) + "/" + str(year) + ": " + result[0]['username'],
+            "deatils": {
+                "username": result[0]['username'],
+                "total_matches": result[0]['total_matches'],
+                "total_wins": result[0]['total_wins']
+            }
+        }), 200
     else:
-        return jsonify({'error': 'No matches found'}), 404
+        return jsonify({
+            "type": "percentage",
+            "value": 0,
+            "unit": "%",
+            "description": "No matches found for the specified month and year.",
+            "deatils": {}
+        }), 200
 
 @statistic_bp.route('/playerGameWins', methods=['GET'])
 @jwt_required()
@@ -901,7 +956,38 @@ def playerGameWins():
     result = list(players_collection.aggregate(pipeline))
 
     if result:
-        return jsonify(result[0], result[-1]), 200
+        # Get the games' names from the game collection
+        best_game = games_collection.find_one({"bgg_id": result[0]["_id"]})
+        worst_game = games_collection.find_one({"bgg_id": result[-1]["_id"]})
+        
+        best_game_name = best_game["name"] if best_game else "Unknown"
+        worst_game_name = worst_game["name"] if worst_game else "Unknown"
+        return jsonify({
+            "type": "comparison",
+            "value": [
+                {
+                    "name": best_game_name,
+                    "game_id": result[0]["_id"],
+                    "total_wins": result[0]["total_wins"],
+                    "status": "best"
+                },
+                {
+                    "name": worst_game_name,
+                    "game_id": result[-1]["_id"],
+                    "total_wins": result[-1]["total_wins"],
+                    "status": "worst"
+                }
+            ],
+            "unit": "wins",
+            "description": "Best and worst game played by player " + player_name
+        }), 200
+    else: 
+        return jsonify({
+            "type": "comparison",
+            "value": [],
+            "unit": "wins",
+            "description": "No matches found for player " + player_name,
+        }), 404
     
 ### GAME STATS ###
 
@@ -909,64 +995,120 @@ def playerGameWins():
 @jwt_required()
 def gameCoopWinRate():
 
-    # This route return the winrate of cooperative games for all the coop games in the collection
+    # This route return the winrate of cooperative games for all the coop games in the collection if no game_id is provided
     
     # Calculate the win rate of cooperative matches for a specific game from game collection
 
-    pipeline = [
-        # 1. Filter the games by is_cooperative
-        {
-            "$match": {
-                "is_cooperative": True
+    game_name = request.args.get('game_name')
+
+    if not game_name:
+        pipeline = [
+            # 1. Filter the games by is_cooperative
+            {
+                "$match": {
+                    "is_cooperative": True
+                }
+            },
+            # 2. Unwind the matches array
+            {
+                "$unwind": "$matches"
+            },
+            # 3. Group by game_id
+            {
+                "$group": {
+                    "_id": "$bgg_id",
+                    "total_matches": {"$sum": 1},
+                    "total_wins": {"$sum": {"$cond": [ {"$gt": [{"$size": "$matches.winner"}, 0]},
+                            1,
+                            0]}}
+                }
+            },
+            # 4. Calculate the winrate
+            {
+                "$project": {
+                    "game_id": "$_id",
+                    "total_matches": 1,
+                    "total_wins": 1,
+                    "winrate": {
+                        "$cond": [
+                            {"$gt": ["$total_matches", 0]},
+                            {"$multiply": [{"$divide": ["$total_wins", "$total_matches"]}, 100]},
+                            0
+                        ]
+                    }
+                }
+            },
+            # 5. Sort by winrate in descending order
+            {
+                "$sort": {
+                    "winrate": -1
+                }
+            },
+            # 6. Limit to the top 5
+            {
+                "$limit": 5
             }
-        },
-        # 2. Unwind the matches array
-        {
-            "$unwind": "$matches"
-        },
-        # 3. Group by game_id
-        {
-            "$group": {
-                "_id": "$bgg_id",
-                "total_matches": {"$sum": 1},
-                "total_wins": {"$sum": {"$cond": [ {"$gt": [{"$size": "$matches.winner"}, 0]},
-                        1,
-                        0]}}
-            }
-        },
-        # 4. Calculate the winrate
-        {
-            "$project": {
-                "game_id": "$_id",
-                "total_matches": 1,
-                "total_wins": 1,
-                "winrate": {
-                    "$cond": [
-                        {"$gt": ["$total_matches", 0]},
-                        {"$multiply": [{"$divide": ["$total_wins", "$total_matches"]}, 100]},
-                        0
-                    ]
+        ]
+    else: 
+        pipeline = [
+            # 1. Filter the games by game_name
+            {
+                "$match": {
+                    "name": game_name,
+                    "is_cooperative": True
+                }
+            },
+            # 2. Unwind the matches array
+            {
+                "$unwind": "$matches"
+            },
+            # 3. Group by game_id
+            {
+                "$group": {
+                    "_id": "$bgg_id",
+                    "total_matches": {"$sum": 1},
+                    "total_wins": {"$sum": {"$cond": [ {"$gt": [{"$size": "$matches.winner"}, 0]},
+                            1,
+                            0]}}
+                }
+            },
+            # 4. Calculate the winrate
+            {
+                "$project": {
+                    "game_id": "$_id",
+                    "total_matches": 1,
+                    "total_wins": 1,
+                    "winrate": {
+                        "$cond": [
+                            {"$gt": ["$total_matches", 0]},
+                            {"$multiply": [{"$divide": ["$total_wins", "$total_matches"]}, 100]},
+                            0
+                        ]
+                    }
                 }
             }
-        },
-        # 5. Sort by winrate in descending order
-        {
-            "$sort": {
-                "winrate": -1
-            }
-        },
-        # 6. Limit to the top 5
-        {
-            "$limit": 5
-        }
-    ]
+        ]
 
     result = list(games_collection.aggregate(pipeline))
 
     if result:
-        return jsonify(result), 200
+        for game in result:
+            game_data = games_collection.find_one({"bgg_id": game["game_id"]})
+            game["name"] = game_data["name"] if game_data else "Unknown"
+            # Remove the game_id from the result
+            del game["game_id"]
+        
+        return jsonify({
+            "type": "list",
+            "value": result,
+            "description": "Top 5 cooperative games winrate"
+        }), 200
     else:
-        return jsonify({'error': 'No matches found'}), 404
+        return jsonify({
+            "type": "list",
+            "value": [],
+            "description": "No cooperative games found"
+        }), 200
 
 @statistic_bp.route('/gameNumMatch', methods=['GET'])
 @jwt_required()
@@ -996,9 +1138,39 @@ def gameNumMatch():
         result = list(games_collection.aggregate(pipeline))
     
         if result:
-            return jsonify(result[0], result[-1]), 200
+
+            # Get the games' names from the game collection
+            most_played = games_collection.find_one({"bgg_id": result[0]["_id"]})
+            least_played = games_collection.find_one({"bgg_id": result[-1]["_id"]})
+            
+            most_played_name = most_played["name"] if most_played else "Unknown"
+            least_played_name = least_played["name"] if least_played else "Unknown"
+        
+
+            return jsonify({
+                "type": "comparison",
+                "value": [
+                    {
+                        "name": most_played_name,
+                        "game_id": result[0]["_id"],
+                        "total_matches": result[0]["total_matches"],
+                        "status": "most"
+                    },
+                    {
+                        "name": least_played_name,
+                        "game_id": result[-1]["_id"],
+                        "total_matches": result[-1]["total_matches"],
+                        "status": "least"
+                    }
+                ],
+                "description": "Most and least played games",
+            }), 200
         else:
-            return jsonify({'error': 'No matches found'}), 404
+            return jsonify({
+                "type": "comparison",
+                "value": [],
+                "description": "No matches found",
+            }), 200
         
 @statistic_bp.route('/gameAvgDuration', methods=['GET'])
 @jwt_required()
@@ -1056,9 +1228,31 @@ def gameAvgDuration():
     result = list(games_collection.aggregate(pipeline))
 
     if result:
-        return jsonify(result), 200
+        # Add game names to results
+        for game in result:
+            game_data = games_collection.find_one({"bgg_id": game["_id"]})
+            game["name"] = game_data["name"] if game_data else "Unknown"
+
+        if game_name:
+            return jsonify({
+                "type": "number",
+                "value": result[0]["average_duration"],
+                "unit": "hours",
+                "description": f"Average duration for {game_name}"
+            }), 200
+        else:
+            return jsonify({
+                "type": "list",
+                "value": result,
+                "description": "Games with longest average duration"
+            }), 200
     else:
-        return jsonify({'error': 'No matches found'}), 404  
+        return jsonify({
+            "type": "number",
+            "value": 0,
+            "unit": "hours",
+            "description": f"No data available for {game_name if game_name else 'any game'}"
+        }), 200
 
 
 @statistic_bp.route('/gameBestValue', methods=['GET'])
@@ -1101,9 +1295,17 @@ def gameBestValue():
     result = list(games_collection.aggregate(pipeline))
 
     if result:
-        return jsonify(result), 200
+        return jsonify({
+            "type": "list",
+            "value": result,
+            "description": "Top 3 games with the best price/tot_hours_played ratio"
+        }), 200
     else:
-        return jsonify({'error': 'No matches found'}), 404
+        return jsonify({
+            "type": "list",
+            "value": [],
+            "description": "No games found"
+        }), 200
     
 @statistic_bp.route('/gameHighestScore', methods=['GET'])
 @jwt_required()
@@ -1113,14 +1315,33 @@ def gameHighestScore():
 
     # Check if the game name is provided
     if not game_name:
-        return jsonify({'error': 'Missing game name'}), 400
+        return jsonify({
+            "type": "number",
+            "value": 0,
+            "unit": "points",
+            "description": "Missing game name"
+        }), 200
     
     game = games_collection.find_one({'name': game_name})
 
     if not game:
-        return jsonify({'error': 'Game not found'}), 404
+        return jsonify({
+            "type": "number",
+            "value": 0,
+            "unit": "points",
+            "description": f"Game {game_name} not found"
+        }), 200
 
-    return jsonify(game['record_score_by_player']), 200
+    return jsonify({
+        "type": "number",
+        "value": game['record_score_by_player']['score'],
+        "unit": "points",
+        "description": f"Highest score for {game_name} is {game['record_score_by_player']['score']} points by {game['record_score_by_player']['name']}",
+        "details": {
+            "player": game['record_score_by_player']['name'],
+            "player_id": game['record_score_by_player']['id']
+        }
+    }), 200
 
 @statistic_bp.route('/gameAvgScore', methods=['GET'])
 @jwt_required()
@@ -1131,14 +1352,29 @@ def gameAvgScore():
 
     # Check if the game name is provided
     if not game_name:
-        return jsonify({'error': 'Missing game name'}), 400
-
+        return jsonify({
+            "type": "number",
+            "value": 0,
+            "unit": "points",
+            "description": "Missing game name"
+        }), 200
+    
     game = games_collection.find_one({'name': game_name})
 
     if not game:
-        return jsonify({'error': 'Game not found'}), 404
+        return jsonify({
+            "type": "number",
+            "value": 0,
+            "unit": "points",
+            "description": f"Game {game_name} not found"
+        }), 200
 
-    return jsonify(game['average_score']), 200
+    return jsonify({
+        "type": "number",
+        "value": round(game['average_score'], 2),
+        "unit": "points",
+        "description": f"Average score for {game_name} is {round(game['average_score'], 2)} points"
+    }), 200
 
 utility_bp = Blueprint('utils', __name__)
 

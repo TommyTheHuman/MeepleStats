@@ -1,4 +1,4 @@
-import { Grid } from "@mantine/core";
+import { Container, Grid, Title, Text } from "@mantine/core";
 import StatisticCard from "../components/StatisticCard"; // Adjust the path as necessary
 import { FilterTypes } from "../model/Constants";
 
@@ -27,28 +27,65 @@ export default function IndexPage() {
     { endpoint: "gameAvgScore", title: "Game Average Score", filters: [filterTypeOptions.game] },
     // Add more endpoints as needed
   ];
+
+  // Group endpoints by categories for better organization
+  const playerStats = endpoints.filter(item => item.endpoint.startsWith('player'));
+  const gameStats = endpoints.filter(item => item.endpoint.startsWith('game'));
+  const globalStats = endpoints.filter(item => !item.endpoint.startsWith('player') && !item.endpoint.startsWith('game'));
+
+
   return (
-    // <Grid>
-    //   {Array(15)
-    //     .fill(0)
-    //     .map((_, index) => (
-    //       <Grid.Col key={index} span={{ base: 6, md: 4, lg: 3 }}>
-    //         <Card shadow="sm" padding="xl">
-    //           <Card.Section>
-    //             <Skeleton h={160} animate={false} />
-    //           </Card.Section>
-    //           <Skeleton h={36} animate={false} mt="md" />
-    //           <Skeleton h={26} animate={false} mt="md" />
-    //         </Card>
-    //       </Grid.Col>
-    //     ))}
-    // </Grid>
-    <Grid>
-      {endpoints.map((item, index) => (
-        <Grid.Col key={index} span={{ base: 6, md: 4, lg: 3 }}>
-          <StatisticCard endpoint={item.endpoint} title={item.title} filters={item.filters} />
-        </Grid.Col>
-      ))}
-    </Grid>
+    <Container size="xl" className="!py-6">
+      {/* Global Statistics */}
+      <div className="!mb-8">
+        <Title order={2} className="!text-gray-800 !mb-4 !font-semibold !text-xl">
+          Global Statistics
+        </Title>
+        <Text className="!text-gray-600 !mb-4">
+          Overview of all gaming activity across MeepleStats
+        </Text>
+        <Grid>
+          {globalStats.map((item, index) => (
+            <Grid.Col key={index} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
+              <StatisticCard endpoint={item.endpoint} title={item.title} filters={item.filters} />
+            </Grid.Col>
+          ))}
+        </Grid>
+      </div>
+
+      {/* Player Statistics */}
+      <div className="!mb-8">
+        <Title order={2} className="!text-gray-800 !mb-4 !font-semibold !text-xl">
+          Player Statistics
+        </Title>
+        <Text className="!text-gray-600 !mb-4">
+          Performance metrics for individual players
+        </Text>
+        <Grid>
+          {playerStats.map((item, index) => (
+            <Grid.Col key={index} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
+              <StatisticCard endpoint={item.endpoint} title={item.title} filters={item.filters} />
+            </Grid.Col>
+          ))}
+        </Grid>
+      </div>
+
+      {/* Game Statistics */}
+      <div>
+        <Title order={2} className="!text-gray-800 !mb-4 !font-semibold !text-xl">
+          Game Statistics
+        </Title>
+        <Text className="!text-gray-600 !mb-4">
+          Metrics about specific games in your collection
+        </Text>
+        <Grid>
+          {gameStats.map((item, index) => (
+            <Grid.Col key={index} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
+              <StatisticCard endpoint={item.endpoint} title={item.title} filters={item.filters} />
+            </Grid.Col>
+          ))}
+        </Grid>
+      </div>
+    </Container>
   );
 }

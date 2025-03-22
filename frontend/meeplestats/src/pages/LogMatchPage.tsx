@@ -1,10 +1,8 @@
-import { Text } from "@mantine/core";
 import LogMatch from "../components/LogMatch";
 
-export default function LoginPage() {
+export default function LogMatchPage() {
   return (
     <>
-      <Text>Log a match</Text>
       <LogMatch />
     </>
   );
