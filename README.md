@@ -219,7 +219,8 @@ Want to improve MeepleStats? Contributions are welcome! Feel free to open an iss
 
 ## 📌 To-Do
 
-- [ ] Improve UI/UX and Dark Mode
+- [x] Improve UI/UX
+- [ ] Support to Dark Mode
 - [ ] Show images for open matches
 - [x] Implement team-based game tracking
 - [x] Add achievements system
@@ -227,7 +228,7 @@ Want to improve MeepleStats? Contributions are welcome! Feel free to open an iss
 - [ ] Create user profile page
 - [x] Develop a game collection page
 - [x] Add support to upload images on Google Drive
-- [ ] Create a page to randomly select a game and a timer to track the play time
+- [x] Create a page to randomly select a game and a timer to track the play time
 - [ ] Implement a RAG pipeline to retirve information about game rules
 
 ---
