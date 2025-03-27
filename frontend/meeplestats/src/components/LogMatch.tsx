@@ -74,17 +74,24 @@ const LogMatch = () => {
   useEffect(() => {
     if (!form.values.isTeamMatch) {
       // Clear the teams array if the match is not a team match
-      setTeams([]);
+      if (teams.length > 0) {
+        setTeams([]);
+      } 
       // Clear the winning team if the match is not a team match
-      form.setFieldValue("winningTeam", "");
-      // Clear the team field for each player if the match is not a team match
-      const updatedPlayers = form.values.players.map((player) => ({
-        ...player,
-        team: ""
-      }));
-      form.setFieldValue("players", updatedPlayers);
+      if (form.values.winningTeam) {
+        form.setFieldValue("winningTeam", "");
+      }
+      // Only update players if at least one player's team is not empty
+      const hasNonEmptyTeam = form.values.players.some((player) => player.team !== "");
+      if (hasNonEmptyTeam) {
+          const updatedPlayers = form.values.players.map((player) => ({
+              ...player,
+              team: ""
+          }));
+          form.setFieldValue("players", updatedPlayers);
+      }
     }
-  }, [form, form.values.isTeamMatch]);
+  }, [form, teams]);
 
   const handleValueSelect = (username: string) => {
     const selectedPlayer = players.find((player) => player.username === username);
