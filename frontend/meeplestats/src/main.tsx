@@ -20,7 +20,25 @@ import MatchHistoryPage from "./pages/MatchHistoryPage.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import GamesPage from "./pages/GamesPage.tsx";
 import MatchUtiliyPage from "./pages/MatchUtilityPage.tsx";
-const theme = createTheme({});
+const theme = createTheme({
+  fontFamily: '"Host Grotesk", sans-serif',
+  headings: {
+    fontFamily: '"Host Grotesk", sans-serif',
+    fontWeight: '600',
+  },
+  components: {
+    Text: {
+      defaultProps: {
+        ff: '"Host Grotesk", sans-serif',
+      },
+    },
+    Title: {
+      defaultProps: {
+        ff: '"Host Grotesk", sans-serif',
+      },
+    },
+  }
+});
 
 const router = createBrowserRouter([
   {

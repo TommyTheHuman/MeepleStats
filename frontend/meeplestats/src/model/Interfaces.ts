@@ -42,6 +42,8 @@ export interface MatchCardInterface {
   players: { id: string, name: string, score: string }[];
   winner: { id: string, name: string, score: string };
   game_image: string;
+  notes: string;
+  image_url: string;
 }
 
 

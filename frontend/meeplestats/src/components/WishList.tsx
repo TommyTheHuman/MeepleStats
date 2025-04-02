@@ -60,9 +60,11 @@ const Wishlist = () => {
       username: "",
     }));
 
+    console.log(items); // Log the items to see the structure
+
     // Rimuovi duplicati
     const uniqueItems = items.filter((item, index, self) =>
-      index === self.findIndex((t) => t.name === item.name)
+      index === self.findIndex((t) => t.bgg_id === item.bgg_id)
     );
     setSuggestions(uniqueItems);
   };
@@ -190,13 +192,16 @@ const Wishlist = () => {
                   searchGames(value);
                 }}
                 onOptionSubmit={(item) => {
-                  const selected = suggestions.find((game) => game.name.toLowerCase() === item.toLowerCase());
+                  console.log(item);
+                  const itemName = item.split("_")[0];
+                  const itemId = item.split("_")[1];
+                  const selected = suggestions.find((game) => game.name.toLowerCase() === itemName.toLowerCase() && game.bgg_id === itemId);
                   if (selected) {
                     selectGame(selected.bgg_id);
                   }
                 }}
                 data={suggestions.map((game: Game) => ({
-                  value: game.name,
+                  value: `${game.name}_${game.bgg_id}`,
                   label: `${game.name} (${game.yearPublished})`,
                   id: game.bgg_id,
                 }))}

@@ -1,9 +1,15 @@
-import { Card, Image, Text, Group, Badge, Box } from "@mantine/core";
+import { Card, Image, Text, Group, Badge, Box, Modal, Button } from "@mantine/core";
+import { useDisclosure } from '@mantine/hooks';
 import { MatchCardInterface } from "../model/Interfaces";
+import { IconPhoto } from "@tabler/icons-react";
+import { API_URL } from "../model/Constants";
 
-const MatchCard = ({ game_name, date, game_duration, game_image, players, winner }: MatchCardInterface) => {
+const MatchCard = ({ game_name, date, game_duration, game_image, players, winner, notes, image_url }: MatchCardInterface) => {
+
+  const [opened, { open, close }] = useDisclosure(false);
+
   return (
-    <Card shadow="sm" radius="lg" className="!overflow-hidden !border !border-gray-100">
+    <Card shadow="sm" radius="lg" className="!overflow-hidden !border !border-gray-100 !min-w-[280px]">
       {/* Image container with fixed dimensions */}
       <Card.Section>
         <div className="!relative !overflow-hidden !h-[160px]">
@@ -63,6 +69,65 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
             </Text>
           </Group>
         ))}
+
+
+        {/* Notes - Only shown if notes exist */}
+        {notes && (
+          <>
+            <Box className="!w-full !h-px !bg-gray-100 !my-3"></Box>
+
+            <Text fw={500} size="sm" className="!mb-2 !text-gray-700">
+              Notes:
+            </Text>
+            <Text size="sm" c="dimmed" className="!text-gray-500 !line-clamp-2">
+              {notes}
+            </Text>
+          </>
+        )}
+
+        <Modal
+          opened={opened}
+          onClose={close}
+          title="Match Photo"
+          size="lg"
+          centered
+          padding="md"
+          classNames={{
+            title: "!text-gray-800 !font-medium",
+            body: "!flex !justify-center !items-center"
+          }}
+        >
+          <Box className="!max-h-[70vh] !overflow-hidden">
+            <Image
+              src={image_url?.startsWith('/uploads')
+                ? `${API_URL}${image_url}`
+                : image_url
+              }
+              alt={game_name || "Match photo"}
+              fit="contain"
+              height="auto"
+              className="!max-h-[70vh] !object-contain"
+            />
+          </Box>
+        </Modal>
+
+        {/* Photo button positioned better */}
+        {image_url && (
+          <Box className="!flex !justify-end !mt-2">
+            <Button
+              onClick={open}
+              variant="light"
+              color="blue"
+              radius="md"
+              size="sm"
+              className="!bg-blue-50 !text-blue-600 hover:!bg-blue-100 !transition-colors"
+              p={8}
+            >
+              <IconPhoto size={18} stroke={1.5} />
+            </Button>
+          </Box>
+        )}
+
       </Box>
     </Card>
   );

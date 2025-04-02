@@ -6,6 +6,8 @@ import { useNavigate } from "react-router";
 import { PillsInput, Pill, Combobox, CheckIcon, useCombobox } from "@mantine/core";
 import { Game, Player } from "../model/Interfaces";
 import { API_URL, JWT_STORAGE } from "../model/Constants";
+import { notifications } from "@mantine/notifications";
+
 
 
 const LogMatch = () => {
@@ -76,7 +78,7 @@ const LogMatch = () => {
       // Clear the teams array if the match is not a team match
       if (teams.length > 0) {
         setTeams([]);
-      } 
+      }
       // Clear the winning team if the match is not a team match
       if (form.values.winningTeam) {
         form.setFieldValue("winningTeam", "");
@@ -84,11 +86,11 @@ const LogMatch = () => {
       // Only update players if at least one player's team is not empty
       const hasNonEmptyTeam = form.values.players.some((player) => player.team !== "");
       if (hasNonEmptyTeam) {
-          const updatedPlayers = form.values.players.map((player) => ({
-              ...player,
-              team: ""
-          }));
-          form.setFieldValue("players", updatedPlayers);
+        const updatedPlayers = form.values.players.map((player) => ({
+          ...player,
+          team: ""
+        }));
+        form.setFieldValue("players", updatedPlayers);
       }
     }
   }, [form, teams]);
@@ -206,8 +208,19 @@ const LogMatch = () => {
       if (response.ok) {
         const data = await response.json();
         console.log("Success:", data);
+        notifications.show({
+          color: "green",
+          title: "Success",
+          message: "Match logged successfully!",
+        });
+        navigate("/matchHistory");
       } else {
         console.error("Error:", response.statusText);
+        notifications.show({
+          color: "red",
+          title: "Error",
+          message: `Failed to log match: ${response.statusText}`,
+        });
       }
     } catch (error) {
       console.error("Fetch Error:", error);
@@ -487,12 +500,6 @@ const LogMatch = () => {
             </Button>
           </Group>
         </form>
-        <Button
-          onClick={() => navigate("/matchHistory")}
-          className="!mt-4 !bg-gray-200"
-        >
-          Test Navigation
-        </Button>
       </Paper>
     </Box>
   );

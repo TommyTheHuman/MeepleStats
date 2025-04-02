@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from dotenv import find_dotenv, load_dotenv
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, jsonify, render_template, request, send_from_directory
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, decode_token
 from jwt.exceptions import InvalidTokenError
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -442,6 +442,9 @@ def remove_wishlist():
 
     return jsonify({'message': 'Game removed from the wishlist'}), 200
 
+@auth_bp.route('/uploads/<path:filename>')
+def uploaded_file(filename):
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
 
 @data_bp.route('/matchHistory', methods=['GET'])
 @jwt_required()
@@ -456,13 +459,17 @@ def matchHistory():
             match['_id'] = str(match['_id'])
             if 'image' in match.keys():
                 if match['image']['type'] in ['s3']:
-                    match['image-url'] = S3Client.get_url_from_filename(match['image']['filename'])
+                    match['image_url'] = S3Client.get_url_from_filename(match['image']['filename'])
                 elif match['image']['type'] in ['local']:
-                    match['image-url'] = match['image']['filename']
+                    filename = os.path.basename(match['image']['filename'])
+                    match['image_url'] = f"/uploads/{filename}"
 
                 del match['image']
                     
             matches_data.append(match)
+
+        # Sort matches by date in descending order
+        matches_data.sort(key=lambda x: x['date'], reverse=True)
 
         return jsonify(matches_data), 200
     except Exception as e:

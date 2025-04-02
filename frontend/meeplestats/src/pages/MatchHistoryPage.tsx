@@ -1,15 +1,27 @@
-import { Grid, Text } from '@mantine/core';
+import { Container, Text } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { MatchCardInterface } from '../model/Interfaces';
 import MatchCard from '../components/MatchCards';
 import { API_URL, JWT_STORAGE } from '../model/Constants';
-
+import { MasonryInfiniteGrid } from "@egjs/react-infinitegrid";
+import { useViewportSize } from '@mantine/hooks';
 
 const MatchHistoryPage = () => {
 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [matches, setMatches] = useState<MatchCardInterface[]>([]);
+  const { width } = useViewportSize();
+
+
+  const getColumnCount = () => {
+    if (width < 576) return 1;      // Mobile
+    if (width < 768) return 2;      // Tablet small
+    if (width < 992) return 2;      // Tablet large
+    if (width < 1200) return 2;     // IPad portrait 
+    if (width < 1400) return 3;     // Desktop medium / IPad landscape
+    return 4;                       // Desktop large
+  };
 
   useEffect(() => {
     const loadMatchHistory = async () => {
@@ -47,16 +59,23 @@ const MatchHistoryPage = () => {
   }, []);
 
   return (
-    <div>
-      <Text size="xl" w={500} mb="md">Match History</Text>
+    <Container size="xl" px="xs">
+      <Text size="xl" mb="md">Match History</Text>
       {loading ? (
         <Text>Loading...</Text>
       ) : error ? (
         <Text c="red">{error}</Text>
       ) : (
-        <Grid>
+
+        <MasonryInfiniteGrid
+          gap={16}
+          column={getColumnCount()}
+          align="center"
+          itemGroup={false}
+        //style={{ width: "100%" }}
+        >
           {matches.map((match, index) => (
-            <Grid.Col key={index} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
+            <div key={index} className='!p-2'>
               <MatchCard
                 game_name={match.game_name}
                 date={match.date}
@@ -64,12 +83,16 @@ const MatchHistoryPage = () => {
                 winner={match.winner}
                 game_image={match.game_image}
                 players={match.players}
+                notes={match.notes}
+                image_url={match.image_url}
               />
-            </Grid.Col>
+            </div>
           ))}
-        </Grid>
+        </MasonryInfiniteGrid>
+
+
       )}
-    </div>
+    </Container>
   );
 };
 

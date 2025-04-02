@@ -169,13 +169,12 @@ const MatchUtiliyPage = () => {
               <Stack align="center">
                 <Title order={3} ta="center">Game Wheel</Title>
 
-                <Box style={{ width: '100%', maxWidth: '400px' }}>
+                <Box style={{ width: '100%', maxWidth: '400px', display: 'flex', justifyContent: 'center' }}>
                   <Wheel
                     mustStartSpinning={mustSpin}
                     prizeNumber={prizeNumber}
                     data={wheelData}
                     textColors={['#ffffff']}
-                    //backgroundColors={getBackgroundColors()}
                     onStopSpinning={handleStopSpinning}
                   />
                 </Box>
