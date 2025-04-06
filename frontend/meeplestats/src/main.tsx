@@ -21,6 +21,7 @@ import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import GamesPage from "./pages/GamesPage.tsx";
 import MatchUtilityPage from "./pages/MatchUtilityPage.tsx";
 import RulebooksPage from "./pages/RulebooksPage.tsx";
+import RulebookChatPage from "./pages/RulebookChatPage.tsx";
 const theme = createTheme({
   fontFamily: '"Host Grotesk", sans-serif',
   headings: {
@@ -95,6 +96,22 @@ const router = createBrowserRouter([
       {
         path: "/rulebooks",
         element: <RulebooksPage />,
+      },
+      {
+        path: "/rulebook-chat",
+        element: (
+          <ProtectedRoute>
+            <RulebookChatPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/rulebook-chat/:rulebook_id",
+        element: (
+          <ProtectedRoute>
+            <RulebookChatPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "*",

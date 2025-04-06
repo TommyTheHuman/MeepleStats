@@ -79,3 +79,13 @@ export interface RulebookInterface {
   original_uploader?: string;
   original_rulebook_id?: string;
 }
+
+export interface RulebookChatResponse {
+  answer: string;
+  context?: string;
+  page_refs?: Array<{
+    page: string;
+    file: string;
+  }>;
+  error?: string;
+}

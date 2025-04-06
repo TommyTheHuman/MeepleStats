@@ -217,3 +217,36 @@ export const deleteRulebook = async (rulebookId: string): Promise<{ message: str
   
   return response.json();
 };
+
+// Send a chat query to the backend
+export const sendChatQuery = async (query: string, rulebookId: string, includeContext: boolean = false): Promise<RulebookChatResponse> => {
+  const requestOptions: RequestInit = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ 
+      query, 
+      rulebook_id: rulebookId,
+      include_context: includeContext
+    }),
+  };
+  
+  if (JWT_STORAGE === "cookie") {
+    requestOptions.credentials = "include";
+  } else if (JWT_STORAGE === "localstorage") {
+    requestOptions.headers = {
+      ...requestOptions.headers,
+      Authorization: `Bearer ${localStorage.getItem("jwt_token")}`,
+    };
+  }
+
+  const response = await fetch(`${API_URL}/rulebook-chat`, requestOptions);
+  
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to query rulebook");
+  }
+  
+  return response.json();
+}; 
