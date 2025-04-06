@@ -10,7 +10,7 @@ from bson import ObjectId
 from flask import current_app
 import requests
 
-from .services.db import players_collection, games_collection, matches_collection, wishlists_collection
+from .services.db import players_collection, games_collection, matches_collection, wishlists_collection, rulebooks_collection
 from .services.bgg_import import import_games_from_bgg
 from .services.achievements_management import check_update_achievements
 from .services.achievements_setup import create_achievements
@@ -444,7 +444,11 @@ def remove_wishlist():
 
 @auth_bp.route('/uploads/<path:filename>')
 def uploaded_file(filename):
-    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
+    try:
+        # Send the file from the upload folder
+        return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
+    except Exception as e:
+        return jsonify({'error': f"Failed to retrieve file: {str(e)}"}), 404
 
 @data_bp.route('/matchHistory', methods=['GET'])
 @jwt_required()
@@ -1405,3 +1409,468 @@ def importGames():
 def setupAchievements():
     create_achievements()
     return jsonify({'message': 'Achievements created successfully'}), 200
+
+# Create a new blueprint for rulebooks
+rulebooks_bp = Blueprint('rulebooks', __name__)
+
+@rulebooks_bp.route('/rulebooks', methods=['GET'])
+@jwt_required()
+def get_rulebooks():
+    try:
+        # Get current user
+        current_user = get_jwt_identity()
+        
+        # Get rulebooks from database for the current user only
+        rulebooks = rulebooks_collection.find({'uploaded_by': current_user})
+        
+        rulebooks_data = []
+        for rulebook in rulebooks:
+            rulebook['_id'] = str(rulebook['_id'])
+            rulebooks_data.append(rulebook)
+            
+        return jsonify(rulebooks_data), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@rulebooks_bp.route('/shared-rulebooks', methods=['GET'])
+@jwt_required()
+def get_shared_rulebooks():
+    try:
+        # Get all rulebooks from database that are marked as shared
+        rulebooks = rulebooks_collection.find({'is_shared': True})
+        
+        rulebooks_data = []
+        for rulebook in rulebooks:
+            rulebook['_id'] = str(rulebook['_id'])
+            rulebooks_data.append(rulebook)
+            
+        return jsonify(rulebooks_data), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@rulebooks_bp.route('/upload-rulebook', methods=['POST'])
+@jwt_required()
+def upload_rulebook():
+    try:
+        # Get current user
+        current_user = get_jwt_identity()
+        
+        # Check if PDF file is in request
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+            
+        file = request.files['file']
+        
+        # Check if file is selected
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+            
+        # Check if file is PDF
+        if not file.filename.lower().endswith('.pdf'):
+            return jsonify({'error': 'File must be PDF'}), 400
+            
+        # Get game information
+        game_id = request.form.get('game_id')
+        game_name = request.form.get('game_name')
+        is_shared = request.form.get('is_shared', 'false').lower() == 'true'
+        
+        # Create unique filename
+        unique_filename = f"{uuid.uuid4()}_{file.filename}"
+        
+        # Save file based on storage type
+        if STORAGE_TYPE == 's3':
+            # Save file to S3
+            S3Client.put(file, unique_filename, content_type='application/pdf')
+            file_url = S3Client.get_url_from_filename(unique_filename)
+        else:
+            # Save file locally
+            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename)
+            file.save(file_path)
+            file_url = f"/uploads/{unique_filename}"
+            
+        # Save rulebook info to database
+        rulebook_data = {
+            'filename': file.filename,
+            'file_url': file_url,
+            'game_id': game_id,
+            'game_name': game_name,
+            'uploaded_by': current_user,
+            'uploaded_at': datetime.now(),
+            'is_shared': is_shared,
+            'in_personal_collection': True  # Add this field
+        }
+        
+        rulebooks_collection.insert_one(rulebook_data)
+        
+        return jsonify({'message': 'Rulebook uploaded successfully', 'file_url': file_url}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@rulebooks_bp.route('/share-rulebook/<rulebook_id>', methods=['PUT'])
+@jwt_required()
+def share_rulebook(rulebook_id):
+    try:
+        # Get current user
+        current_user = get_jwt_identity()
+        
+        # Find rulebook
+        rulebook = rulebooks_collection.find_one({'_id': ObjectId(rulebook_id)})
+        
+        if not rulebook:
+            return jsonify({'error': 'Rulebook not found'}), 404
+            
+        # Check if user is the one who uploaded the rulebook
+        if rulebook['uploaded_by'] != current_user:
+            return jsonify({'error': 'Unauthorized to share this rulebook'}), 403
+        
+        # Update the rulebook to be shared
+        rulebooks_collection.update_one(
+            {'_id': ObjectId(rulebook_id)},
+            {'$set': {'is_shared': True}}
+        )
+        
+        return jsonify({'message': 'Rulebook shared successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@rulebooks_bp.route('/upload-shared-rulebook', methods=['POST'])
+@jwt_required()
+def upload_shared_rulebook():
+    try:
+        # Get current user
+        current_user = get_jwt_identity()
+        
+        # Check if PDF file is in request
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+            
+        file = request.files['file']
+        
+        # Check if file is selected
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+            
+        # Check if file is PDF
+        if not file.filename.lower().endswith('.pdf'):
+            return jsonify({'error': 'File must be PDF'}), 400
+            
+        # Get game information
+        game_id = request.form.get('game_id')
+        game_name = request.form.get('game_name')
+        
+        # Create unique filename
+        unique_filename = f"{uuid.uuid4()}_{file.filename}"
+        
+        # Always use S3 for shared rulebooks
+        if STORAGE_TYPE == 's3':
+            # Save file to S3
+            S3Client.put(file, unique_filename, content_type='application/pdf')
+            file_url = S3Client.get_url_from_filename(unique_filename)
+        else:
+            # Save file locally as fallback
+            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename)
+            file.save(file_path)
+            file_url = f"/uploads/{unique_filename}"
+            
+        # Save rulebook info to database - always marked as shared
+        rulebook_data = {
+            'filename': file.filename,
+            'file_url': file_url,
+            'game_id': game_id,
+            'game_name': game_name,
+            'uploaded_by': current_user,
+            'uploaded_at': datetime.now(),
+            'is_shared': True
+        }
+        
+        rulebooks_collection.insert_one(rulebook_data)
+        
+        return jsonify({'message': 'Shared rulebook uploaded successfully', 'file_url': file_url}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@rulebooks_bp.route('/rulebook/<rulebook_id>', methods=['DELETE'])
+@jwt_required()
+def delete_rulebook(rulebook_id):
+    try:
+        # Get current user
+        current_user = get_jwt_identity()
+        
+        # Find rulebook
+        rulebook = rulebooks_collection.find_one({'_id': ObjectId(rulebook_id)})
+        
+        if not rulebook:
+            return jsonify({'error': 'Rulebook not found'}), 404
+            
+        # Check if user is the one who uploaded the rulebook
+        if rulebook['uploaded_by'] != current_user:
+            return jsonify({'error': 'Unauthorized to delete this rulebook'}), 403
+            
+        # Delete from database
+        rulebooks_collection.delete_one({'_id': ObjectId(rulebook_id)})
+        
+        # If local storage, delete file
+        if STORAGE_TYPE == 'local':
+            filename = os.path.basename(rulebook['file_url'])
+            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                
+        return jsonify({'message': 'Rulebook deleted successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@rulebooks_bp.route('/add-to-collection/<rulebook_id>', methods=['POST'])
+@jwt_required()
+def add_to_collection(rulebook_id):
+    try:
+        # Get current user
+        current_user = get_jwt_identity()
+        
+        # Find shared rulebook
+        shared_rulebook = rulebooks_collection.find_one({'_id': ObjectId(rulebook_id)})
+        
+        if not shared_rulebook:
+            return jsonify({'error': 'Rulebook not found'}), 404
+            
+        # Check if the rulebook is already in the user's collection
+        existing = rulebooks_collection.find_one({
+            'file_url': shared_rulebook['file_url'],
+            'uploaded_by': current_user,
+            'in_personal_collection': True
+        })
+        
+        if existing:
+            return jsonify({'error': 'Rulebook already in your collection', 'rulebook_id': str(existing['_id'])}), 400
+            
+        # Add to the user's collection by creating a new entry that references the same file
+        collection_entry = {
+            'filename': shared_rulebook['filename'],
+            'file_url': shared_rulebook['file_url'],
+            'game_id': shared_rulebook['game_id'],
+            'game_name': shared_rulebook['game_name'],
+            'uploaded_by': current_user,
+            'added_from_shared': True,
+            'original_uploader': shared_rulebook['uploaded_by'],
+            'original_rulebook_id': str(shared_rulebook['_id']),
+            'uploaded_at': datetime.now(),
+            'in_personal_collection': True
+        }
+        
+        result = rulebooks_collection.insert_one(collection_entry)
+        
+        return jsonify({
+            'message': 'Rulebook added to your collection', 
+            'rulebook_id': str(result.inserted_id)
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@rulebooks_bp.route('/personal-collection', methods=['GET'])
+@jwt_required()
+def get_personal_collection():
+    try:
+        # Get current user
+        current_user = get_jwt_identity()
+        
+        # Get rulebooks from database for the current user's personal collection
+        rulebooks = rulebooks_collection.find({
+            'uploaded_by': current_user,
+            'in_personal_collection': True
+        })
+        
+        rulebooks_data = []
+        for rulebook in rulebooks:
+            rulebook['_id'] = str(rulebook['_id'])
+            rulebooks_data.append(rulebook)
+            
+        return jsonify(rulebooks_data), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@rulebooks_bp.route('/remove-from-collection/<rulebook_id>', methods=['DELETE'])
+@jwt_required()
+def remove_from_collection(rulebook_id):
+    try:
+        # Get current user
+        current_user = get_jwt_identity()
+        
+        # Find rulebook in personal collection
+        rulebook = rulebooks_collection.find_one({
+            '_id': ObjectId(rulebook_id),
+            'uploaded_by': current_user,
+            'in_personal_collection': True
+        })
+        
+        if not rulebook:
+            return jsonify({'error': 'Rulebook not found in your collection'}), 404
+            
+        # If it was added from shared repository, just delete the entry
+        if rulebook.get('added_from_shared', False):
+            rulebooks_collection.delete_one({'_id': ObjectId(rulebook_id)})
+        else:
+            # Otherwise, it's a personally uploaded rulebook, so just remove from collection
+            rulebooks_collection.update_one(
+                {'_id': ObjectId(rulebook_id)},
+                {'$set': {'in_personal_collection': False}}
+            )
+            
+        return jsonify({'message': 'Rulebook removed from your collection'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@rulebooks_bp.route('/rulebook/<rulebook_id>', methods=['GET'])
+@jwt_required()
+def get_rulebook(rulebook_id):
+    try:
+        # Get current user
+        current_user = get_jwt_identity()
+        
+        # Find rulebook
+        rulebook = rulebooks_collection.find_one({'_id': ObjectId(rulebook_id)})
+        
+        if not rulebook:
+            return jsonify({'error': 'Rulebook not found'}), 404
+            
+        # Check if the rulebook is shared or belongs to the user
+        if not rulebook.get('is_shared', False) and rulebook['uploaded_by'] != current_user and not rulebook.get('in_personal_collection', False):
+            return jsonify({'error': 'You do not have access to this rulebook'}), 403
+            
+        # Convert ObjectId to string
+        rulebook['_id'] = str(rulebook['_id'])
+        
+        return jsonify(rulebook), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@rulebooks_bp.route('/rulebook-chat', methods=['POST'])
+@jwt_required()
+def rulebook_chat():
+    try:
+        # Get current user
+        current_user = get_jwt_identity()
+        
+        # Get query and rulebook ID from request
+        data = request.json
+        query = data.get('query')
+        rulebook_id = data.get('rulebook_id')
+        
+        if not query:
+            return jsonify({'error': 'No query provided'}), 400
+        
+        if not rulebook_id:
+            return jsonify({'error': 'No rulebook ID provided'}), 400
+        
+        # Find rulebook
+        rulebook = rulebooks_collection.find_one({'_id': ObjectId(rulebook_id)})
+        
+        if not rulebook:
+            return jsonify({'error': 'Rulebook not found'}), 404
+        
+        # Import the RAG functionality
+        from .services.rag import query_llm, query_index, display_search_results, initialize_embedding_model, initialize_pinecone, create_safe_namespace
+        
+        # Get the safe namespace for the rulebook (filename without extension)
+        filename = rulebook.get('filename', '')
+        namespace = create_safe_namespace(filename)
+        
+        # Initialize embedding model and Pinecone
+        embedding_model = initialize_embedding_model()
+        index = initialize_pinecone()
+        
+        # Query Pinecone
+        top_matches = query_index(query, [namespace], index, embedding_model)
+        
+        # No matches found
+        if not top_matches:
+            response_payload = {
+                'answer': "I couldn't find any relevant information in this rulebook to answer your question. Please try rephrasing your query or check if this rulebook contains information about this topic.",
+                'page_refs': []
+            }
+            
+            # Include context only if requested
+            include_context = data.get('include_context', False)
+            if include_context:
+                response_payload['context'] = ""
+                
+            return jsonify(response_payload), 200
+        
+        # Process the results
+        context, page_refs = display_search_results(top_matches)
+        
+        # Ensure page_refs are properly serializable
+        serializable_page_refs = []
+        for ref in page_refs:
+            serializable_page_refs.append({
+                "page": str(ref["page"]),
+                "file": str(ref["file"])
+            })
+        
+        # Ensure context is a string
+        if not isinstance(context, str):
+            context = str(context)
+        
+        # Query the LLM
+        answer = query_llm(query, context, page_refs)
+        
+        # Ensure answer is a string
+        if not isinstance(answer, str):
+            answer = str(answer)
+        
+        # Create a response payload with only JSON-serializable types
+        response_payload = {
+            'answer': answer,
+            # Only include context if explicitly requested with include_context=true
+            'page_refs': serializable_page_refs
+        }
+        
+        # Include context only if requested
+        include_context = data.get('include_context', False)
+        if include_context:
+            response_payload['context'] = context
+        
+        # Convert to JSON string and back to dict to ensure all objects are serializable
+        try:
+            import json
+            response_json = json.dumps(response_payload)
+            response_payload = json.loads(response_json)
+        except TypeError as e:
+            print(f"JSON serialization error: {str(e)}")
+            # Fallback response if serialization fails
+            response_payload = {
+                'answer': "I processed your query but encountered an error formatting the response. Please try again.",
+                'page_refs': []
+            }
+            if include_context:
+                response_payload['context'] = ""
+        
+        return jsonify(response_payload), 200
+        
+    except Exception as e:
+        error_message = str(e)
+        print(f"Error in rulebook chat: {error_message}")
+        
+        # Add more detailed debugging
+        import traceback
+        traceback.print_exc()
+        
+        # Try to identify the problematic object type
+        if "is not JSON serializable" in error_message:
+            try:
+                import inspect
+                print(f"Attempting to identify non-serializable object...")
+                if "page_refs" in locals():
+                    print(f"page_refs type: {type(page_refs)}")
+                    if page_refs and len(page_refs) > 0:
+                        print(f"First page_ref item type: {type(page_refs[0])}")
+                if "context" in locals():
+                    print(f"context type: {type(context)}")
+                if "answer" in locals():
+                    print(f"answer type: {type(answer)}")
+            except Exception as debug_error:
+                print(f"Error during debugging: {str(debug_error)}")
+        
+        return jsonify({
+            'error': error_message, 
+            'message': 'An error occurred while processing your request'
+        }), 500

@@ -19,7 +19,8 @@ import Wishlist from "./pages/WishListPage.tsx";
 import MatchHistoryPage from "./pages/MatchHistoryPage.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import GamesPage from "./pages/GamesPage.tsx";
-import MatchUtiliyPage from "./pages/MatchUtilityPage.tsx";
+import MatchUtilityPage from "./pages/MatchUtilityPage.tsx";
+import RulebooksPage from "./pages/RulebooksPage.tsx";
 const theme = createTheme({
   fontFamily: '"Host Grotesk", sans-serif',
   headings: {
@@ -88,8 +89,12 @@ const router = createBrowserRouter([
       },
       {
         path: "/matchUtility",
-        element: <MatchUtiliyPage />,
+        element: <MatchUtilityPage />,
         id: "matchUtility"
+      },
+      {
+        path: "/rulebooks",
+        element: <RulebooksPage />,
       },
       {
         path: "*",
