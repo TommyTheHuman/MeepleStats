@@ -64,3 +64,28 @@ export interface StaticResponse {
   unit?: string;
   description?: string;
 }
+
+export interface RulebookInterface {
+  _id: string;
+  filename: string;
+  file_url: string;
+  game_id: string;
+  game_name: string;
+  uploaded_by: string;
+  uploaded_at: string;
+  is_shared?: boolean;
+  in_personal_collection?: boolean;
+  added_from_shared?: boolean;
+  original_uploader?: string;
+  original_rulebook_id?: string;
+}
+
+export interface RulebookChatResponse {
+  answer: string;
+  context?: string;
+  page_refs?: Array<{
+    page: string;
+    file: string;
+  }>;
+  error?: string;
+}

@@ -1,7 +1,7 @@
 import { AppShell, Group, Burger, Text, Avatar, Container, NavLink, Button, Divider, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useContext } from "react";
-import { Link, Outlet } from "react-router";
+import { Link, Outlet, useNavigate } from "react-router";
 import { AuthContext } from "./AuthContext";
 import { API_URL, Constants, JWT_STORAGE } from "../model/Constants";
 
@@ -187,6 +187,20 @@ export default function Layout() {
               component={Link}
               to="/matchUtility"
               label="Match Utility"
+              onClick={closeMobile}
+              className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
+            />
+            <NavLink
+              component={Link}
+              to="/rulebooks"
+              label="Rulebook Repository"
+              onClick={closeMobile}
+              className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
+            />
+            <NavLink
+              component={Link}
+              to="/rulebook-chat"
+              label="Rulebook Chat"
               onClick={closeMobile}
               className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
             />

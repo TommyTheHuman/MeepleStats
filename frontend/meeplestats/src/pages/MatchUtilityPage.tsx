@@ -4,7 +4,8 @@ import { Game } from '../model/Interfaces';
 import { API_URL, JWT_STORAGE } from '../model/Constants';
 import { Box, Button, Paper, Select, Stack, Title, Text, Group, Container, Grid, Divider, List } from '@mantine/core';
 import { useStopwatch } from 'react-timer-hook';
-const MatchUtiliyPage = () => {
+
+const MatchUtilityPage = () => {
 
   const [games, setGames] = useState<Game[]>([]);
   const [mustSpin, setMustSpin] = useState(false);
@@ -139,10 +140,10 @@ const MatchUtiliyPage = () => {
               <Divider label="Games in Wheel" labelPosition="center" />
 
               {wheelGames.length > 0 ? (
-                <List spacing="xs">
+                <List>
                   {wheelGames.map((game, index) => (
-                    <List.Item key={index}>
-                      <Group p="apart">
+                    <List.Item key={index} className="mb-2">
+                      <Group justify="apart">
                         <Text>{game.name}</Text>
                         <Button
                           variant="subtle"
@@ -208,4 +209,4 @@ const MatchUtiliyPage = () => {
   );
 }
 
-export default MatchUtiliyPage;
+export default MatchUtilityPage;
