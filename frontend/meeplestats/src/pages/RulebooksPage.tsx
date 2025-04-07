@@ -188,7 +188,8 @@ const RulebooksPage = () => {
       const response = await uploadSharedRulebook(file, selectedGame.bgg_id, selectedGame.name);
       console.log('Upload response:', response);
       
-      // Refresh shared rulebooks
+      // Only refresh shared rulebooks, the uploaded rulebooks are not  
+      // automatically added to personal collection
       const sharedData = await fetchSharedRulebooks();
       setSharedRulebooks(sharedData);
       
@@ -199,7 +200,7 @@ const RulebooksPage = () => {
       
       notifications.show({
         title: "Success",
-        message: "Rulebook uploaded successfully to the shared repository",
+        message: "Rulebook uploaded successfully to the shared repository. Click the + button to add it to your collection.",
         color: "green",
       });
     } catch (err) {
