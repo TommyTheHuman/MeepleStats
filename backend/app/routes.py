@@ -1488,7 +1488,7 @@ def upload_rulebook():
             file.save(file_path)
             file_url = f"/uploads/{unique_filename}"
             
-        # Save rulebook info to database
+        # Save rulebook info to database, always marked as shared
         rulebook_data = {
             'filename': file.filename,
             'file_url': file_url,
@@ -1496,8 +1496,7 @@ def upload_rulebook():
             'game_name': game_name,
             'uploaded_by': current_user,
             'uploaded_at': datetime.now(),
-            'is_shared': is_shared,
-            'in_personal_collection': True  # Add this field
+            'is_shared': True
         }
         
         rulebooks_collection.insert_one(rulebook_data)
@@ -1609,12 +1608,17 @@ def delete_rulebook(rulebook_id):
         # Delete from database
         rulebooks_collection.delete_one({'_id': ObjectId(rulebook_id)})
         
-        # If local storage, delete file
+        # Delete the actual file based on storage type
         if STORAGE_TYPE == 'local':
             filename = os.path.basename(rulebook['file_url'])
             file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             if os.path.exists(file_path):
                 os.remove(file_path)
+        elif STORAGE_TYPE == 's3':
+            file_url = rulebook['file_url']
+            if file_url:
+                filename = file_url.split('/')[-1]
+                S3Client.delete(filename)
                 
         return jsonify({'message': 'Rulebook deleted successfully'}), 200
     except Exception as e:

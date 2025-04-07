@@ -36,3 +36,20 @@ class S3Client:
     
     def get_url_from_filename(file_name):
         return f"{S3_ENDPOINT}/{S3_BUCKET_NAME}/{file_name}"
+    
+    def delete(file_name):
+        """Delete an object from S3 bucket.
+        
+        Args:
+            file_name: The key/name of the file in the S3 bucket
+            
+        Returns:
+            True if the file was successfully deleted, False otherwise
+        """
+        try:
+            client = S3Client.get_client()
+            client.delete_object(Bucket=S3_BUCKET_NAME, Key=file_name)
+            return True
+        except Exception as e:
+            print(f"Error deleting file from S3: {str(e)}")
+            return False
