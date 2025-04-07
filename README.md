@@ -180,7 +180,8 @@ Additionally, you can choose where to store images from your game nights. You ca
 
 ## 🌍 Environment Variables
 
-Create a `.env` file and define the following for the backend:
+### Backend Environment Variables
+Create a `.env` file in the root directory of the project `/meeplestats` and define the following:
 
 ```ini
 BGG_USERNAME=your_boardgamegeek_username
@@ -200,9 +201,16 @@ S3_ENDPOINT=your_s3_server_url
 S3_ACCESS_KEY=your_s3_access_key
 S3_SECRET_KEY=your_s3_secret_key
 S3_BUCKET_NAME=your_s3_bucket_name
+PINECONE_API_KEY=your_pinecone_key
+PINECONE_INDEX_NAME=gamerulebooks
+EMBEDDING_MODEL=embedding_model_name # for example: sentence-transformers/all-mpnet-base-v2
+PINECONE_DIMENSION=768
+OPENROUTER_API_KEY=your_openrouter_key
+LLM_MODEL=llm_model_name # for example: qwen/qwq-32b:free
 ```
 
-Create a `.env` file and define the following for the frontend:
+### Frontend Environment Variables
+Create a `.env` file in the `/frontend/meeplestats` directory of the project and define the following:
 
 ```ini
 VITE_API_URL=your_backend_url
@@ -229,7 +237,7 @@ Want to improve MeepleStats? Contributions are welcome! Feel free to open an iss
 - [x] Develop a game collection page
 - [x] Add support to upload images on Google Drive
 - [x] Create a page to randomly select a game and a timer to track the play time
-- [ ] Implement a RAG pipeline to retirve information about game rules
+- [x] Implement a RAG pipeline to retirve information about game rules
 
 ---
 
