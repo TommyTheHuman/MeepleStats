@@ -22,6 +22,8 @@ import GamesPage from "./pages/GamesPage.tsx";
 import MatchUtilityPage from "./pages/MatchUtilityPage.tsx";
 import RulebooksPage from "./pages/RulebooksPage.tsx";
 import RulebookChatPage from "./pages/RulebookChatPage.tsx";
+import NotFoundPage from "./pages/NotFoundPage.tsx";
+
 const theme = createTheme({
   fontFamily: '"Host Grotesk", sans-serif',
   headings: {
@@ -115,7 +117,7 @@ const router = createBrowserRouter([
       },
       {
         path: "*",
-        element: <Navigate to="/" replace />,
+        element: <NotFoundPage />,
       },
     ],
   },
