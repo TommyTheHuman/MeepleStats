@@ -5,9 +5,7 @@ from llama_index.core.llms import ChatMessage
 from pinecone import Pinecone
 from langchain_huggingface import HuggingFaceEmbeddings
 import os
-import pathlib
 import hashlib
-import argparse
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -117,7 +115,6 @@ def upsert_records_in_batches(index, records, namespace, batch_size=100):
         index.upsert(vectors=batch, namespace=namespace)
         print(f"Upserted batch {i//batch_size + 1}/{(len(records)-1)//batch_size + 1}")
 
-# funzioni di indicizzazione
 def index_single_pdf(file_path, index, embedding_model):
     """Indicizza un singolo file PDF in un namespace specifico.
     
@@ -133,14 +130,9 @@ def index_single_pdf(file_path, index, embedding_model):
     
     if vectors_count > 0:
         print(f"Namespace {safe_namespace} already contains {vectors_count} vectors.")
-        proceed = input("Do you want to clear and reindex this namespace? (y/n): ")
-        if proceed.lower() == 'y':
-            # cancello il namespace
-            index.delete(delete_all=True, namespace=safe_namespace)
-            print(f"Cleared namespace {safe_namespace}")
-        else:
-            print("Skipping indexing for this PDF.")
-            return False
+        # cancello il namespace esistente
+        index.delete(delete_all=True, namespace=safe_namespace)
+        print(f"Cleared namespace {safe_namespace}")
     
     # carico il pdf
     documents = load_document(file_path)
@@ -249,9 +241,6 @@ def display_search_results(matches):
         print("No matching results found.")
         return "", []
         
-    # stampo i chunks recuperati con i punteggi relativi
-    #print("\n===== RETRIEVED CHUNKS =====")
-    
     page_refs = []
     context_with_pages = []
     
@@ -263,11 +252,6 @@ def display_search_results(matches):
             text = metadata.get("text", "")
             page_number = metadata.get("page_label", "unknown")
             file_name = metadata.get("file_name", "unknown")
-            
-            #print(f"\nCHUNK {i+1} (Score: {score:.4f}, Namespace: {namespace}):")
-            #print(f"Source: {file_name}, Page: {page_number}")
-            #print(f"Text: {text}")
-            #print("-" * 80)
             
             # estraggo i metadati
             page_refs.append({"page": str(page_number), "file": str(file_name)})
@@ -299,7 +283,7 @@ def query_llm(query, context, page_refs):
         
         prompt = f"""You are an expert in board game rules and gameplay mechanics, with deep knowledge of strategy games.
 
-Using the context provided, answer the query in a clear, formal, and detailed manner. Your answer should:
+Using the context provided, answer the query in a clear, formal, and detailed manner. Your answer MUST:
 - Be written in the same language as the query
 - Adhere strictly to the official game rules
 - Provide clarifications if the context is ambiguous or insufficient
@@ -360,25 +344,10 @@ Answer:"""
         print(f"Error querying LLM: {str(e)}")
         return f"I encountered an error while processing your query. Error: {str(e)}"
 
-# utility 
-def list_available_namespaces(index_stats):
-    """Elenca i namespace disponibili con il conteggio dei vettori."""
-    print("\nAvailable namespaces:")
-    for ns, stats in index_stats.get("namespaces", {}).items():
-        count = stats.get("vector_count", 0)
-        print(f"  - {ns} ({count} vectors)")
-
 def clear_namespace(index, namespace):
     """Cancella un namespace specifico."""
     index.delete(delete_all=True, namespace=namespace)
     print(f"Cleared namespace {namespace}")
-
-def delete_pinecone_index(pc, name):
-    """Elimina un intero indice Pinecone."""
-    index_name = os.getenv("PINECONE_INDEX_NAME") if name is None else name
-    if pc.has_index(index_name):
-        pc.delete_index(index_name)
-        print(f"Deleted Pinecone index: {index_name}")
 
 def clear_all_namespaces(index):
     """Cancella tutti i namespace dall'indice.
@@ -395,11 +364,6 @@ def clear_all_namespaces(index):
         return False
     
     print(f"Found {len(namespaces)} namespaces to clear: {', '.join(namespaces)}")
-    confirm = input(f"Are you sure you want to clear ALL {len(namespaces)} namespaces? This action cannot be undone. (y/n): ")
-    
-    if confirm.lower() != 'y':
-        print("Operation cancelled.")
-        return False
     
     cleared_count = 0
     for namespace in namespaces:
@@ -415,121 +379,4 @@ def clear_all_namespaces(index):
         return True
     else:
         print("No namespaces were cleared.")
-        return False
-
-def main():
-    # argomenti della riga di comando
-    parser = argparse.ArgumentParser(description='Query game rulebooks using Pinecone vector DB')
-    parser.add_argument('--query', type=str, required=False, help='The query to search for')
-    parser.add_argument('--pdf', type=str, required=False, help='Specific PDF filename to search in')
-    parser.add_argument('--index', action='store_true', help='Index documents only, no query')
-    parser.add_argument('--list_namespaces', action='store_true', help='List all available namespaces')
-    parser.add_argument('--index_pdf', type=str, help='Index a specific PDF file')
-    parser.add_argument('--clear_namespace', type=str, help='Clear a specific namespace')
-    parser.add_argument('--clear_all', action='store_true', help='Clear all namespaces (use with caution)')
-    
-    args = parser.parse_args()
-    query = args.query if args.query else None
-    
-    # 1: carico pdf dalla directory
-    current_dir = pathlib.Path(__file__).parent.absolute()
-    data_dir = current_dir / "data"
-    print(f"Looking for files in: {data_dir}")
-    
-    # 2: modello di embedding
-    embedding_model = initialize_embedding_model()
-    
-    # 3: pinecone per vector DB
-    index = initialize_pinecone()
-    
-    # ottengo tutti i nomi dei namespace dall'indice
-    all_namespaces, index_stats = get_namespaces(index)
-    
-    # casi dei comandi richiesti
-    if args.clear_all:
-        success = clear_all_namespaces(index)
-        if success:
-            all_namespaces, _ = get_namespaces(index)
-        exit(0)
-    
-    if args.clear_namespace:
-        namespace = create_safe_namespace(args.clear_namespace)
-        if namespace in all_namespaces:
-            clear_namespace(index, namespace)
-            exit(0)
-        else:
-            print(f"Namespace '{namespace}' not found.")
-            exit(1)
-    
-    # elenco i namespace se richiesto ed esco
-    if args.list_namespaces:
-        list_available_namespaces(index_stats)
-        exit(0)
-    
-    # richiesta di indicizzazione di un pdf specifico
-    if args.index_pdf:
-        specific_pdf_path = os.path.join(data_dir, args.index_pdf)
-        success = index_single_pdf(specific_pdf_path, index, embedding_model)
-        if success:
-            # aggiorno la lista dei namespace dopo l'indicizzazione
-            all_namespaces, _ = get_namespaces(index)
-            print(f"Updated namespaces: {', '.join(all_namespaces)}")
-        exit(0)
-    
-    # eseguo l'indicizzazione se richiesto
-    if args.index or not all_namespaces:
-        success = index_all_documents(data_dir, index, embedding_model)
-        if success:
-            # aggiorno la lista dei namespace dopo l'indicizzazione
-            all_namespaces, _ = get_namespaces(index)
-        
-        if args.index:
-            print("Indexing complete.")
-            exit(0)
-    
-    # interrogo dentro il namespace specifico o attraverso tutti
-    if not query:
-        if not args.index and not args.index_pdf and not args.list_namespaces:
-            print("Error: No query provided. Use --query to specify a query or --help for more options.")
-            exit(1)
-        else:
-            # se stiamo solo indicizzando o elencando i namespace, non è necessaria la query
-            exit(0)
-    
-    # determino quali namespace interrogare
-    target_namespaces = []
-    if args.pdf:
-        # estraggo il nome base del file senza estensione se viene fornito un nome file completo
-        safe_namespace = create_safe_namespace(args.pdf)
-        
-        if safe_namespace in all_namespaces:
-            target_namespaces = [safe_namespace]
-            print(f"Targeting specific namespace: {safe_namespace}")
-        else:
-            print(f"Warning: Namespace '{safe_namespace}' not found. Available namespaces: {', '.join(all_namespaces)}")
-            exit(1)
-    else:
-        # se non è specificato alcun pdf, interrogo tutti i namespace
-        target_namespaces = all_namespaces
-        print(f"Querying across all {len(target_namespaces)} namespaces")
-    
-    # eseguo la query
-    top_matches = query_index(query, target_namespaces, index, embedding_model)
-    
-    # visualizzo i risultati rilevanti (chunks) e i riferimenti alle pagine
-    if top_matches:
-        context, page_refs = display_search_results(top_matches)
-        
-        # invio i risultati al LLM
-        query_llm(query, context, page_refs)
-
-
-if __name__ == "__main__":
-    main()
-
-# esempi di utilizzo:
-# python pinecone_main.py --query "how many players can play the game?" --pdf "villainous.pdf"
-# python pinecone_main.py --index  # solo indicizzazione dei documenti
-# python pinecone_main.py --list_namespaces  # elenca tutti i namespace disponibili
-# python pinecone_main.py --clear_namespace "villainous"  # cancella uno specifico namespace
-# python pinecone_main.py --clear_all  # cancella tutti i namespace (usa con cautela) 
+        return False 
