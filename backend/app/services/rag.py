@@ -63,12 +63,12 @@ def load_document(file_path):
     print(f"Loaded {len(documents)} documents from {os.path.basename(file_path)}")
     return documents
 
-def load_all_documents(directory):
-    """Carica tutti i documenti dalla directory specificata."""
-    reader = SimpleDirectoryReader(input_dir=str(directory))
-    documents = reader.load_data()
-    print(f"Loaded {len(documents)} documents for indexing")
-    return documents
+#def load_all_documents(directory):
+#    """Carica tutti i documenti dalla directory specificata."""
+#    reader = SimpleDirectoryReader(input_dir=str(directory))
+#    documents = reader.load_data()
+#    print(f"Loaded {len(documents)} documents for indexing")
+#    return documents
 
 def process_document_chunk(doc, safe_namespace, i, embedding_model):
     """Elabora un singolo documento (pagina del pdf) in chunks e crea i record per Pinecone."""
@@ -115,7 +115,7 @@ def upsert_records_in_batches(index, records, namespace, batch_size=100):
         index.upsert(vectors=batch, namespace=namespace)
         print(f"Upserted batch {i//batch_size + 1}/{(len(records)-1)//batch_size + 1}")
 
-def index_single_pdf(file_path, index, embedding_model):
+def index_single_pdf(file_path, index, embedding_model, unique_file_name):
     """Indicizza un singolo file PDF in un namespace specifico.
     
     Returns:
@@ -135,7 +135,7 @@ def index_single_pdf(file_path, index, embedding_model):
         print(f"Cleared namespace {safe_namespace}")
     
     # carico il pdf
-    documents = load_document(file_path)
+    documents = load_document(unique_file_name)
     if not documents:
         return False
     
@@ -152,60 +152,60 @@ def index_single_pdf(file_path, index, embedding_model):
     
     return True
 
-def index_all_documents(data_dir, index, embedding_model):
-    """Indicizza tutti i documenti dalla directory dei dati.
-    
-    Returns:
-        bool: True se almeno un documento è stato indicizzato con successo, False altrimenti
-    """
-    # carico i documenti
-    documents = load_all_documents(data_dir)
-    if not documents:
-        print("No documents found to index.")
-        return False
-        
-    # raggruppo i documenti per nome file 
-    documents_by_file = {}
-    for doc in documents:
-        file_name = doc.metadata.get('file_name', 'unknown')
-        # rimuovo l'estensione del file per il nome del namespace
-        namespace = os.path.splitext(file_name)[0]
-        if namespace not in documents_by_file:
-            documents_by_file[namespace] = []
-        documents_by_file[namespace].append(doc)
-    
-    if not documents_by_file:
-        print("No valid documents found to index.")
-        return False
-        
-    indexed_count = 0
-    # elaboro i documenti di ciascun file e inserisco nel namespace appropriato
-    for namespace, docs in documents_by_file.items():
-        # creo il nome del namespace
-        safe_namespace = create_safe_namespace(namespace)
-        print(f"\nProcessing {len(docs)} documents for namespace: {safe_namespace}")
-        
-        # controllo se questo namespace ha già contenuti
-        namespace_stats = index.describe_index_stats(namespace=safe_namespace)
-        vectors_count = namespace_stats.get("namespaces", {}).get(safe_namespace, {}).get("vector_count", 0)
-        
-        # se il namespace ha già contenuti, skippo l'inserimento e passo al prossimo
-        if vectors_count > 0:
-            print(f"Namespace {safe_namespace} already contains {vectors_count} vectors. Skipping insertion.")
-            continue
-        
-        # analizzo e creo embedding per i documenti (pagine del pdf) di questo namespace
-        all_records = []
-        for i, doc in enumerate(docs):
-            records = process_document_chunk(doc, safe_namespace, i, embedding_model)
-            all_records.extend(records)
-        
-        # inserisco i records in pinecone in batch
-        if all_records:
-            upsert_records_in_batches(index, all_records, safe_namespace)
-            indexed_count += 1
-    
-    return indexed_count > 0
+#def index_all_documents(data_dir, index, embedding_model):
+#    """Indicizza tutti i documenti dalla directory dei dati.
+#    
+#    Returns:
+#        bool: True se almeno un documento è stato indicizzato con successo, False altrimenti
+#    """
+#    # carico i documenti
+#    documents = load_all_documents(data_dir)
+#    if not documents:
+#        print("No documents found to index.")
+#        return False
+#        
+#    # raggruppo i documenti per nome file 
+#    documents_by_file = {}
+#    for doc in documents:
+#        file_name = doc.metadata.get('file_name', 'unknown')
+#        # rimuovo l'estensione del file per il nome del namespace
+#        namespace = os.path.splitext(file_name)[0]
+#        if namespace not in documents_by_file:
+#            documents_by_file[namespace] = []
+#        documents_by_file[namespace].append(doc)
+#    
+#    if not documents_by_file:
+#        print("No valid documents found to index.")
+#        return False
+#        
+#    indexed_count = 0
+#    # elaboro i documenti di ciascun file e inserisco nel namespace appropriato
+#    for namespace, docs in documents_by_file.items():
+#        # creo il nome del namespace
+#        safe_namespace = create_safe_namespace(namespace)
+#        print(f"\nProcessing {len(docs)} documents for namespace: {safe_namespace}")
+#        
+#        # controllo se questo namespace ha già contenuti
+#        namespace_stats = index.describe_index_stats(namespace=safe_namespace)
+#        vectors_count = namespace_stats.get("namespaces", {}).get(safe_namespace, {}).get("vector_count", 0)
+#        
+#        # se il namespace ha già contenuti, skippo l'inserimento e passo al prossimo
+#        if vectors_count > 0:
+#            print(f"Namespace {safe_namespace} already contains {vectors_count} vectors. Skipping insertion.")
+#            continue
+#        
+#        # analizzo e creo embedding per i documenti (pagine del pdf) di questo namespace
+#        all_records = []
+#        for i, doc in enumerate(docs):
+#            records = process_document_chunk(doc, safe_namespace, i, embedding_model)
+#            all_records.extend(records)
+#        
+#        # inserisco i records in pinecone in batch
+#        if all_records:
+#            upsert_records_in_batches(index, all_records, safe_namespace)
+#            indexed_count += 1
+#    
+#    return indexed_count > 0
 
 def query_index(query, target_namespaces, index, embedding_model, top_k=3):
     """Esegue query su uno o più namespace e restituisce i risultati."""

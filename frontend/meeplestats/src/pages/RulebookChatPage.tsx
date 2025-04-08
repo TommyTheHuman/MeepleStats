@@ -1,40 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
-import { fetchPersonalCollection, fetchRulebookById, sendChatQuery } from "../api/rulebooksApi";
+import { fetchRulebookById, fetchSharedRulebooks, sendChatQuery } from "../api/rulebooksApi";
 import { RulebookInterface } from "../model/Interfaces";
-import { API_URL, JWT_STORAGE } from "../model/Constants";
-import {
-  Container,
-  Title,
-  Paper,
-  Group,
-  Text,
-  Button,
-  Select,
-  LoadingOverlay,
-  Box,
-  Textarea,
-  Stack,
-  Card,
-  Avatar,
-  Divider,
-  Alert,
-  rem,
-  Badge,
-  ScrollArea
-} from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { API_URL } from "../model/Constants";
+import { Container, Title, Paper, Group, Text, Button, Select, LoadingOverlay, Box, Textarea, Stack, Avatar, Alert, Badge, ScrollArea } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import {
-  IconAlertCircle,
-  IconSend,
-  IconRobot,
-  IconUser,
-  IconBook,
-  IconFile
-} from "@tabler/icons-react";
+import { IconAlertCircle, IconSend, IconRobot, IconUser, IconBook, IconFile } from "@tabler/icons-react";
 import { useContext } from "react";
 import { AuthContext } from "../components/AuthContext";
+//import ReactMarkdown from 'react-markdown';
+//import remarkGfm from 'remark-gfm';
+
 
 interface Message {
   id: string;
@@ -66,11 +42,11 @@ const RulebookChatPage = () => {
     const loadPersonalCollection = async () => {
       setLoading(true);
       try {
-        const data = await fetchPersonalCollection();
+        const data = await fetchSharedRulebooks();
         console.log('Personal collection loaded:', data);
         setRulebooks(data);
         setError(null);
-        
+
         // If we have a rulebook_id in the URL, load that rulebook
         if (rulebook_id) {
           try {
@@ -78,7 +54,7 @@ const RulebookChatPage = () => {
             setSelectedRulebook(rulebook);
           } catch (err) {
             console.error("Error loading specific rulebook:", err);
-            
+
             // If the rulebook doesn't exist or isn't in the user's collection,
             // select the first rulebook in the collection if available
             if (data.length > 0) {
@@ -103,7 +79,7 @@ const RulebookChatPage = () => {
         setLoading(false);
       }
     };
-    
+
     if (isLoggedIn) {
       loadPersonalCollection();
     }
@@ -113,16 +89,16 @@ const RulebookChatPage = () => {
   useEffect(() => {
     const loadSelectedRulebook = async () => {
       if (!selectedRulebookId) return;
-      
+
       try {
         // First check if the rulebook is already in our loaded collection
         const found = rulebooks.find(r => r._id === selectedRulebookId);
-        
+
         if (found) {
           setSelectedRulebook(found);
           return;
         }
-        
+
         // If not found locally, fetch it from the API
         const rulebook = await fetchRulebookById(selectedRulebookId);
         setSelectedRulebook(rulebook);
@@ -136,7 +112,7 @@ const RulebookChatPage = () => {
         });
       }
     };
-    
+
     if (selectedRulebookId) {
       loadSelectedRulebook();
     }
@@ -144,7 +120,7 @@ const RulebookChatPage = () => {
 
   const handleSendMessage = async () => {
     if (!message.trim() || !selectedRulebookId) return;
-    
+
     // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -152,7 +128,7 @@ const RulebookChatPage = () => {
       sender: "user",
       timestamp: new Date()
     };
-    
+
     // Add placeholder for bot response
     const botMessageId = (Date.now() + 1).toString();
     const botMessage: Message = {
@@ -162,24 +138,24 @@ const RulebookChatPage = () => {
       timestamp: new Date(),
       isLoading: true
     };
-    
+
     setMessages(prev => [...prev, userMessage, botMessage]);
     setMessage("");
     setChatLoading(true);
-    
+
     try {
       // Send query to backend - always false for includeContext
       const response = await sendChatQuery(message.trim(), selectedRulebookId, false);
-      
+
       // Update bot message with response
-      setMessages(prev => prev.map(msg => 
-        msg.id === botMessageId 
-          ? { 
-              ...msg, 
-              content: response.answer,
-              isLoading: false,
-              page_refs: response.page_refs
-            }
+      setMessages(prev => prev.map(msg =>
+        msg.id === botMessageId
+          ? {
+            ...msg,
+            content: response.answer,
+            isLoading: false,
+            page_refs: response.page_refs
+          }
           : msg
       ));
     } catch (err) {
@@ -188,18 +164,18 @@ const RulebookChatPage = () => {
       if (err instanceof Error) {
         errorMessage = err.message;
       }
-      
-      setMessages(prev => prev.map(msg => 
-        msg.id === botMessageId 
-          ? { 
-              ...msg, 
-              content: errorMessage,
-              isLoading: false,
-              error: errorMessage
-            }
+
+      setMessages(prev => prev.map(msg =>
+        msg.id === botMessageId
+          ? {
+            ...msg,
+            content: errorMessage,
+            isLoading: false,
+            error: errorMessage
+          }
           : msg
       ));
-      
+
       notifications.show({
         title: "Error",
         message: errorMessage,
@@ -220,12 +196,12 @@ const RulebookChatPage = () => {
   // Helper function to get the correct file URL
   const getFileUrl = (fileUrl: string | undefined) => {
     if (!fileUrl) return "";
-    
+
     // Check if the URL starts with http or https
     if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) {
       return fileUrl;
     }
-    
+
     // If it's a relative path, prepend with API_URL
     return `${API_URL}${fileUrl}`;
   };
@@ -250,7 +226,7 @@ const RulebookChatPage = () => {
       ) : (
         <Paper p="md" radius="md" className="!bg-white">
           <LoadingOverlay visible={loading} overlayProps={{ radius: "md", blur: 2 }} />
-          
+
           {error ? (
             <Alert title="Error" color="red">
               {error}
@@ -281,7 +257,7 @@ const RulebookChatPage = () => {
                     }}
                   />
                 </Box>
-                
+
                 <Button
                   onClick={handleViewRulebook}
                   className="!bg-blue-600 hover:!bg-blue-700 !transition-colors !mt-7"
@@ -292,13 +268,13 @@ const RulebookChatPage = () => {
                   View Rulebook
                 </Button>
               </Group>
-              
+
               {selectedRulebook && (
                 <>
-                  <Paper 
-                    p="md" 
-                    radius="md" 
-                    className="!bg-gray-50 !mb-4" 
+                  <Paper
+                    p="md"
+                    radius="md"
+                    className="!bg-gray-50 !mb-4"
                     withBorder
                     style={{ height: '500px' }}
                   >
@@ -312,8 +288,8 @@ const RulebookChatPage = () => {
                       ) : (
                         <Stack gap="md">
                           {messages.map((msg) => (
-                            <Group 
-                              key={msg.id} 
+                            <Group
+                              key={msg.id}
                               justify={msg.sender === "user" ? "right" : "left"}
                               wrap="nowrap"
                               gap="xs"
@@ -323,16 +299,15 @@ const RulebookChatPage = () => {
                                   <IconRobot size={18} />
                                 </Avatar>
                               )}
-                              
+
                               <Box className={`!max-w-[85%]`}>
-                                <Paper 
-                                  p="sm" 
-                                  radius="md" 
-                                  className={`${
-                                    msg.sender === "user" 
-                                      ? "!bg-blue-500 !text-white" 
-                                      : "!bg-white !text-gray-800 !border !border-gray-200"
-                                  } ${msg.error ? "!border-red-300" : ""}`}
+                                <Paper
+                                  p="sm"
+                                  radius="md"
+                                  className={`${msg.sender === "user"
+                                    ? "!bg-blue-500 !text-white"
+                                    : "!bg-white !text-gray-800 !border !border-gray-200"
+                                    } ${msg.error ? "!border-red-300" : ""}`}
                                 >
                                   {msg.isLoading ? (
                                     <Text size="sm">Thinking...</Text>
@@ -340,15 +315,15 @@ const RulebookChatPage = () => {
                                     <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</Text>
                                   )}
                                 </Paper>
-                                
+
                                 {msg.page_refs && msg.page_refs.length > 0 && (
                                   <Group mt="xs" gap="xs">
                                     <Text size="xs" fw={500} c="dimmed">References:</Text>
                                     {msg.page_refs.map((ref, index) => (
-                                      <Badge 
-                                        key={index} 
-                                        size="sm" 
-                                        color="blue" 
+                                      <Badge
+                                        key={index}
+                                        size="sm"
+                                        color="blue"
                                         variant="light"
                                         leftSection={<IconFile size={12} />}
                                       >
@@ -358,7 +333,7 @@ const RulebookChatPage = () => {
                                   </Group>
                                 )}
                               </Box>
-                              
+
                               {msg.sender === "user" && (
                                 <Avatar color="blue" radius="xl">
                                   <IconUser size={18} />
@@ -370,7 +345,7 @@ const RulebookChatPage = () => {
                       )}
                     </ScrollArea>
                   </Paper>
-                  
+
                   <Group align="flex-start" gap="xs">
                     <Textarea
                       placeholder="Ask a question about the rulebook..."
@@ -386,7 +361,7 @@ const RulebookChatPage = () => {
                         input: { borderRadius: '0.5rem' }
                       }}
                     />
-                    
+
                     <Button
                       onClick={handleSendMessage}
                       className="!bg-blue-600 hover:!bg-blue-700 !transition-colors"
