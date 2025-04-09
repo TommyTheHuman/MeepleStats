@@ -106,7 +106,7 @@ export default function Layout() {
         </Group>
       </AppShell.Header>
 
-      <AppShell.Navbar p="md" className="!gap-0 !bg-white !border-r !border-gray-200">
+      <AppShell.Navbar p="md" className="!gap-0 !bg-white !border-r !border-gray-200 !flex !flex-col">
         {/* User Profile */}
         <div className="!mb-6 !flex !items-center !gap-3">
           <Avatar
@@ -125,126 +125,133 @@ export default function Layout() {
 
         <Divider className="!mb-4" />
 
-        {/* Navigation Links */}
-        <NavLink
-          component={Link}
-          to="/"
-          label="Home"
-          onClick={closeMobile}
-          className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
-        />
+        {/* Main Navigation Section */}
+        <div className="!flex-1 !overflow-y-auto">
+          {/* Navigation Links */}
+          <NavLink
+            component={Link}
+            to="/"
+            label="Home"
+            onClick={closeMobile}
+            className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
+          />
 
-        {!isLoggedIn && (
-          <>
-            <NavLink
-              component={Link}
-              to="/login"
-              label="Login"
-              onClick={closeMobile}
-              className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
-            />
-            <NavLink
-              component={Link}
-              to="/register"
-              label="Register"
-              onClick={closeMobile}
-              className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
-            />
-          </>
-        )}
+          {!isLoggedIn && (
+            <>
+              <NavLink
+                component={Link}
+                to="/login"
+                label="Login"
+                onClick={closeMobile}
+                className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
+              />
+              <NavLink
+                component={Link}
+                to="/register"
+                label="Register"
+                onClick={closeMobile}
+                className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
+              />
+            </>
+          )}
 
+          {isLoggedIn && (
+            <>
+              <NavLink
+                component={Link}
+                to="/wishlist"
+                label="Wishlist"
+                onClick={closeMobile}
+                className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
+              />
+              <NavLink
+                component={Link}
+                to="/matchHistory"
+                label="Match History"
+                onClick={closeMobile}
+                className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
+              />
+              <NavLink
+                component={Link}
+                to="/logmatch"
+                label="Log Match"
+                onClick={closeMobile}
+                className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
+              />
+              <NavLink
+                component={Link}
+                to="/gameCollection"
+                label="Games Collection"
+                onClick={closeMobile}
+                className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
+              />
+              <NavLink
+                component={Link}
+                to="/matchUtility"
+                label="Match Utility"
+                onClick={closeMobile}
+                className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
+              />
+              <NavLink
+                component={Link}
+                to="/rulebooks"
+                label="Rulebook Repository"
+                onClick={closeMobile}
+                className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
+              />
+              <NavLink
+                component={Link}
+                to="/rulebook-chat"
+                label="Rulebook Chat"
+                onClick={closeMobile}
+                className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
+              />
+
+              <Divider className="!my-4" />
+
+              <Text fw={600} className="!text-gray-800 !mb-2">
+                Admin Tools
+              </Text>
+
+              <Stack gap="sm" className="!px-2 !mb-4">
+                <Button
+                  onClick={handleImportGames}
+                  variant="light"
+                  color="blue"
+                  size="sm"
+                  radius="md"
+                  fullWidth
+                  className="!bg-blue-50 !text-blue-600 hover:!bg-blue-100 !transition-colors"
+                >
+                  Import Games
+                </Button>
+
+                <Button
+                  onClick={handleAchievementsSetup}
+                  variant="light"
+                  color="blue"
+                  size="sm"
+                  radius="md"
+                  fullWidth
+                  className="!bg-blue-50 !text-blue-600 hover:!bg-blue-100 !transition-colors"
+                >
+                  Setup Achievements
+                </Button>
+              </Stack>
+            </>
+          )}
+        </div>
+
+        {/* Footer Section - Always visible at bottom */}
         {isLoggedIn && (
-          <>
-            <NavLink
-              component={Link}
-              to="/wishlist"
-              label="Wishlist"
-              onClick={closeMobile}
-              className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
-            />
-            <NavLink
-              component={Link}
-              to="/matchHistory"
-              label="Match History"
-              onClick={closeMobile}
-              className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
-            />
-            <NavLink
-              component={Link}
-              to="/logmatch"
-              label="Log Match"
-              onClick={closeMobile}
-              className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
-            />
-            <NavLink
-              component={Link}
-              to="/gameCollection"
-              label="Games Collection"
-              onClick={closeMobile}
-              className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
-            />
-            <NavLink
-              component={Link}
-              to="/matchUtility"
-              label="Match Utility"
-              onClick={closeMobile}
-              className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
-            />
-            <NavLink
-              component={Link}
-              to="/rulebooks"
-              label="Rulebook Repository"
-              onClick={closeMobile}
-              className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
-            />
-            <NavLink
-              component={Link}
-              to="/rulebook-chat"
-              label="Rulebook Chat"
-              onClick={closeMobile}
-              className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
-            />
-
-            <Divider className="!my-4" />
-
-            <Text size="sm" fw={500} className="!text-gray-500 !mb-2 !px-3">
-              Admin Tools
-            </Text>
-
-            <Stack gap="sm" className="!px-2 !mb-4">
-              <Button
-                onClick={handleImportGames}
-                variant="light"
-                color="blue"
-                size="sm"
-                radius="md"
-                fullWidth
-                className="!bg-blue-50 !text-blue-600 hover:!bg-blue-100 !transition-colors"
-              >
-                Import Games
-              </Button>
-
-              <Button
-                onClick={handleAchievementsSetup}
-                variant="light"
-                color="blue"
-                size="sm"
-                radius="md"
-                fullWidth
-                className="!bg-blue-50 !text-blue-600 hover:!bg-blue-100 !transition-colors"
-              >
-                Setup Achievements
-              </Button>
-            </Stack>
-
+          <div className="!mt-auto !pt-4">
             <Divider className="!mb-4" />
-
             <NavLink
               label="Logout"
               onClick={() => { handleLogout(); closeMobile(); }}
               className="!transition-colors !rounded-md !text-red-600 hover:!bg-red-50"
             />
-          </>
+          </div>
         )}
       </AppShell.Navbar>
 
