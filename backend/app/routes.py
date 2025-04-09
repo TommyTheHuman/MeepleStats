@@ -1421,27 +1421,8 @@ rulebooks_bp = Blueprint('rulebooks', __name__)
 @jwt_required()
 def get_rulebooks():
     try:
-        # Get current user
-        current_user = get_jwt_identity()
-        
-        # Get rulebooks from database for the current user only
-        rulebooks = rulebooks_collection.find({'uploaded_by': current_user})
-        
-        rulebooks_data = []
-        for rulebook in rulebooks:
-            rulebook['_id'] = str(rulebook['_id'])
-            rulebooks_data.append(rulebook)
-            
-        return jsonify(rulebooks_data), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@rulebooks_bp.route('/shared-rulebooks', methods=['GET'])
-@jwt_required()
-def get_shared_rulebooks():
-    try:
-        # Get all rulebooks from database that are marked as shared
-        rulebooks = rulebooks_collection.find({'is_shared': True})
+        # Get all rulebooks from database
+        rulebooks = rulebooks_collection.find()
         
         rulebooks_data = []
         for rulebook in rulebooks:
@@ -1476,109 +1457,11 @@ def upload_rulebook():
         # Get game information
         game_id = request.form.get('game_id')
         game_name = request.form.get('game_name')
-        is_shared = request.form.get('is_shared', 'false').lower() == 'true'
         
         # Create unique filename
         unique_filename = f"{uuid.uuid4()}_{file.filename}"
         
-
-        
-
-        # Save file based on storage type
-        if STORAGE_TYPE == 's3':
-            # Save file to S3
-            S3Client.put(file, unique_filename, content_type='application/pdf')
-            file_url = S3Client.get_url_from_filename(unique_filename)
-
-            temp_file_path = os.path.join('/tmp', unique_filename)
-                
-            # Download from S3 to temp file
-            S3Client.download(unique_filename, temp_file_path)
-            # Clean up
-            os.remove(temp_file_path)
-        else:
-            # Save file locally
-            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename)
-            file.save(file_path)
-            file_url = f"/uploads/{unique_filename}"
-            index_single_pdf(file_path, index, embedding_model)
-            
-        # Save rulebook info to database, always marked as shared
-        rulebook_data = {
-            'filename': file.filename,
-            'file_url': file_url,
-            'game_id': game_id,
-            'game_name': game_name,
-            'uploaded_by': current_user,
-            'uploaded_at': datetime.now(),
-            'is_shared': True
-        }
-        
-        rulebooks_collection.insert_one(rulebook_data)
-        
-        return jsonify({'message': 'Rulebook uploaded successfully', 'file_url': file_url}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@rulebooks_bp.route('/share-rulebook/<rulebook_id>', methods=['PUT'])
-@jwt_required()
-def share_rulebook(rulebook_id):
-    try:
-        # Get current user
-        current_user = get_jwt_identity()
-        
-        # Find rulebook
-        rulebook = rulebooks_collection.find_one({'_id': ObjectId(rulebook_id)})
-        
-        if not rulebook:
-            return jsonify({'error': 'Rulebook not found'}), 404
-            
-        # Check if user is the one who uploaded the rulebook
-        if rulebook['uploaded_by'] != current_user:
-            return jsonify({'error': 'Unauthorized to share this rulebook'}), 403
-        
-        # Update the rulebook to be shared
-        rulebooks_collection.update_one(
-            {'_id': ObjectId(rulebook_id)},
-            {'$set': {'is_shared': True}}
-        )
-        
-        return jsonify({'message': 'Rulebook shared successfully'}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@rulebooks_bp.route('/upload-shared-rulebook', methods=['POST'])
-@jwt_required()
-def upload_shared_rulebook():
-    try:
-        # Get current user
-        current_user = get_jwt_identity()
-        
-        # Check if PDF file is in request
-        if 'file' not in request.files:
-            return jsonify({'error': 'No file part'}), 400
-            
-        file = request.files['file']
-        
-        # Check if file is selected
-        if file.filename == '':
-            return jsonify({'error': 'No file selected'}), 400
-            
-        # Check if file is PDF
-        if not file.filename.lower().endswith('.pdf'):
-            return jsonify({'error': 'File must be PDF'}), 400
-            
-        # Get game information
-        game_id = request.form.get('game_id')
-        game_name = request.form.get('game_name')
-        
-        # Create unique filename
-        unique_filename = f"{uuid.uuid4()}_{file.filename}"
-        
-
-        
-
-        # Always use S3 for shared rulebooks
+        # Always use S3 for rulebooks
         if STORAGE_TYPE == 's3':
             # Save file to S3
             S3Client.put(file, unique_filename, content_type='application/pdf')
@@ -1599,7 +1482,7 @@ def upload_shared_rulebook():
             file_url = f"/uploads/{unique_filename}"
             index_single_pdf(file.filename, index, embedding_model, file_path)
             
-        # Save rulebook info to database - always marked as shared
+        # Save rulebook info to database
         rulebook_data = {
             'filename': file.filename,
             'file_url': file_url,
@@ -1607,12 +1490,12 @@ def upload_shared_rulebook():
             'game_name': game_name,
             'uploaded_by': current_user,
             'uploaded_at': datetime.now(),
-            'is_shared': True
+            'original_uploader': current_user
         }
         
         rulebooks_collection.insert_one(rulebook_data)
         
-        return jsonify({'message': 'Shared rulebook uploaded successfully', 'file_url': file_url}), 200
+        return jsonify({'message': 'Rulebook uploaded successfully', 'file_url': file_url}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -1654,128 +1537,22 @@ def delete_rulebook(rulebook_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-#@rulebooks_bp.route('/add-to-collection/<rulebook_id>', methods=['POST'])
-#@jwt_required()
-#def add_to_collection(rulebook_id):
-#    try:
-#        # Get current user
-#        current_user = get_jwt_identity()
-#        
-#        # Find shared rulebook
-#        shared_rulebook = rulebooks_collection.find_one({'_id': ObjectId(rulebook_id)})
-#        
-#        if not shared_rulebook:
-#            return jsonify({'error': 'Rulebook not found'}), 404
-#            
-#        # Check if the rulebook is already in the user's collection
-#        existing = rulebooks_collection.find_one({
-#            'file_url': shared_rulebook['file_url'],
-#            'uploaded_by': current_user,
-#            'in_personal_collection': True
-#        })
-#        
-#        if existing:
-#            return jsonify({'error': 'Rulebook already in your collection', 'rulebook_id': str(existing['_id'])}), 400
-#            
-#        # Add to the user's collection by creating a new entry that references the same file
-#        collection_entry = {
-#            'filename': shared_rulebook['filename'],
-#            'file_url': shared_rulebook['file_url'],
-#            'game_id': shared_rulebook['game_id'],
-#            'game_name': shared_rulebook['game_name'],
-#            'uploaded_by': current_user,
-#            'added_from_shared': True,
-#            'original_uploader': shared_rulebook['uploaded_by'],
-#            'original_rulebook_id': str(shared_rulebook['_id']),
-#            'uploaded_at': datetime.now(),
-#            'in_personal_collection': True
-#        }
-#        
-#        result = rulebooks_collection.insert_one(collection_entry)
-#        
-#        return jsonify({
-#            'message': 'Rulebook added to your collection', 
-#            'rulebook_id': str(result.inserted_id)
-#        }), 200
-#    except Exception as e:
-#        return jsonify({'error': str(e)}), 500
-#
-#@rulebooks_bp.route('/personal-collection', methods=['GET'])
-#@jwt_required()
-#def get_personal_collection():
-#    try:
-#        # Get current user
-#        current_user = get_jwt_identity()
-#        
-#        # Get rulebooks from database for the current user's personal collection
-#        rulebooks = rulebooks_collection.find({
-#            'uploaded_by': current_user,
-#            'in_personal_collection': True
-#        })
-#        
-#        rulebooks_data = []
-#        for rulebook in rulebooks:
-#            rulebook['_id'] = str(rulebook['_id'])
-#            rulebooks_data.append(rulebook)
-#            
-#        return jsonify(rulebooks_data), 200
-#    except Exception as e:
-#        return jsonify({'error': str(e)}), 500
-#
-#@rulebooks_bp.route('/remove-from-collection/<rulebook_id>', methods=['DELETE'])
-#@jwt_required()
-#def remove_from_collection(rulebook_id):
-#    try:
-#        # Get current user
-#        current_user = get_jwt_identity()
-#        
-#        # Find rulebook in personal collection
-#        rulebook = rulebooks_collection.find_one({
-#            '_id': ObjectId(rulebook_id),
-#            'uploaded_by': current_user,
-#            'in_personal_collection': True
-#        })
-#        
-#        if not rulebook:
-#            return jsonify({'error': 'Rulebook not found in your collection'}), 404
-#            
-#        # If it was added from shared repository, just delete the entry
-#        if rulebook.get('added_from_shared', False):
-#            rulebooks_collection.delete_one({'_id': ObjectId(rulebook_id)})
-#        else:
-#            # Otherwise, it's a personally uploaded rulebook, so just remove from collection
-#            rulebooks_collection.update_one(
-#                {'_id': ObjectId(rulebook_id)},
-#                {'$set': {'in_personal_collection': False}}
-#            )
-#            
-#        return jsonify({'message': 'Rulebook removed from your collection'}), 200
-#    except Exception as e:
-#        return jsonify({'error': str(e)}), 500
-#
-#@rulebooks_bp.route('/rulebook/<rulebook_id>', methods=['GET'])
-#@jwt_required()
-#def get_rulebook(rulebook_id):
-#    try:
-#        # Get current user
-#        current_user = get_jwt_identity()
-#        
-#        # Find rulebook
-#        rulebook = rulebooks_collection.find_one({'_id': ObjectId(rulebook_id)})
-#        
-#        if not rulebook:
-#            return jsonify({'error': 'Rulebook not found'}), 404
-#            
-#        # Check if the rulebook is shared or belongs to the user
-#        if not rulebook.get('is_shared', False) and rulebook['uploaded_by'] != current_user and not rulebook.get('in_personal_collection', False):
-#            return jsonify({'error': 'You do not have access to this rulebook'}), 403
-#            
-#        # Convert ObjectId to string
-#        rulebook['_id'] = str(rulebook['_id'])
-#        
-#        return jsonify(rulebook), 200
-#    except Exception as e:
-#        return jsonify({'error': str(e)}), 500
+@rulebooks_bp.route('/rulebook/<rulebook_id>', methods=['GET'])
+@jwt_required()
+def get_rulebook(rulebook_id):
+    try:
+        # Find rulebook
+        rulebook = rulebooks_collection.find_one({'_id': ObjectId(rulebook_id)})
+        
+        if not rulebook:
+            return jsonify({'error': 'Rulebook not found'}), 404
+            
+        # Convert ObjectId to string
+        rulebook['_id'] = str(rulebook['_id'])
+        
+        return jsonify(rulebook), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @rulebooks_bp.route('/rulebook-chat', methods=['POST'])
 @jwt_required()

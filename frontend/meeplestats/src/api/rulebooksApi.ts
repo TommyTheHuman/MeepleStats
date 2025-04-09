@@ -16,7 +16,7 @@ const getAuthOptions = (): RequestInit => {
   return requestOptions;
 };
 
-// Fetch user's rulebooks
+// Fetch all rulebooks
 export const fetchRulebooks = async (): Promise<RulebookInterface[]> => {
   const requestOptions: RequestInit = {
     method: "GET",
@@ -31,7 +31,6 @@ export const fetchRulebooks = async (): Promise<RulebookInterface[]> => {
 
   return response.json();
 };
-
 
 // Fetch a specific rulebook by ID
 export const fetchRulebookById = async (id: string): Promise<RulebookInterface> => {
@@ -49,27 +48,8 @@ export const fetchRulebookById = async (id: string): Promise<RulebookInterface> 
   return response.json();
 };
 
-// Fetch shared rulebooks (all users)
-export const fetchSharedRulebooks = async (): Promise<RulebookInterface[]> => {
-  const requestOptions: RequestInit = {
-    method: "GET",
-    ...getAuthOptions(),
-  };
-
-  const response = await fetch(`${API_URL}/shared-rulebooks`, requestOptions);
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch shared rulebooks: ${await response.text()}`);
-  }
-
-  return response.json();
-};
-
-
-
-
-// Upload a shared rulebook (always shared with all users)
-export const uploadSharedRulebook = async (
+// Upload a rulebook
+export const uploadRulebook = async (
   file: File,
   gameId: string,
   gameName: string
@@ -95,15 +75,14 @@ export const uploadSharedRulebook = async (
     }
   }
 
-  const response = await fetch(`${API_URL}/upload-shared-rulebook`, requestOptions);
+  const response = await fetch(`${API_URL}/upload-rulebook`, requestOptions);
 
   if (!response.ok) {
-    throw new Error(`Failed to upload shared rulebook: ${await response.text()}`);
+    throw new Error(`Failed to upload rulebook: ${await response.text()}`);
   }
 
   return response.json();
 };
-
 
 // Delete a rulebook
 export const deleteRulebook = async (rulebookId: string): Promise<{ message: string }> => {

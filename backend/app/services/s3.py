@@ -53,3 +53,21 @@ class S3Client:
         except Exception as e:
             print(f"Error deleting file from S3: {str(e)}")
             return False
+            
+    def download(file_name, local_path):
+        """Download a file from S3 to a local path.
+        
+        Args:
+            file_name: The key/name of the file in the S3 bucket
+            local_path: The local path where the file should be saved
+            
+        Returns:
+            True if the file was successfully downloaded, False otherwise
+        """
+        try:
+            client = S3Client.get_client()
+            client.download_file(S3_BUCKET_NAME, file_name, local_path)
+            return True
+        except Exception as e:
+            print(f"Error downloading file from S3: {str(e)}")
+            return False

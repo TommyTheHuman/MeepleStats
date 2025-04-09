@@ -203,8 +203,8 @@ S3_SECRET_KEY=your_s3_secret_key
 S3_BUCKET_NAME=your_s3_bucket_name
 PINECONE_API_KEY=your_pinecone_key
 PINECONE_INDEX_NAME=gamerulebooks
-EMBEDDING_MODEL=embedding_model_name # for example: sentence-transformers/all-mpnet-base-v2
-PINECONE_DIMENSION=768
+EMBEDDING_MODEL=embedding_model_name # for example: BAAI/bge-small-en-v1.5
+PINECONE_DIMENSION=384
 OPENROUTER_API_KEY=your_openrouter_key
 LLM_MODEL=llm_model_name # for example: qwen/qwq-32b:free
 ```
