@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
-import { fetchRulebookById, fetchSharedRulebooks, sendChatQuery } from "../api/rulebooksApi";
+import { fetchRulebookById, fetchRulebooks, sendChatQuery } from "../api/rulebooksApi";
 import { RulebookInterface } from "../model/Interfaces";
 import { API_URL } from "../model/Constants";
 import { Container, Title, Paper, Group, Text, Button, Select, LoadingOverlay, Box, Textarea, Stack, Avatar, Alert, Badge, ScrollArea } from "@mantine/core";
@@ -37,13 +37,13 @@ const RulebookChatPage = () => {
 
   const isLoggedIn = authStatus === "LoggedIn";
 
-  // Fetch personal collection
+  // Fetch rulebooks
   useEffect(() => {
-    const loadPersonalCollection = async () => {
+    const loadRulebooks = async () => {
       setLoading(true);
       try {
-        const data = await fetchSharedRulebooks();
-        console.log('Personal collection loaded:', data);
+        const data = await fetchRulebooks();
+        console.log('Rulebooks loaded:', data);
         setRulebooks(data);
         setError(null);
 
@@ -55,8 +55,7 @@ const RulebookChatPage = () => {
           } catch (err) {
             console.error("Error loading specific rulebook:", err);
 
-            // If the rulebook doesn't exist or isn't in the user's collection,
-            // select the first rulebook in the collection if available
+            // If the rulebook doesn't exist, select the first rulebook in the collection if available
             if (data.length > 0) {
               setSelectedRulebook(data[0]);
               setSelectedRulebookId(data[0]._id);
@@ -81,7 +80,7 @@ const RulebookChatPage = () => {
     };
 
     if (isLoggedIn) {
-      loadPersonalCollection();
+      loadRulebooks();
     }
   }, [isLoggedIn, rulebook_id, navigate]);
 
@@ -233,7 +232,7 @@ const RulebookChatPage = () => {
             </Alert>
           ) : rulebooks.length === 0 ? (
             <Alert title="No Rulebooks Found" color="yellow">
-              You don't have any rulebooks in your personal collection. Add rulebooks to your collection to use the chat feature.
+              There are no rulebooks available. Upload rulebooks to use the chat feature.
             </Alert>
           ) : (
             <Box>
@@ -241,7 +240,7 @@ const RulebookChatPage = () => {
                 <Box style={{ flex: '1' }}>
                   <Select
                     label="Select Rulebook"
-                    placeholder="Choose a rulebook from your collection"
+                    placeholder="Choose a rulebook"
                     data={rulebooks.map(rulebook => ({
                       value: rulebook._id,
                       label: `${rulebook.game_name} - ${rulebook.filename}`
