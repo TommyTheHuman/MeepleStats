@@ -3,7 +3,7 @@ from llama_index.core.node_parser import SentenceSplitter
 from llama_index.llms.openrouter import OpenRouter
 from llama_index.core.llms import ChatMessage
 from pinecone import Pinecone
-from langchain_huggingface import HuggingFaceEmbeddings
+from fastembed import TextEmbedding
 import os
 import hashlib
 from dotenv import load_dotenv
@@ -13,8 +13,8 @@ load_dotenv()
 # configurazione iniziale
 def initialize_embedding_model():
     """Inizializza il modello di embedding."""
-    embedding_model_name = os.getenv("EMBEDDING_MODEL")
-    embedding_model = HuggingFaceEmbeddings(model_name=embedding_model_name) 
+    embedding_model_name = os.getenv("EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
+    embedding_model = TextEmbedding(embedding_model_name)
     print(f"Initialized embedding model: {embedding_model_name}")
     return embedding_model
 
@@ -88,7 +88,9 @@ def process_document_chunk(doc, safe_namespace, i, embedding_model):
         record_id = f"{safe_namespace}_doc_{i}_chunk_{j}_{content_hash[:8]}"
         
         # creo embedding per il testo del chunk
-        embedding = embedding_model.embed_query(node.text)
+        # fastembed ritorna un generatore di embeddings, dobbiamo convertirlo in una lista
+        embeddings = list(embedding_model.embed(node.text))
+        embedding = embeddings[0].tolist()
         
         # aggiungo al record (unità di informazione per pinecone) l'embedding e i metadati (id univoco, embedding, testo del chunk, pagina e nome del pdf)
         records.append({
@@ -210,7 +212,9 @@ def index_single_pdf(file_path, index, embedding_model, unique_file_name):
 def query_index(query, target_namespaces, index, embedding_model, top_k=3):
     """Esegue query su uno o più namespace e restituisce i risultati."""
     print(f"\nQuerying the index with: {query}")
-    query_embedding = embedding_model.embed_query(query)
+    # fastembed ritorna un generatore di embeddings, converto in lista
+    embeddings = list(embedding_model.embed(query))
+    query_embedding = embeddings[0].tolist()
     
     # interrogo ogni namespace
     all_matches = []
@@ -309,23 +313,18 @@ Answer:"""
         resp = llm.chat([message])
         print("LLM Response:\n", resp)
         
-        # Check which attribute contains the response text
+        # prendo il testo della risposta
         if hasattr(resp, 'message'):
             response_text = resp.message
-        elif hasattr(resp, 'text'):
-            response_text = resp.text
-        elif hasattr(resp, 'response'):
-            response_text = resp.response
         elif isinstance(resp, str):
             response_text = resp
         else:
-            # If we can't find the expected attribute, convert the entire response to string
+            # converto l'intera risposta in stringa
             response_text = str(resp)
-            # Extract text after "assistant:" if present in the string
+            # estraggo il testo dopo "assistant:" se presente nella stringa
             if "assistant:" in response_text:
                 response_text = response_text.split("assistant:", 1)[1].strip()
         
-        # Make sure serializable_page_refs only contains simple data types
         serializable_page_refs = []
         for ref in page_refs:
             serializable_page_refs.append({
