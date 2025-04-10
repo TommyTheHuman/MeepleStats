@@ -1,7 +1,7 @@
 import { AppShell, Group, Burger, Text, Avatar, Container, NavLink, Button, Divider, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useContext } from "react";
-import { Link, Outlet, useNavigate } from "react-router";
+import { Link, Outlet } from "react-router";
 import { AuthContext } from "./AuthContext";
 import { API_URL, Constants, JWT_STORAGE } from "../model/Constants";
 
