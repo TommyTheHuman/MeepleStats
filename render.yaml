@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: meeple-stats-backend
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && gunicorn run:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
