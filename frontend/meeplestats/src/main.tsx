@@ -5,7 +5,7 @@ import '@mantine/notifications/styles.css';
 import '@mantine/dates/styles.css';
 import "./globals.css";
 import IndexPage from "./pages/IndexPage.tsx";
-import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
+import { createBrowserRouter, RouterProvider } from "react-router";
 import { createTheme, MantineProvider } from "@mantine/core";
 import LoginPage from "./pages/LoginPage.tsx";
 import Layout from "./components/Layout.tsx";
