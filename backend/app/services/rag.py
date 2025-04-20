@@ -3,27 +3,105 @@ from llama_index.core.node_parser import SentenceSplitter
 from llama_index.llms.openrouter import OpenRouter
 from llama_index.core.llms import ChatMessage
 from pinecone import Pinecone
-from fastembed import TextEmbedding
 import os
 import hashlib
 from dotenv import load_dotenv
+from abc import ABC, abstractmethod
 
 load_dotenv()
 
+
+# Abstract Embedding Provider
+class EmbeddingProvider(ABC):
+    @abstractmethod
+    def embed(self, text):
+        """Embed text into a vector representation"""
+        pass
+    
+    @abstractmethod
+    def get_dimension(self):
+        """Return the dimension of the embedding vector"""
+        pass
+
+# Local Embedding Provider using fastembed
+class LocalEmbeddingProvider(EmbeddingProvider):
+    def __init__(self, model_name="BAAI/bge-small-en-v1.5"):
+        try:
+            from fastembed import TextEmbedding
+            self.model_name = model_name
+            self.model = TextEmbedding(model_name)
+            print(f"Initialized local embedding model: {model_name}")
+        except ImportError:
+            raise ImportError("Please install fastembed package to use local embeddings")
+    
+    def embed(self, text):
+        embeddings = list(self.model.embed(text))
+        return embeddings[0].tolist()
+    
+    def get_dimension(self):
+        # For BAAI/bge-small-en-v1.5 it's 384
+        return int(os.getenv("PINECONE_DIMENSION", "384"))
+
+# Gemini Embedding Provider
+class GeminiEmbeddingProvider(EmbeddingProvider):
+    def __init__(self, api_key):
+        try:
+            import google.generativeai as genai
+            self.genai = genai  # Store the module reference
+            self.api_key = api_key
+            genai.configure(api_key=api_key)
+            print("Initialized Gemini embedding model")
+        except ImportError:
+            raise ImportError("Please install google-generativeai package to use Gemini embeddings")
+    
+    def embed(self, text):
+        # Use the correct embedding method from the genai module
+        embedding_result = self.genai.embed_content(
+            model="models/embedding-001",
+            content=text,
+            task_type="retrieval_document"
+        )
+        # Access the embedding from the result dictionary
+        return embedding_result['embedding']
+    
+    def get_dimension(self):
+        # Gemini embeddings are typically 768-dimensional
+        return 768
+
+# Factory function to create the appropriate embedding provider
+def create_embedding_provider():
+    embedding_type = os.getenv("EMBEDDING_TYPE", "local").lower()
+    
+    if embedding_type == "local":
+        embedding_model_name = os.getenv("EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
+        return LocalEmbeddingProvider(model_name=embedding_model_name)
+    elif embedding_type == "gemini":
+        gemini_api_key = os.getenv("GEMINI_API_KEY")
+        if not gemini_api_key:
+            raise ValueError("GEMINI_API_KEY is required when EMBEDDING_TYPE is set to 'gemini'")
+        return GeminiEmbeddingProvider(api_key=gemini_api_key)
+    else:
+        raise ValueError(f"Unknown EMBEDDING_TYPE: {embedding_type}. Use 'local' or 'gemini'")
+
+
+
 # configurazione iniziale
-def initialize_embedding_model():
-    """Inizializza il modello di embedding."""
-    embedding_model_name = os.getenv("EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
-    embedding_model = TextEmbedding(embedding_model_name)
-    print(f"Initialized embedding model: {embedding_model_name}")
-    return embedding_model
+def initialize_embedding_provider():
+    #"""Inizializza il modello di embedding."""
+    #embedding_model_name = os.getenv("EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
+    #embedding_model = TextEmbedding(embedding_model_name)
+    #print(f"Initialized embedding model: {embedding_model_name}")
+    #return embedding_model
+    return create_embedding_provider()
 
 def initialize_pinecone():
     """Inizializza la connessione a Pinecone e crea/connette all'indice."""
     pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
     
     index_name = os.getenv("PINECONE_INDEX_NAME")
-    dimension = int(os.getenv("PINECONE_DIMENSION"))
+    #dimension = int(os.getenv("PINECONE_DIMENSION"))
+    embedding_provider = initialize_embedding_provider()
+    dimension = embedding_provider.get_dimension()
     
     if not pc.has_index(index_name):
         pc.create_index(
@@ -37,7 +115,7 @@ def initialize_pinecone():
     index = pc.Index(index_name)
     print(f"Connected to index '{index_name}'")
     
-    return index
+    return index, embedding_provider
 
 def get_namespaces(index):
     """Ottiene la lista dei namespace disponibili."""
@@ -70,7 +148,7 @@ def load_document(file_path):
 #    print(f"Loaded {len(documents)} documents for indexing")
 #    return documents
 
-def process_document_chunk(doc, safe_namespace, i, embedding_model):
+def process_document_chunk(doc, safe_namespace, i, embedding_provider):
     """Elabora un singolo documento (pagina del pdf) in chunks e crea i record per Pinecone."""
     records = []
     page_number = doc.metadata.get('page_label', 'unknown')
@@ -89,9 +167,11 @@ def process_document_chunk(doc, safe_namespace, i, embedding_model):
         
         # creo embedding per il testo del chunk
         # fastembed ritorna un generatore di embeddings, dobbiamo convertirlo in una lista
-        embeddings = list(embedding_model.embed(node.text))
-        embedding = embeddings[0].tolist()
-        
+        #embeddings = list(embedding_model.embed(node.text))
+        #embedding = embeddings[0].tolist()
+        embedding = embedding_provider.embed(node.text)
+
+
         # aggiungo al record (unità di informazione per pinecone) l'embedding e i metadati (id univoco, embedding, testo del chunk, pagina e nome del pdf)
         records.append({
             "id": record_id,
@@ -117,7 +197,7 @@ def upsert_records_in_batches(index, records, namespace, batch_size=100):
         index.upsert(vectors=batch, namespace=namespace)
         print(f"Upserted batch {i//batch_size + 1}/{(len(records)-1)//batch_size + 1}")
 
-def index_single_pdf(file_path, index, embedding_model, unique_file_name):
+def index_single_pdf(file_path, index, embedding_provider, unique_file_name):
     """Indicizza un singolo file PDF in un namespace specifico.
     
     Returns:
@@ -144,7 +224,7 @@ def index_single_pdf(file_path, index, embedding_model, unique_file_name):
     # elaboro i docs per questo namespace (corrispondono alle pagine del pdf)
     all_records = []
     for i, doc in enumerate(documents):
-        records = process_document_chunk(doc, safe_namespace, i, embedding_model)
+        records = process_document_chunk(doc, safe_namespace, i, embedding_provider)
         all_records.extend(records)
     
     # inserisco i vettori in pinecone in batch
@@ -209,12 +289,13 @@ def index_single_pdf(file_path, index, embedding_model, unique_file_name):
 #    
 #    return indexed_count > 0
 
-def query_index(query, target_namespaces, index, embedding_model, top_k=3):
+def query_index(query, target_namespaces, index, embedding_provider, top_k=3):
     """Esegue query su uno o più namespace e restituisce i risultati."""
     print(f"\nQuerying the index with: {query}")
     # fastembed ritorna un generatore di embeddings, converto in lista
-    embeddings = list(embedding_model.embed(query))
-    query_embedding = embeddings[0].tolist()
+    #embeddings = list(embedding_model.embed(query))
+    #query_embedding = embeddings[0].tolist()
+    query_embedding = embedding_provider.embed(query)
     
     # interrogo ogni namespace
     all_matches = []

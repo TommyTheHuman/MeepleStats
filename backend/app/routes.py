@@ -16,11 +16,13 @@ from .services.achievements_management import check_update_achievements
 from .services.achievements_setup import create_achievements
 
 from .services.s3 import S3Client
-from .services.rag import query_llm, query_index, display_search_results, initialize_embedding_model, initialize_pinecone, create_safe_namespace, index_single_pdf, clear_namespace
+from .services.rag import query_llm, query_index, display_search_results, initialize_pinecone, create_safe_namespace, index_single_pdf, clear_namespace
 
 
-embedding_model = initialize_embedding_model()
-index = initialize_pinecone()
+#embedding_model = initialize_embedding_model()
+#index = initialize_pinecone()
+
+index, embedding_provider = initialize_pinecone()
 
 STORAGE_TYPE = os.getenv('STORAGE_TYPE')#'local'#'s3'
 
@@ -1471,7 +1473,7 @@ def upload_rulebook():
             # Download from S3 to temp file
             S3Client.download(unique_filename, temp_file_path)
             
-            index_single_pdf(file.filename, index, embedding_model, temp_file_path)
+            index_single_pdf(file.filename, index, embedding_provider, temp_file_path)
 
             # Clean up
             os.remove(temp_file_path)
@@ -1480,7 +1482,7 @@ def upload_rulebook():
             file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename)
             file.save(file_path)
             file_url = f"/uploads/{unique_filename}"
-            index_single_pdf(file.filename, index, embedding_model, file_path)
+            index_single_pdf(file.filename, index, embedding_provider, file_path)
             
         # Save rulebook info to database
         rulebook_data = {
@@ -1590,7 +1592,7 @@ def rulebook_chat():
         #index = initialize_pinecone()
         
         # Query Pinecone
-        top_matches = query_index(query, [namespace], index, embedding_model)
+        top_matches = query_index(query, [namespace], index, embedding_provider)
         
         # No matches found
         if not top_matches:
