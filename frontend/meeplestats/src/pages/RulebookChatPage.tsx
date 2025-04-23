@@ -8,8 +8,8 @@ import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconSend, IconRobot, IconUser, IconBook, IconFile } from "@tabler/icons-react";
 import { useContext } from "react";
 import { AuthContext } from "../components/AuthContext";
-//import ReactMarkdown from 'react-markdown';
-//import remarkGfm from 'remark-gfm';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 
 interface Message {
@@ -311,7 +311,16 @@ const RulebookChatPage = () => {
                                   {msg.isLoading ? (
                                     <Text size="sm">Thinking...</Text>
                                   ) : (
-                                    <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</Text>
+                                    msg.sender === "bot" ? (
+                                      <ReactMarkdown
+                                        remarkPlugins={[remarkGfm]}
+
+                                      >
+                                        {msg.content}
+                                      </ReactMarkdown>
+                                    ) : (
+                                      <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</Text>
+                                    )
                                   )}
                                 </Paper>
 

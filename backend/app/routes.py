@@ -1468,7 +1468,9 @@ def upload_rulebook():
             # Save file to S3
             S3Client.put(file, unique_filename, content_type='application/pdf')
             file_url = S3Client.get_url_from_filename(unique_filename)
-            temp_file_path = os.path.join('/tmp', unique_filename)
+            import tempfile
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
+                temp_file_path = temp_file.name
                 
             # Download from S3 to temp file
             S3Client.download(unique_filename, temp_file_path)
