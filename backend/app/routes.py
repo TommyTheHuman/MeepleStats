@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import traceback
 from dotenv import find_dotenv, load_dotenv
 from flask import Blueprint, jsonify, render_template, request, send_from_directory
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, decode_token
@@ -167,7 +168,7 @@ def update_games():
 
     if game_id:
         # Update the game in the database
-        res = games_collection.update_one({'bgg_id': game_id}, {'$set': {'isGifted': isGifted, 'price': game_price}})
+        res = games_collection.update_one({'bgg_id': game_id}, {'$set': {'isGifted': isGifted, 'price': float(game_price)}})
         if res.modified_count:
             return jsonify({'message': 'Game updated successfully'}), 200
         else:
@@ -321,7 +322,11 @@ def log_match():
         player_data['matches'].append({
             'match_id': str(match_id),
             'game_id': game_id,
-            'is_winner': (player['id'] == winner['id']) or (player['team'] == winning_team),
+            'is_winner': (
+                (game['is_cooperative'] and isWin) or  # Always True if coop and isWin
+                (not game['is_cooperative'] and player['id'] == winner['id']) or  # Competitive game, check player ID
+                (isTeamMatch and winning_team is not None and player['team'] == winning_team)  # Team match, check team
+            ),
             'score': player['score'],
             'date': date,
         })
@@ -515,17 +520,53 @@ def totHours():
 
     try:
         # Find matches in the date range
-        matches = matches_collection.find({
-            'date': {
-                '$gte': start_date,
-                '$lte': end_date
+        pipeline = [
+            {
+                '$addFields': {
+                    'date_obj': {
+                        '$dateFromString': {
+                            'dateString': '$date',
+                            'format': '%Y-%m-%d'
+                        }
+                    }
+                }
+            },
+            {
+                '$match': {
+                    'date_obj': {
+                        '$gte': start_date,
+                        '$lte': end_date
+                    }
+                }
+            },
+            {
+                '$group': {
+                    '_id': None,
+                    'total_hours': {
+                        '$sum': {
+                            '$toInt': '$game_duration'  # Convert string to integer before summing
+                        }
+                    }
+                }
+            },
+            {
+                '$project': {
+                    '_id': 0,
+                    'total_hours': {  # Divide total minutes by 60 to get hours
+                        '$divide': ['$total_hours', 60]
+                    }
+                }
             }
-        })
-        
-        total_hours = 0
+        ]
 
-        for match in matches:
-            total_hours += match['game_duration']
+        result = list(matches_collection.aggregate(pipeline))
+
+
+        if result:
+            total_hours = round(result[0]['total_hours'], 2)
+        else:
+            total_hours = 0
+
 
         return jsonify({
             "type": "number",
@@ -562,17 +603,33 @@ def totMatches():
         
         try:
             # Find matches in the date range
-            matches = matches_collection.find({
-                'date': {
-                    '$gte': start_date,
-                    '$lte': end_date
+
+            pipeline = [
+                {
+                    '$addFields': {
+                        'date_obj': {
+                            '$dateFromString': {
+                                'dateString': '$date',
+                                'format': '%Y-%m-%d'
+                            }
+                        }
+                    }
+                },
+                {
+                    '$match': {
+                        'date_obj': {
+                            '$gte': start_date,
+                            '$lte': end_date
+                        }
+                    }
                 }
-            })
+            ]
+
+            #result = list(matches_collection.aggregate(pipeline))
             
-            total_matches = 0
+            total_matches = len(list(matches_collection.aggregate(pipeline)))
     
-            for match in matches:
-                total_matches += 1
+            
     
             return jsonify({
                 "type": "number",
@@ -643,11 +700,27 @@ def playerWins():
                             "input": "$matches",
                             "as": "match",
                             "cond": {
-                                "$and": [
-                                    {"$eq": ["$$match.is_winner", True]},
-                                    {"$gte": ["$$match.match_date", start_date]},
-                                    {"$lte": ["$$match.match_date", end_date]}
-                                ]
+                                "$let": {
+                                    "vars": {
+                                        # Convert the string date to a date object
+                                        "match_date_obj": {
+                                            "$dateFromString": {
+                                                "dateString": "$$match.date", # Use the correct field name ('date')
+                                                "format": "%Y-%m-%d",
+                                                "onError": None, # Return null if conversion fails
+                                                "onNull": None   # Return null if date string is null
+                                            }
+                                        }
+                                    },
+                                    "in": {
+                                        "$and": [
+                                            {"$ne": ["$$match_date_obj", None]}, # Ensure conversion was successful
+                                            {"$eq": ["$$match.is_winner", True]},
+                                            {"$gte": ["$$match_date_obj", start_date]}, # Compare date objects
+                                            {"$lte": ["$$match_date_obj", end_date]}   # Compare date objects
+                                        ]
+                                    }
+                                }
                             }
                         }
                     }
@@ -745,10 +818,25 @@ def playerWinRate():
                             "input": "$matches",
                             "as": "match",
                             "cond": {
-                                "$and": [
-                                    {"$gte": ["$$match.match_date", start_date]},
-                                    {"$lte": ["$$match.match_date", end_date]}
-                                ]
+                                "$let": {  # Use $let to define a temporary variable
+                                    "vars": {
+                                        "match_date_obj": {
+                                            "$dateFromString": {
+                                                "dateString": "$$match.date", # Convert the date string
+                                                "format": "%Y-%m-%d",
+                                                "onError": None,
+                                                "onNull": None
+                                            }
+                                        }
+                                    },
+                                    "in": {
+                                        "$and": [
+                                            {"$ne": ["$$match_date_obj", None]}, # Ensure conversion was successful
+                                            {"$gte": ["$$match_date_obj", start_date]}, # Compare date objects
+                                            {"$lte": ["$$match_date_obj", end_date]}   # Compare date objects
+                                        ]
+                                    }
+                                }
                             }
                         }
                     }
@@ -782,7 +870,7 @@ def playerWinRate():
             }
         ]
 
-        result = players_collection.aggregate(pipeline)
+        result = list(players_collection.aggregate(pipeline))
 
         if result:
             winrate = result[0]["winrate"]
@@ -857,22 +945,40 @@ def playerHighestWinRate():
         {
             "$unwind": "$matches"
         },
-        # 2. Filter matches by month and year
+        # 2. Add a field for the converted date object
+        {
+            "$addFields": {
+                "matches.match_date_obj": {
+                    "$dateFromString": {
+                        "dateString": "$matches.date", # Convert the string date field
+                        "format": "%Y-%m-%d",
+                        "onError": None, # Handle conversion errors
+                        "onNull": None   # Handle null dates
+                    }
+                }
+            }
+        },
+        # 3. Filter matches by month and year
         {
             "$match": {
+                # Ensure the date conversion was successful
+                "matches.match_date_obj": {"$ne": None},
+                # Apply year and month filters using $expr
                 "$expr": {
                     "$and": [
-                        {"$eq": [{"$year": "$matches.match_date"}, year]},
+                        # Compare the year of the converted date object
+                        {"$eq": [{"$year": "$matches.match_date_obj"}, year]},
+                        # Conditionally compare the month if 'month' is provided
                         {"$cond": {
                             "if": {"$ne": [month, None]},
-                                "then": {"$eq": [{"$month": "$matches.match_date"}, month]},
-                            "else": True
+                            "then": {"$eq": [{"$month": "$matches.match_date_obj"}, month]},
+                            "else": True # If month is None, this condition is always true
                         }}
                     ]
                 }
             }
         },
-        # 3. Group by username
+        # 4. Group by username
         {
             "$group": {
                 "_id": "$username",
@@ -880,7 +986,7 @@ def playerHighestWinRate():
                 "total_wins": {"$sum": {"$cond": [{"$eq": ["$matches.is_winner", True]}, 1, 0]}}
             }
         },
-        # 4. Calculate the winrate
+        # 5. Calculate the winrate
         {
             "$project": {
                 "username": "$_id",
@@ -895,13 +1001,13 @@ def playerHighestWinRate():
                 }
             }
         },
-        # 5. Sort by winrate in descending order
+        # 6. Sort by winrate in descending order
         {
             "$sort": {
                 "winrate": -1
             }
         },
-        # 6. Limit to the first result
+        # 7. Limit to the first result
         {
             "$limit": 1
         }
@@ -1207,7 +1313,7 @@ def gameAvgDuration():
             {
                 "$group": {
                     "_id": "$bgg_id",
-                    "average_duration": {"$avg": "$matches.game_duration"}
+                    "average_duration": {"$avg": {"$toInt": "$matches.game_duration"}}
                 }
             },
             # 3. Sort by average_duration in descending order
@@ -1280,6 +1386,12 @@ def gameBestValue():
 
     pipeline = [
         {
+            '$match': { # Filter out documents where price is null or doesn't exist
+                'price': {'$ne': None, '$exists': True},
+                'isGifted': {'$ne': True} # Exclude gifted games
+            }
+        },
+        {
             '$unwind': '$matches'
         },
         {
@@ -1287,7 +1399,13 @@ def gameBestValue():
                 '_id': '$bgg_id',
                 'name': {'$first': '$name'},
                 'price': {'$first': '$price'},
-                'total_hours_played': {'$sum': '$matches.game_duration'}
+                'total_minutes_played': {'$sum': {"$toInt":'$matches.game_duration'}}
+            }
+        },
+        {
+            '$addFields': {
+                 # Calculate total hours played
+                'total_hours_played': {'$divide': ['$total_minutes_played', 60]}
             }
         },
         {
@@ -1296,10 +1414,15 @@ def gameBestValue():
                 'price': 1,
                 'price_per_hour': {'$cond': [
                     {'$gt': ['$total_hours_played', 0]}, 
-                    {'$divide': ['$price', '$total_hours_played']},
-                    0
+                    {'$round': [{'$divide': ['$price', '$total_hours_played']}, 2]},
+                    None
                 ]}
             }
+        },
+        {
+           '$match': { # Filter out results where price_per_hour couldn't be calculated (e.g., 0 hours)
+               'price_per_hour': {'$ne': None}
+           }
         },
         {
             '$sort': {'price_per_hour': 1}
