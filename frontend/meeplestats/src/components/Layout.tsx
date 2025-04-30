@@ -206,6 +206,20 @@ export default function Layout() {
                 onClick={closeMobile}
                 className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
               />
+              <NavLink
+                component={Link}
+                to="/create-scoresheet"
+                label="Create Score Sheet"
+                onClick={closeMobile}
+                className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
+              />
+              <NavLink
+                component={Link}
+                to="/scoreSheet"
+                label="Score Sheet"
+                onClick={closeMobile}
+                className="!transition-colors !rounded-md !mb-1 hover:!bg-gray-100"
+              />
 
               <Divider className="!my-4" />
 

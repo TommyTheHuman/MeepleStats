@@ -86,3 +86,18 @@ export interface RulebookChatResponse {
   }>;
   error?: string;
 }
+export interface ScoreSheetDataInterface {
+  game_id: string;
+  game_name: string;
+  game_description: string;
+  fields: Array<{
+    label: string;
+    type: string;
+    weight: number;
+    rule: string;
+  }>;
+  calculation: {
+    type: string;
+    formula: null | string;
+  };
+}

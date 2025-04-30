@@ -37,10 +37,12 @@ def create_app():
         from .routes import statistic_bp as statistic_blueprint
         from .routes import utility_bp as utility_blueprint
         from .routes import rulebooks_bp as rulebooks_blueprint
+        from .routes import scoresheets_bp as scoresheets_blueprint
         app.register_blueprint(auth_blueprint)
         app.register_blueprint(data_blueprint)
         app.register_blueprint(statistic_blueprint)
         app.register_blueprint(utility_blueprint)
         app.register_blueprint(rulebooks_blueprint)
+        app.register_blueprint(scoresheets_blueprint)
 
     return app

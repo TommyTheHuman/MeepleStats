@@ -23,6 +23,8 @@ import MatchUtilityPage from "./pages/MatchUtilityPage.tsx";
 import RulebooksPage from "./pages/RulebooksPage.tsx";
 import RulebookChatPage from "./pages/RulebookChatPage.tsx";
 import NotFoundPage from "./pages/NotFoundPage.tsx";
+import ScoreSheetCreator from "./pages/ScoreSheetCreator.tsx";
+import ScoreSheet from "./pages/ScoreSheet.tsx";
 
 const theme = createTheme({
   fontFamily: '"Host Grotesk", sans-serif',
@@ -114,6 +116,15 @@ const router = createBrowserRouter([
             <RulebookChatPage />
           </ProtectedRoute>
         ),
+      },
+      {
+        path: "/create-scoresheet",
+        element: <ScoreSheetCreator />,
+      },
+      {
+        path: "/scoreSheet",
+        element: <ScoreSheet />
+
       },
       {
         path: "*",
