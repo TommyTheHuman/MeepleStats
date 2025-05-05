@@ -7,13 +7,15 @@
 ## 📜 Table of Contents
 
 - [✨ Features](#-features)
-- [⚙️ Installation](#-installation)
+- [⚙️ Installation](#️-installation)
   - [📌 Prerequisites](#-prerequisites)
   - [🚀 Backend Setup](#-backend-setup)
   - [🎨 Frontend Setup](#-frontend-setup)
   - [▲ Vercel Setup](#-vercel-installation)
   - [🐳 Docker Deployment](#-docker-deployment-pre-built-images)
-- [🛠️ Usage](#-usage)
+- [🛠️ Usage](#️-usage)
+- [📚 Rulebook Chat (RAG System)](#-rulebook-chat-rag-system)
+- [🧮 Score Sheet System](#-score-sheet-system)
 - [🔗 API Endpoints](#-api-endpoints)
 - [🌍 Environment Variables](#-environment-variables)
 - [🤝 Contributing](#-contributing)
@@ -33,6 +35,8 @@
 - Local or Remote image storage
 - Achievement system
 - Explore match history
+- Chat to ask questions about game rules
+- Configurable score sheets
 
 ---
 
@@ -136,8 +140,20 @@ The project now includes a GitHub Actions workflow that builds and publishes Doc
 
 Open your browser and navigate to the provided URL to access the frontend.
 Use the provided API endpoints to interact with the backend.
-Decide where to store the `JWT Token`: you can use either cookies or your browser's local storage. Make sure to set up the [Environment Variables](#-environment-variables) correclty.
+Decide where to store the `JWT Token`: you can use either cookies or your browser's local storage. Make sure to set up the [Environment Variables](#-environment-variables) correctly.
 Additionally, you can choose where to store images from your game nights. You can either save them locally or use Amazon Simple Storage Service (S3). In either case, ensure that the relevant variables are configured correctly.
+
+---
+
+## 📚 Rulebook Chat (RAG System)
+The Rulebook Chat feature lets you upload board game rulebooks as PDFs and then ask questions about game rules without manually searching through pages. Simply upload a rulebook for your game, then ask questions like "How do I set up the game?" or "What happens when two players tie?" The system will find the relevant sections in the rulebook and provide specific answers with page references, making it easy to resolve rule questions during gameplay.
+
+---
+
+## 🧮 Score Sheet System
+The Score Sheet Creator helps you track complex game scoring without pen and paper. Create custom score sheets for games by defining scoring categories with different types (numbers or text) and rules. During gameplay, anyone can access the Score Sheet page, select a game, add players, and track scores in real-time. The system automatically calculates totals and displays scoring rules when needed. This feature is perfect for games with multiple scoring categories, helping you focus on the fun rather than the math.
+
+If you want to contribute, you can submit with a PR new configs to create a score sheets database.
 
 ---
 
@@ -207,6 +223,8 @@ EMBEDDING_MODEL=embedding_model_name # for example: BAAI/bge-small-en-v1.5
 PINECONE_DIMENSION=384
 OPENROUTER_API_KEY=your_openrouter_key
 LLM_MODEL=llm_model_name # for example: qwen/qwq-32b:free
+EMBEDDING_TYPE='gemini' or 'local'
+GEMINI_API_KEY=your_gemini_key
 ```
 
 ### Frontend Environment Variables
@@ -229,7 +247,7 @@ Want to improve MeepleStats? Contributions are welcome! Feel free to open an iss
 
 - [x] Improve UI/UX
 - [ ] Support to Dark Mode
-- [ ] Show images for open matches
+- [x] Show images for open matches
 - [x] Implement team-based game tracking
 - [x] Add achievements system
 - [ ] Introduce multilingual support
