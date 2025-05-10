@@ -39,11 +39,15 @@ export interface MatchCardInterface {
   game_name: string;
   date: string;
   game_duration: string;
-  players: { id: string, name: string, score: string }[];
-  winner: { id: string, name: string, score: string };
+  players: { id: string, name: string, score: string, team?: string }[];
+  winner: { id: string, name: string, score: string, team?: string } | { id: string, name: string, score: string, team: string }[];
   game_image: string;
   notes: string;
   image_url: string;
+  is_cooperative: boolean;
+  is_team_match: boolean;
+  winning_team: string;
+  use_manual_winner?: boolean;
 }
 
 

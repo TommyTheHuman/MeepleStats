@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Game } from "../model/Interfaces";
 import { API_URL, JWT_STORAGE } from "../model/Constants";
-import { ActionIcon, Box, Button, Container, Divider, Grid, Group, LoadingOverlay, Paper, Select, TextInput, Title } from "@mantine/core";
+import { ActionIcon, Box, Button, Container, Divider, Grid, Group, LoadingOverlay, Paper, ScrollArea, Select, Stack, TextInput, Title } from "@mantine/core";
 import { IconPlus, IconTrash, IconDownload } from "@tabler/icons-react";
 import { showNotification } from "@mantine/notifications";
+import { useMediaQuery } from "@mantine/hooks";
 
 const ScoreSheetCreator = () => {
-
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -139,15 +140,15 @@ const ScoreSheetCreator = () => {
   }
 
   return (
-    <Container size="xl" py="xl">
-      <Title order={1} className="!mb-8 !text-gray-800 !text-2xl !font-bold">
+    <Container size="xl" py="md" px={isMobile ? "xs" : "md"}>
+      <Title order={1} className="!mb-6 !text-gray-800 !text-2xl !font-bold">
         Score Sheet Creator
       </Title>
 
-      <Grid gutter="md">
-        {/* Form Column */}
-        <Grid.Col span={{ base: 12, md: 6 }}>
-          <Paper p="md" radius="md" className="!bg-white !shadow-sm !mb-4">
+      <Grid gutter={isMobile ? "xs" : "md"}>
+        {/* Form Column - Full width on mobile, half width on desktop */}
+        <Grid.Col span={isMobile ? 12 : 6}>
+          <Paper p={isMobile ? "sm" : "md"} radius="md" className="!bg-white !shadow-sm !mb-4">
             <Box pos="relative">
               <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: "md", blur: 2 }} />
 
@@ -188,7 +189,7 @@ const ScoreSheetCreator = () => {
             </Box>
           </Paper>
 
-          <Paper p="md" radius="md" className="!bg-white !shadow-sm">
+          <Paper p={isMobile ? "sm" : "md"} radius="md" className="!bg-white !shadow-sm !mb-4">
             <Box pos="relative">
               <Title order={3} className="!mb-4 !text-gray-800 !text-lg !font-semibold">
                 Score Fields
@@ -215,49 +216,54 @@ const ScoreSheetCreator = () => {
                   {fields.map((field, index) => (
                     <Paper
                       key={index}
-                      p="sm"
+                      p={isMobile ? "xs" : "sm"}
                       mb="sm"
                       radius="md"
                       className="!bg-gray-50 !border !border-gray-100"
                     >
-                      <Group align="flex-end" wrap="nowrap" gap="md">
+                      {/* Use the same Stack layout for both mobile and desktop */}
+                      <Stack gap={isMobile ? "xs" : "sm"}>
                         <TextInput
                           label="Field Label"
                           value={field.label}
                           onChange={(e) => updateField(index, "label", e.target.value)}
                           placeholder="e.g., Victory Points"
-                          className="!flex-grow"
                           styles={{
                             input: { borderRadius: "0.75rem" },
                             label: { fontWeight: 500, fontSize: "0.875rem" }
                           }}
                         />
 
-                        <Select
-                          label="Type"
-                          value={field.type}
-                          onChange={(value) => updateField(index, "type", value || "number")}
-                          data={[
-                            { value: "number", label: "Number" },
-                            { value: "text", label: "Text" }
-                          ]}
-                          styles={{
-                            input: { borderRadius: "0.75rem" },
-                            label: { fontWeight: 500, fontSize: "0.875rem" }
-                          }}
-                        />
-
-                        <TextInput
-                          label="Weight"
-                          type="number"
-                          value={field.weight.toString()}
-                          onChange={(e) => updateField(index, "weight", parseFloat(e.target.value) || 0)}
-                          placeholder="1"
-                          styles={{
-                            input: { borderRadius: "0.75rem", width: "80px" },
-                            label: { fontWeight: 500, fontSize: "0.875rem" }
-                          }}
-                        />
+                        <Grid>
+                          <Grid.Col span={isMobile ? 6 : 6}>
+                            <Select
+                              label="Type"
+                              value={field.type}
+                              onChange={(value) => updateField(index, "type", value || "number")}
+                              data={[
+                                { value: "number", label: "Number" },
+                                { value: "text", label: "Text" }
+                              ]}
+                              styles={{
+                                input: { borderRadius: "0.75rem" },
+                                label: { fontWeight: 500, fontSize: "0.875rem" }
+                              }}
+                            />
+                          </Grid.Col>
+                          <Grid.Col span={isMobile ? 6 : 6}>
+                            <TextInput
+                              label="Weight"
+                              type="number"
+                              value={field.weight.toString()}
+                              onChange={(e) => updateField(index, "weight", parseFloat(e.target.value) || 0)}
+                              placeholder="1"
+                              styles={{
+                                input: { borderRadius: "0.75rem" },
+                                label: { fontWeight: 500, fontSize: "0.875rem" }
+                              }}
+                            />
+                          </Grid.Col>
+                        </Grid>
 
                         <TextInput
                           label="Rule"
@@ -270,65 +276,68 @@ const ScoreSheetCreator = () => {
                           }}
                         />
 
-                        <ActionIcon
-                          color="red"
-                          onClick={() => removeField(index)}
-                          variant="subtle"
-                          size="lg"
-                          radius="md"
-                          className="!mb-1"
-                        >
-                          <IconTrash size={18} />
-                        </ActionIcon>
-                      </Group>
+                        <Group justify="flex-end">
+                          <ActionIcon
+                            color="red"
+                            onClick={() => removeField(index)}
+                            variant={isMobile ? "filled" : "subtle"}
+                            size={isMobile ? "md" : "lg"}
+                            radius="md"
+                          >
+                            <IconTrash size={isMobile ? 16 : 18} />
+                          </ActionIcon>
+                        </Group>
+                      </Stack>
                     </Paper>
                   ))}
                 </Box>
               )}
 
               {fields.length > 0 && (
-                <>
+                <Group grow>
                   <Button
                     onClick={downloadJSON}
                     className="!bg-green-600 hover:!bg-green-700 !transition-colors"
                     radius="md"
                     leftSection={<IconDownload size={16} />}
-                    fullWidth
+                    size={isMobile ? "sm" : "md"}
                   >
-                    Download Score Sheet
+                    Download
                   </Button>
                   <Button
                     onClick={handleUpload}
-                    className="!bg-blue-600 hover:!bg-blue-700 !transition-colors !mt-2"
+                    className="!bg-blue-600 hover:!bg-blue-700 !transition-colors"
                     radius="md"
                     leftSection={<IconPlus size={16} />}
-                    fullWidth
+                    size={isMobile ? "sm" : "md"}
                   >
-                    Upload to MeepleStats
+                    Upload
                   </Button>
-                </>
+                </Group>
               )}
             </Box>
           </Paper>
         </Grid.Col>
 
-        {/* Preview Column */}
-        <Grid.Col span={{ base: 12, md: 6 }}>
-          <Paper p="md" radius="md" className="!bg-white !shadow-sm">
+        {/* Preview Column - Full width on mobile, half width on desktop */}
+        <Grid.Col span={isMobile ? 12 : 6}>
+          <Paper p={isMobile ? "sm" : "md"} radius="md" className="!bg-white !shadow-sm" style={!isMobile ? { position: "sticky", top: "1rem" } : {}}>
             <Title order={3} className="!mb-4 !text-gray-800 !text-lg !font-semibold">
               JSON Preview
             </Title>
 
-            <Paper
-              p="md"
-              radius="md"
-              className="!bg-gray-50 !border !border-gray-100 !overflow-auto"
-              style={{ maxHeight: '500px', fontFamily: 'monospace' }}
-            >
-              <pre className="!text-sm !text-gray-700 !whitespace-pre-wrap">
-                {JSON.stringify(generateJSON(), null, 2)}
-              </pre>
-            </Paper>
+            <ScrollArea h={isMobile ? 300 : 600} scrollbarSize={6}>
+              <Paper
+                p={isMobile ? "xs" : "md"}
+                radius="md"
+                className="!bg-gray-50 !border !border-gray-100 !overflow-auto"
+                style={{ fontFamily: 'monospace' }}
+              >
+                <pre className="!text-xs md:!text-sm !text-gray-700 !whitespace-pre-wrap">
+                  {JSON.stringify(generateJSON(), null, 2)}
+                </pre>
+              </Paper>
+            </ScrollArea>
           </Paper>
         </Grid.Col>
       </Grid>

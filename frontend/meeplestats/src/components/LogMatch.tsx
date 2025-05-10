@@ -36,6 +36,8 @@ const LogMatch = () => {
       isWin: false,
       isTeamMatch: false,
       winningTeam: "",
+      useManualWinner: false,
+      manualWinner: "",
     },
   });
 
@@ -176,6 +178,8 @@ const LogMatch = () => {
     data.append("isWin", values.isWin.toString());
     data.append("isTeamMatch", values.isTeamMatch.toString());
     data.append("winningTeam", values.winningTeam);
+
+    data.append("useManualWinner", values.useManualWinner.toString());
 
     if (Array.isArray(values.players)) {
       values.players.forEach((player, index) => {
@@ -391,20 +395,47 @@ const LogMatch = () => {
               {!form.values.isCooperative && !form.values.isTeamMatch && form.values.players.length > 0 && (
                 <Box className="!mt-6">
                   <Divider label="Player Scores" labelPosition="center" className="!mb-4 !opacity-60" />
+
+                  <Checkbox
+                    label="Use manual winner selection instead of highest score"
+                    checked={form.values.useManualWinner || false}
+                    onChange={(event) => form.setFieldValue("useManualWinner", event.currentTarget.checked)}
+                    className="!mb-4"
+                    styles={{
+                      input: { cursor: "pointer" },
+                      label: { fontWeight: 500 }
+                    }}
+                  />
+
                   <Grid>
                     {form.values.players.map((player, index) => (
-                      <Grid.Col span={6} key={player._id}>
-                        <NumberInput
-                          label={player.name}
-                          value={parseInt(player.score) || 0}
-                          onChange={(value) => handleScoreChange(index, value?.toString() || "0")}
-                          min={0}
-                          required
-                          styles={{
-                            input: { borderRadius: "0.75rem" },
-                            label: { fontWeight: 500, fontSize: "0.875rem" }
-                          }}
-                        />
+                      <Grid.Col span={form.values.useManualWinner ? 12 : 6} key={player._id}>
+                        <Group align="flex-end" gap="sm" grow>
+                          <NumberInput
+                            label={player.name}
+                            value={parseInt(player.score) || 0}
+                            onChange={(value) => handleScoreChange(index, value?.toString() || "0")}
+                            min={0}
+                            required={!form.values.useManualWinner}
+                            disabled={form.values.useManualWinner}
+                            styles={{
+                              input: { borderRadius: "0.75rem" },
+                              label: { fontWeight: 500, fontSize: "0.875rem" }
+                            }}
+                          />
+
+                          {form.values.useManualWinner && (
+                            <Checkbox
+                              label="Winner"
+                              checked={form.values.manualWinner === player._id}
+                              onChange={() => form.setFieldValue("manualWinner", player._id)}
+                              styles={{
+                                input: { cursor: "pointer" },
+                                label: { fontWeight: 500 }
+                              }}
+                            />
+                          )}
+                        </Group>
                       </Grid.Col>
                     ))}
                   </Grid>

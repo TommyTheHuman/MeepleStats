@@ -205,6 +205,8 @@ def log_match():
     isWin = request.form.get('isWin', '').strip().lower() in ['true', '1', 'yes']
     isTeamMatch = request.form.get('isTeamMatch', '').strip().lower() in ['true', '1', 'yes']
     winning_team = request.form.get('winningTeam')
+    use_manual_winner = request.form.get('useManualWinner', '').strip().lower() in ['true', '1', 'yes']
+    manual_winner_id = request.form.get('manualWinner')
 
     # Handle file upload
     image_file_name = None
@@ -254,7 +256,7 @@ def log_match():
 
     if (game['is_cooperative']):
         # Check if the match is cooperative --> each player wins
-        winner = [player for player in players]
+        winner = [player for player in players] if isWin else []
         total_score = None
         worst_score_player = None
     elif isTeamMatch and winning_team is not None:
@@ -264,9 +266,14 @@ def log_match():
         worst_score_player = None
     else:
         # Check if the match is not cooperative --> the player with the highest score wins
-        winner = max(players, key=lambda x: x['score'])
-        total_score = sum([player['score'] for player in players])
-        worst_score_player = min(players, key=lambda x: x['score'])
+        
+        if use_manual_winner and manual_winner_id is not None:
+            # Use the manual winner if provided
+            winner = next((player for player in players if player['id'] == manual_winner_id), None)
+        else:
+            winner = max(players, key=lambda x: x['score'])
+            total_score = sum([player['score'] for player in players])
+            worst_score_player = min(players, key=lambda x: x['score'])
 
     # Create the match
     match_data = {
@@ -284,6 +291,7 @@ def log_match():
         'is_team_match': isTeamMatch,
         'total_score': total_score,
         'winning_team': winning_team,
+        'use_manual_winner': use_manual_winner,
     }
 
     if image_file_name is not None:
@@ -304,12 +312,12 @@ def log_match():
         if game['is_cooperative'] and isWin:
             player_data['wins'] += 1
             player_data['winstreak'] += 1
-        elif not game['is_cooperative'] and player['id'] == winner['id']:
-            player_data['wins'] += 1
-            player_data['num_competitive_win'] += 1
-            player_data['winstreak'] += 1
         elif isTeamMatch and winning_team is not None and player['team'] == winning_team:
             player_data['wins'] += 1
+            player_data['winstreak'] += 1
+        elif not game['is_cooperative'] and not isTeamMatch and isinstance(winner, dict) and player['id'] == winner['id']:
+            player_data['wins'] += 1
+            player_data['num_competitive_win'] += 1
             player_data['winstreak'] += 1
         else:
             player_data['losses'] += 1
@@ -325,7 +333,7 @@ def log_match():
             'game_id': game_id,
             'is_winner': (
                 (game['is_cooperative'] and isWin) or  # Always True if coop and isWin
-                (not game['is_cooperative'] and player['id'] == winner['id']) or  # Competitive game, check player ID
+                (not game['is_cooperative'] and not isTeamMatch and isinstance(winner, dict) and player['id'] == winner['id']) or  # Competitive game, check player ID
                 (isTeamMatch and winning_team is not None and player['team'] == winning_team)  # Team match, check team
             ),
             'score': player['score'],

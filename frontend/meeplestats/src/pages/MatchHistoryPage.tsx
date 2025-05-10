@@ -85,6 +85,10 @@ const MatchHistoryPage = () => {
                 players={match.players}
                 notes={match.notes}
                 image_url={match.image_url}
+                is_cooperative={match.is_cooperative}
+                is_team_match={match.is_team_match}
+                winning_team={match.winning_team}
+                use_manual_winner={match.use_manual_winner}
               />
             </div>
           ))}

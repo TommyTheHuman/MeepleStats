@@ -4,9 +4,34 @@ import { MatchCardInterface } from "../model/Interfaces";
 import { IconPhoto } from "@tabler/icons-react";
 import { API_URL } from "../model/Constants";
 
-const MatchCard = ({ game_name, date, game_duration, game_image, players, winner, notes, image_url }: MatchCardInterface) => {
+const MatchCard = ({ game_name, date, game_duration, game_image, players, winner, notes, image_url, is_cooperative, is_team_match, winning_team, use_manual_winner }: MatchCardInterface) => {
 
   const [opened, { open, close }] = useDisclosure(false);
+
+  const isWinner = (playerId: string) => {
+    if (is_cooperative) {
+      // For coop games, check if winner array has players (win) or is empty (loss)
+      return Array.isArray(winner) && winner.length > 0 && winner.some(w => w.id === playerId);
+    } else if (is_team_match) {
+      // For team matches, check if player is in the winner array
+      return Array.isArray(winner) && winner.some(w => w.id === playerId);
+    } else {
+      // For competitive matches, check if this player has the winner id
+      return winner && !Array.isArray(winner) && winner.id === playerId;
+    }
+  };
+
+  const detectManualWinner = () => {
+    // If we have the explicit flag, use it
+    if (typeof use_manual_winner !== 'undefined') {
+      return use_manual_winner;
+    }
+    else {
+      return false;
+    }
+  };
+
+  const isManualWinner = detectManualWinner();
 
   return (
     <Card shadow="sm" radius="lg" className="!overflow-hidden !border !border-gray-100 !min-w-[280px]">
@@ -38,6 +63,40 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
           </Badge>
         </Group>
 
+        {/* Game Type & Result */}
+        {is_cooperative && (
+          <Badge
+            variant="light"
+            color={Array.isArray(winner) && winner.length > 0 ? "green" : "red"}
+            size="sm"
+            className="!mb-3"
+          >
+            {Array.isArray(winner) && winner.length > 0 ? "Cooperative Win" : "Cooperative Loss"}
+          </Badge>
+        )}
+
+        {is_team_match && winning_team && (
+          <Badge
+            variant="light"
+            color="green"
+            size="sm"
+            className="!mb-3"
+          >
+            Winning Team: {winning_team}
+          </Badge>
+        )}
+
+        {!is_cooperative && !is_team_match && isManualWinner && (
+          <Badge
+            variant="light"
+            color="violet"
+            size="sm"
+            className="!mb-3"
+          >
+            Special Victory
+          </Badge>
+        )}
+
         {/* Divider */}
         <Box className="!w-full !h-px !bg-gray-100 !my-3"></Box>
 
@@ -51,25 +110,33 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
             <Box className="!flex !items-center !gap-1 !max-w-[70%]">
               <Text
                 size="sm"
-                fw={player.id === winner.id ? 600 : 400}
-                c={player.id === winner.id ? "blue.6" : "gray.7"}
-                className={`!truncate ${player.id === winner.id ? '!text-blue-600' : '!text-gray-700'}`}
+                fw={isWinner(player.id) ? 600 : 400}
+                c={isWinner(player.id) ? "blue.6" : "gray.7"}
+                className={`!truncate ${isWinner(player.id) ? '!text-blue-600' : '!text-gray-700'}`}
                 title={player.name}
               >
                 {player.name}
+                {player.team && is_team_match && (
+                  <span className="!ml-1 !text-xs !text-gray-500">
+                    ({player.team})
+                  </span>
+                )}
               </Text>
-              {player.id === winner.id && (
+              {isWinner(player.id) && (
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" className="!flex-shrink-0 !text-blue-600">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                 </svg>
               )}
             </Box>
-            <Text size="sm" fw={500} className={player.id === winner.id ? '!text-blue-600' : '!text-gray-700'}>
-              {player.score}
-            </Text>
+
+            {/* Only show scores for competitive (non-cooperative, non-team) matches */}
+            {!is_cooperative && !is_team_match && !isManualWinner && (
+              <Text size="sm" fw={500} className={isWinner(player.id) ? '!text-blue-600' : '!text-gray-700'}>
+                {player.score}
+              </Text>
+            )}
           </Group>
         ))}
-
 
         {/* Notes - Only shown if notes exist */}
         {notes && (
@@ -127,7 +194,6 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
             </Button>
           </Box>
         )}
-
       </Box>
     </Card>
   );
