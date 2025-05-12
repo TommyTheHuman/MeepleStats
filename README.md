@@ -225,6 +225,7 @@ OPENROUTER_API_KEY=your_openrouter_key
 LLM_MODEL=llm_model_name # for example: qwen/qwq-32b:free
 EMBEDDING_TYPE='gemini' or 'local'
 GEMINI_API_KEY=your_gemini_key
+ENABLE_RAG=True/False
 ```
 
 ### Frontend Environment Variables
@@ -232,7 +233,8 @@ Create a `.env` file in the `/frontend/meeplestats` directory of the project and
 
 ```ini
 VITE_API_URL=your_backend_url
-VITE_JWT_STORAGE='localstorage' or 'cookie' 
+VITE_JWT_STORAGE='localstorage' or 'cookie'
+VITE_ENABLE_RAG=True/False 
 ```
 
 ---

@@ -13,3 +13,5 @@ export const FilterTypes = {
 export const API_URL = import.meta.env.VITE_API_URL;
 
 export const JWT_STORAGE = import.meta.env.VITE_JWT_STORAGE;
+
+export const ENABLE_RAG = ["true", "1", "yes"].includes((import.meta.env.VITE_ENABLE_RAG || "").toLowerCase());

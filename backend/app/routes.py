@@ -24,7 +24,8 @@ from .services.rag import query_llm, query_index, display_search_results, initia
 #embedding_model = initialize_embedding_model()
 #index = initialize_pinecone()
 
-index, embedding_provider = initialize_pinecone()
+if os.getenv('ENABLE_RAG') == 'True':
+    index, embedding_provider = initialize_pinecone()
 
 STORAGE_TYPE = os.getenv('STORAGE_TYPE')#'local'#'s3'
 
