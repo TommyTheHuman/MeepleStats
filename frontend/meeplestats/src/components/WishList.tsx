@@ -288,6 +288,8 @@ const Wishlist = () => {
                     playingTime={game.playingTime}
                     notes={game.notes}
                     username={game.username}
+                    gameId={game.bgg_id}
+                    onDelete={fetchWishlist}
                   />
                 </Grid.Col>
               ))}

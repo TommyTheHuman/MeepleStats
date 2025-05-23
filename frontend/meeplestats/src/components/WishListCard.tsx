@@ -1,8 +1,43 @@
-import { Card, Text, Image, Title, Badge, Group } from "@mantine/core";
+import { Card, Text, Image, Title, Badge, Group, ActionIcon, Tooltip } from "@mantine/core";
 import { WishListCardInterface } from "../model/Interfaces";
+//import { useState } from "react";
+import { API_URL, JWT_STORAGE } from "../model/Constants";
+import { IconX } from "@tabler/icons-react";
 
 
-const WishListCard = ({ name, thumbnail, minPlayers, maxPlayers, notes, playingTime, username }: WishListCardInterface) => {
+const WishListCard = ({ name, thumbnail, minPlayers, maxPlayers, notes, playingTime, username, gameId, onDelete }: WishListCardInterface) => {
+  const handleDelete = async () => {
+    //setLoading(true);
+    const requestOptions: RequestInit = {
+      method: "DELETE",
+    };
+
+    // Check the JWT_STORAGE value and set credentials or headers accordingly
+    if (JWT_STORAGE === "cookie") {
+      requestOptions.credentials = "include";
+      requestOptions.headers = {
+        "Content-Type": "application/json",
+      };
+    } else if (JWT_STORAGE === "localstorage") {
+      requestOptions.headers = {
+        Authorization: `Bearer ${localStorage.getItem("jwt_token")}`,
+        "Content-Type": "application/json"
+      };
+    }
+
+    requestOptions.body = JSON.stringify({
+      game_id: gameId
+    });
+
+    const response = await fetch(`${API_URL}/removewishlist`, requestOptions);
+    if (response.ok) {
+      if (onDelete) {
+        onDelete();
+      }
+    }
+    //setLoading(false);
+  }
+
   return (
     <Card
       shadow="sm"
@@ -10,9 +45,24 @@ const WishListCard = ({ name, thumbnail, minPlayers, maxPlayers, notes, playingT
       radius="md"
       className="!bg-white !border !border-gray-100 !overflow-hidden !transition-shadow hover:!shadow-md !h-full !flex !flex-col"
     >
+
       {/* Image Section */}
       <Card.Section>
         <div className="!relative !overflow-hidden !h-[160px]">
+          {/* Delete Button */}
+          <Tooltip label="Remove from wishlist">
+            <ActionIcon
+              color="red"
+              variant="subtle"
+              onClick={handleDelete}
+              className="!absolute !top-2 !right-2 !z-10 !bg-white/80 hover:!bg-red-50 !shadow-sm !transition-colors"
+              radius="xl"
+              size="md"
+              aria-label="Remove from wishlist"
+            >
+              <IconX size={16} stroke={2} />
+            </ActionIcon>
+          </Tooltip>
           <Image
             src={thumbnail}
             alt={name}

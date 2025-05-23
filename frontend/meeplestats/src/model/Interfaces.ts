@@ -59,6 +59,8 @@ export interface WishListCardInterface {
   thumbnail: string;
   notes: string;
   username: string;
+  gameId: string;
+  onDelete?: () => void;
 }
 
 export interface StaticResponse {

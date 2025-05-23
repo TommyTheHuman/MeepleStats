@@ -448,7 +448,8 @@ def add_wishlist():
 @jwt_required()
 def remove_wishlist():
     # Get the bgg id from the query string
-    game_id = request.args.get('game_id')
+    data = request.get_json()
+    game_id = data.get('game_id')
 
     if not game_id:
         return jsonify({'error': 'Missing game_id'}), 400
