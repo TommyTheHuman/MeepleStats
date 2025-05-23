@@ -267,10 +267,11 @@ def log_match():
         worst_score_player = None
     else:
         # Check if the match is not cooperative --> the player with the highest score wins
-        
         if use_manual_winner and manual_winner_id is not None:
             # Use the manual winner if provided
             winner = next((player for player in players if player['id'] == manual_winner_id), None)
+            total_score = None
+            worst_score_player = None
         else:
             winner = max(players, key=lambda x: x['score'])
             total_score = sum([player['score'] for player in players])

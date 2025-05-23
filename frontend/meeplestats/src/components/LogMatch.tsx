@@ -180,6 +180,7 @@ const LogMatch = () => {
     data.append("winningTeam", values.winningTeam);
 
     data.append("useManualWinner", values.useManualWinner.toString());
+    data.append("manualWinner", values.manualWinner);
 
     if (Array.isArray(values.players)) {
       values.players.forEach((player, index) => {
