@@ -34,7 +34,7 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
   const isManualWinner = detectManualWinner();
 
   return (
-    <Card shadow="sm" radius="lg" className="!overflow-hidden !border !border-gray-100 !min-w-[280px]">
+    <Card shadow="sm" radius="lg" className="!overflow-hidden !border !border-gray-100 !w-[280px]">
       {/* Image container with fixed dimensions */}
       <Card.Section>
         <div className="!relative !overflow-hidden !h-[160px]">
@@ -146,7 +146,13 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
             <Text fw={500} size="sm" className="!mb-2 !text-gray-700">
               Notes:
             </Text>
-            <Text size="sm" c="dimmed" className="!text-gray-500 !line-clamp-2">
+            <Text
+              size="sm"
+              c="dimmed"
+              // 🔸 use break-all + explicit overflowWrap
+              className="!text-gray-500 !line-clamp-2 !break-all !whitespace-normal"
+              style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
+            >
               {notes}
             </Text>
           </>
