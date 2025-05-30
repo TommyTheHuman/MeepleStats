@@ -1,0 +1,47 @@
+services:
+  mongo:
+    image: mongo:4.4
+    container_name: meeplestats-mongo
+    restart: unless-stopped
+    volumes:
+      - ~/data/db:/data/db
+    networks:
+      - docker
+      # ports:
+      # - 27017:27017
+    env_file: .env
+  backend:
+    image: ghcr.io/tommythehuman/meeplestats/backend:latest
+    container_name: meeplestats-backend
+    restart: unless-stopped
+    volumes:
+      - ~/data:/data
+    networks:
+      - docker
+      # ports:
+      # - 5000:5000
+    env_file: .env
+    depends_on:
+      - mongo
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.meeplestats-backend-rtr.entrypoints=websecure
+      - traefik.http.routers.meeplestats-backend-rtr.rule=Host(`backend.domain.tld`)
+      - traefik.http.routers.meeplestats-backend-rtr.service=meeplestats-backend-svc
+      - traefik.http.services.meeplestats-backend-svc.loadbalancer.server.port=5000
+  frontend:
+    image: ghcr.io/tommythehuman/meeplestats/frontend:latest
+    container_name: meeplestats-frontend
+    networks:
+      - docker
+      # ports:
+      # - 5173:5173
+    env_file: .env
+    depends_on:
+      - backend
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.meeplestats-frontend-rtr.entrypoints=websecure
+      - traefik.http.routers.meeplestats-frontend-rtr.rule=Host(`frontend.domain.tld`)
+      - traefik.http.routers.meeplestats-frontend-rtr.service=meeplestats-frontend-svc
+      - traefik.http.services.meeplestats-frontend-svc.loadbalancer.server.port=5173
