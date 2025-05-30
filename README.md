@@ -235,6 +235,7 @@ Create a `.env` file in the `/frontend/meeplestats` directory of the project and
 VITE_API_URL=your_backend_url
 VITE_JWT_STORAGE='localstorage' or 'cookie'
 VITE_ENABLE_RAG=True/False 
+VITE_ALLOWED_HOSTS=allowed_hosts_coma_separated
 ```
 
 ---

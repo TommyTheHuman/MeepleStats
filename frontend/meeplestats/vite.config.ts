@@ -3,6 +3,11 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa';
 
+const ALLOWED_HOSTS = (process.env.VITE_ALLOWED_HOSTS || "")
+  .split(",")
+  .map((host) => host.trim())
+  .filter((host) => host.length > 0);
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -34,5 +39,8 @@ export default defineConfig({
         ]
       }
     })
-  ]
+  ],
+  server: {
+    allowedHosts: ALLOWED_HOSTS
+  }
 })
