@@ -107,3 +107,10 @@ export interface ScoreSheetDataInterface {
     formula: null | string;
   };
 }
+
+
+export type Faction = {
+  name: string;
+  reach: number;
+  color: string;
+};

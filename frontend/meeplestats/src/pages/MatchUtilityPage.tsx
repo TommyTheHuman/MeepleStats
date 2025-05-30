@@ -4,6 +4,7 @@ import { Game } from '../model/Interfaces';
 import { API_URL, JWT_STORAGE } from '../model/Constants';
 import { Box, Button, Paper, Select, Stack, Title, Text, Group, Container, Grid, Divider, List } from '@mantine/core';
 import { useStopwatch } from 'react-timer-hook';
+import RootCounter from '../components/RootCounter';
 
 const MatchUtilityPage = () => {
 
@@ -205,6 +206,11 @@ const MatchUtilityPage = () => {
           </Stack>
         </Grid.Col>
       </Grid>
+
+      {/* Root Counter with proper spacing */}
+      <Title order={2} mb="md" mt="xl">Game Balance Tools</Title>
+      <RootCounter />
+
     </Container>
   );
 }

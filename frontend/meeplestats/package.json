@@ -18,6 +18,7 @@
     "@mantine/hooks": "^7.16.0",
     "@mantine/modals": "^7.16.0",
     "@mantine/notifications": "^7.16.0",
+    "@observablehq/plot": "^0.6.17",
     "@tabler/icons-react": "^3.31.0",
     "@tailwindcss/vite": "^4.0.8",
     "dayjs": "^1.11.13",

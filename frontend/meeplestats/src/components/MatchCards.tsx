@@ -149,7 +149,6 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
             <Text
               size="sm"
               c="dimmed"
-              // 🔸 use break-all + explicit overflowWrap
               className="!text-gray-500 !line-clamp-2 !break-all !whitespace-normal"
               style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
             >
