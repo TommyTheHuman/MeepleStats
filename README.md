@@ -130,6 +130,22 @@ The project now includes a GitHub Actions workflow that builds and publishes Doc
    - The backend will be available on port 5000.
    - The frontend will be accessible on port 5173.
 
+## Additional Dockge Instructions
+
+Instructions for Dockge:
+In your stacks folder, pull repo from GitHub:
+   ```sh
+   git clone https://github.com/TommyTheHuman/MeepleStats.git
+   ```
+
+Then rename the pulled folder:
+   ```sh
+mv MeepleStats meeplestats
+  ```
+
+Then in dockge, pull and update to pull the latest configurations and update. Missing this step could result in unexpected failures. 
+
+
 ### Notes
 
 - If changes are made to the code, the GitHub workflow will automatically build and push updated images to GHCR upon merges or pushes to `main`.
