@@ -496,11 +496,34 @@ def matchHistory():
             matches_data.append(match)
 
         # Sort matches by date in descending order
-        matches_data.sort(key=lambda x: x['date'], reverse=True)
+        matches_data.sort(key=lambda x: (x['date'], x['_id']), reverse=True)
 
         return jsonify(matches_data), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@data_bp.route('/achievements', methods=['GET'])
+@jwt_required()
+def get_achievements():
+    # Get the achievements for the spiecified player, the logged user by default
+    # Get player name from query string
+    player_name = request.args.get('username')
+
+    # Check if the player name is provided otherwise use the logged user
+    if not player_name:
+        player_name = get_jwt_identity()
+
+    # Find the player in the database
+    player = players_collection.find_one({'username': player_name})
+    if not player:
+        return jsonify({'error': 'Player not found'}), 404
+    # Get the achievements from the player
+    achievements = player.get('achievements', [])
+   
+    return jsonify(achievements), 200
+
+
 
 statistic_bp = Blueprint('statistic', __name__)
 

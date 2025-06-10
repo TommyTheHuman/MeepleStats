@@ -23,6 +23,7 @@ def create_app():
     app.config['JWT_ACCESS_COOKIE_NAME'] = os.getenv('JWT_ACCESS_COOKIE_NAME', 'jwt_token')
     app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, os.getenv('UPLOAD_FOLDER', 'uploads'))
     app.config['JWT_COOKIE_CSRF_PROTECT'] = os.getenv('JWT_COOKIE_CSRF_PROTECT', 'False').lower() in ['true', '1', 't']
+    app.config['MAX_CONTENT_LENGTH'] = 300 * 1024 * 1024
     
     jwt = JWTManager(app)
 
