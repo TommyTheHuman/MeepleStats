@@ -161,27 +161,32 @@ def process_document_chunk(doc, safe_namespace, i, embedding_provider):
     
     # creo vettore per ogni chunk di una pagina specifica
     for j, node in enumerate(nodes):
+        # Skip empty nodes or nodes with only whitespace
+        if not node.text or not node.text.strip():
+            print(f"Skipping empty chunk on page {i+1}, chunk {j}")
+            continue
+            
         # creo un id deterministico basato sul contenuto del chunk per evitare duplicati
         content_hash = hashlib.md5(node.text.encode()).hexdigest()
         record_id = f"{safe_namespace}_doc_{i}_chunk_{j}_{content_hash[:8]}"
         
         # creo embedding per il testo del chunk
-        # fastembed ritorna un generatore di embeddings, dobbiamo convertirlo in una lista
-        #embeddings = list(embedding_model.embed(node.text))
-        #embedding = embeddings[0].tolist()
-        embedding = embedding_provider.embed(node.text)
+        try:
+            embedding = embedding_provider.embed(node.text)
 
-
-        # aggiungo al record (unità di informazione per pinecone) l'embedding e i metadati (id univoco, embedding, testo del chunk, pagina e nome del pdf)
-        records.append({
-            "id": record_id,
-            "values": embedding,
-            "metadata": {
-                "text": node.text,
-                "page_label": page_number,
-                "file_name": doc.metadata.get('file_name', 'unknown')
-            }
-        })
+            # aggiungo al record (unità di informazione per pinecone) l'embedding e i metadati (id univoco, embedding, testo del chunk, pagina e nome del pdf)
+            records.append({
+                "id": record_id,
+                "values": embedding,
+                "metadata": {
+                    "text": node.text,
+                    "page_label": page_number,
+                    "file_name": doc.metadata.get('file_name', 'unknown')
+                }
+            })
+        except ValueError as e:
+            print(f"Error embedding chunk on page {i+1}, chunk {j}: {str(e)}")
+            continue
     
     return records
 
