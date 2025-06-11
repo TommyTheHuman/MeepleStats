@@ -520,8 +520,19 @@ def get_achievements():
         return jsonify({'error': 'Player not found'}), 404
     # Get the achievements from the player
     achievements = player.get('achievements', [])
+
+    achievements_data = []
+
+    for achievement in achievements:
+        if achievement['image']['type'] in ['s3']:
+            achievement['image']['filename'] = S3Client.get_url_from_filename(achievement['image']['filename'])
+        elif achievement['image']['type'] in ['local']:
+            filename = os.path.basename(achievement['image']['filename'])
+            achievement['image']['filename'] = f"/uploads/{filename}"
+            
+        achievements_data.append(achievement)
    
-    return jsonify(achievements), 200
+    return jsonify(achievements_data), 200
 
 
 
