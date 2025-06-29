@@ -1,4 +1,4 @@
-import { Container, Grid, Title, Text, Button, Group, Select } from "@mantine/core";
+import { Container, Grid, Title, Text, Button, Group, Select, useMantineColorScheme } from "@mantine/core";
 import StatisticCard from "../components/StatisticCard"; // Adjust the path as necessary
 import { API_URL, FilterTypes, JWT_STORAGE } from "../model/Constants";
 import PlayerAchievementCard from "../components/PlayerAchievementCard";
@@ -16,6 +16,9 @@ const filterTypeOptions = {
 }
 
 export default function IndexPage() {
+  const { colorScheme } = useMantineColorScheme();
+  const isDarkMode = colorScheme === "dark";
+
   const [selectedUsername, setSelectedUsername] = useState<string | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
 
@@ -66,9 +69,9 @@ export default function IndexPage() {
   return (
     <Container size="xl" className="!py-6">
       {/* Player Selection Header */}
-      <div className="!mb-6 !bg-gray-50 !p-4 !rounded-lg !border !border-gray-100">
+      <div className={`!mb-6 !p-4 !rounded-lg !border ${isDarkMode ? "!bg-gray-700 !border-gray-600" : "!bg-gray-50 !border-gray-100"}`}>
         <Group justify="space-between" align="center" className="!flex-wrap">
-          <Title order={2} className="!text-gray-800 !mb-0 !font-semibold !text-xl">
+          <Title order={2} className={`!mb-0 !font-semibold !text-xl ${isDarkMode ? "!text-gray-100" : "!text-gray-800"}`}>
             Achievements
           </Title>
 
@@ -82,16 +85,20 @@ export default function IndexPage() {
               searchable
               className="!min-w-[200px]"
               leftSection={<IconUser size={16} />}
-              classNames={{
-                input: "!border-gray-200 !text-gray-700",
-                dropdown: "!border-gray-100 !shadow-md"
+              styles={{
+                input: {
+                  border: "1px solid",
+                  borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
+                  backgroundColor: isDarkMode ? "rgb(55, 65, 81)" : "white",
+                  color: isDarkMode ? "white" : "black",
+                },
               }}
             />
             <Button
               variant="light"
-              color="gray"
+              color="blue"
               onClick={() => setSelectedUsername(null)}
-              className="!text-gray-600 !bg-gray-100 hover:!bg-gray-200"
+              className={`!transition-colors ${isDarkMode ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600" : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"}`}
             >
               My Achievements
             </Button>
@@ -103,10 +110,10 @@ export default function IndexPage() {
       <PlayerAchievementCard username={selectedUsername} />
       {/* Global Statistics */}
       <div className="!mb-8">
-        <Title order={2} className="!text-gray-800 !mb-4 !font-semibold !text-xl">
+        <Title order={2} className={`!mb-4 !font-semibold !text-xl ${isDarkMode ? "!text-gray-100" : "!text-gray-800"}`}>
           Global Statistics
         </Title>
-        <Text className="!text-gray-600 !mb-4">
+        <Text className={`!mb-4 ${isDarkMode ? "!text-gray-400" : "!text-gray-600"}`}>
           Overview of all gaming activity across MeepleStats
         </Text>
         <Grid>
@@ -120,10 +127,10 @@ export default function IndexPage() {
 
       {/* Player Statistics */}
       <div className="!mb-8">
-        <Title order={2} className="!text-gray-800 !mb-4 !font-semibold !text-xl">
+        <Title order={2} className={`!mb-4 !font-semibold !text-xl ${isDarkMode ? "!text-gray-100" : "!text-gray-800"}`}>
           Player Statistics
         </Title>
-        <Text className="!text-gray-600 !mb-4">
+        <Text className={`!mb-4 ${isDarkMode ? "!text-gray-400" : "!text-gray-600"}`}>
           Performance metrics for individual players
         </Text>
         <Grid>
@@ -137,10 +144,10 @@ export default function IndexPage() {
 
       {/* Game Statistics */}
       <div>
-        <Title order={2} className="!text-gray-800 !mb-4 !font-semibold !text-xl">
+        <Title order={2} className={`!mb-4 !font-semibold !text-xl ${isDarkMode ? "!text-gray-100" : "!text-gray-800"}`}>
           Game Statistics
         </Title>
-        <Text className="!text-gray-600 !mb-4">
+        <Text className={`!mb-4 ${isDarkMode ? "!text-gray-400" : "!text-gray-600"}`}>
           Metrics about specific games in your collection
         </Text>
         <Grid>

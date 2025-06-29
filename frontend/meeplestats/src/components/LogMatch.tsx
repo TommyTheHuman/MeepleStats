@@ -1,4 +1,4 @@
-import { Box, Button, Group, LoadingOverlay, TextInput, Textarea, Select, Checkbox, NumberInput, Divider, Grid, Paper, Stack, Title, Text as MantineText } from "@mantine/core";
+import { Box, Button, Group, LoadingOverlay, TextInput, Textarea, Select, Checkbox, NumberInput, Divider, Grid, Paper, Stack, Title, Text as MantineText, useMantineColorScheme } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useEffect, useState } from "react";
 //import { notifications } from "@mantine/notifications";
@@ -22,6 +22,9 @@ const LogMatch = () => {
     onDropdownClose: () => combobox.resetSelectedOption(),
     onDropdownOpen: () => combobox.updateSelectedOptionIndex("active"),
   });
+
+  const { colorScheme } = useMantineColorScheme();
+  const isDarkMode = colorScheme === "dark";
 
   const form = useForm({
     initialValues: {
@@ -143,7 +146,12 @@ const LogMatch = () => {
   };
 
   const values = form.values.players.map((player) => (
-    <Pill key={player.name} withRemoveButton onRemove={() => handleValueRemove(player.name)} className="!bg-blue-50 !text-blue-600 !font-medium">
+    <Pill 
+      key={player.name} 
+      withRemoveButton 
+      onRemove={() => handleValueRemove(player.name)} 
+      className={`!font-medium ${isDarkMode ? "!bg-blue-900 !text-blue-200" : "!bg-blue-50 !text-blue-600"}`}
+    >
       {player.name}
     </Pill>
   ));
@@ -236,7 +244,12 @@ const LogMatch = () => {
 
   return (
     <Box className="!mx-auto !max-w-2xl">
-      <Paper p="xl" radius="lg" className="!bg-white !shadow-sm !border !border-gray-100">
+      <Paper
+        p="xl"
+        radius="lg"
+        className={`!shadow-sm !border ${isDarkMode ? "!bg-gray-800 !border-gray-700" : "!bg-white !border-gray-100"
+          }`}
+      >
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: "lg", blur: 2 }} />
 
@@ -246,10 +259,16 @@ const LogMatch = () => {
 
           {/* Game Selection Section */}
           <Box className="!mb-8">
-            <MantineText className="!text-xs !uppercase !font-medium !tracking-wide !text-gray-500 mb-2">
+            <MantineText
+              className={`!text-xs !uppercase !font-medium !tracking-wide ${isDarkMode ? "!text-gray-400" : "!text-gray-500"
+                } !mb-2`}
+            >
               Game
             </MantineText>
-            <Paper className="!bg-gray-50 !p-4 !rounded-xl !border !border-gray-100">
+            <Paper
+              className={`!p-4 !rounded-xl !border ${isDarkMode ? "!bg-gray-700 !border-gray-600" : "!bg-gray-50 !border-gray-100"
+                }`}
+            >
               <Select
                 placeholder="Select a game"
                 data={games.map((game) => ({ value: game.name, label: game.name }))}
@@ -265,7 +284,15 @@ const LogMatch = () => {
                 required
                 searchable
                 className="mb-2"
-                styles={{ input: { border: "none", backgroundColor: "white", borderRadius: "0.75rem" } }}
+                styles={{
+                  input: {
+                    border: "1px solid",
+                    borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
+                    backgroundColor: isDarkMode ? "rgb(55, 65, 81)" : "white",
+                    borderRadius: "0.5rem",
+                    color: isDarkMode ? "white" : "black",
+                  },
+                }}
               />
 
               {!form.values.isCooperative && (
@@ -275,7 +302,7 @@ const LogMatch = () => {
                   className="mt-3"
                   styles={{
                     input: { cursor: "pointer" },
-                    label: { fontWeight: 500 }
+                    label: { fontWeight: 500, color: isDarkMode ? "white" : "black" },
                   }}
                 />
               )}
@@ -284,13 +311,29 @@ const LogMatch = () => {
 
           {/* Players Section */}
           <Box className="!mb-8">
-            <MantineText className="!text-xs !uppercase !font-medium !tracking-wide !text-gray-500 !mb-2">
+            <MantineText className={`!text-xs !uppercase !font-medium !tracking-wide ${isDarkMode ? "!text-gray-400" : "!text-gray-500"
+              } !mb-2`}>
               Players
             </MantineText>
-            <Paper className="!bg-gray-50 !p-4 !rounded-xl !border !border-gray-100">
+            <Paper
+              className={`!p-4 !rounded-xl !border ${isDarkMode ? "!bg-gray-700 !border-gray-600" : "!bg-gray-50 !border-gray-100"
+                }`}
+            >
               <Combobox store={combobox} onOptionSubmit={handleValueSelect}>
                 <Combobox.DropdownTarget>
-                  <PillsInput onClick={() => combobox.openDropdown()} className="!border-0 !bg-white !rounded-xl">
+                  <PillsInput
+                    className={`!rounded-xl ${isDarkMode ? "!text-white" : "!text-black"}`}
+                    onClick={() => combobox.openDropdown()}
+                    styles={{
+                      input: {
+                        border: "1px solid",
+                        borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
+                        borderRadius: "0.5rem",
+                        backgroundColor: isDarkMode ? "rgb(55, 65, 81)" : "white",
+                        color: isDarkMode ? "white" : "black",
+                      },
+                    }}
+                  >
                     <Pill.Group>
                       {values}
                       <Combobox.EventsTarget>
@@ -324,12 +367,25 @@ const LogMatch = () => {
               {/* Team Match Options */}
               {form.values.isTeamMatch && (
                 <Box className="!mt-6">
-                  <Divider label="Team Setup" labelPosition="center" className="!mb-4 !opacity-60" />
+                  <Divider
+                    label="Team Setup"
+                    labelPosition="center"
+                    className={`!mb-4 ${isDarkMode ? "!border-gray-600 !text-gray-400" : "!opacity-60"
+                      }`}
+                  />
 
                   <TextInput
                     placeholder="Enter team name and press Enter"
                     className="!mb-4"
-                    styles={{ input: { borderRadius: "0.75rem" } }}
+                    styles={{
+                      input: {
+                        border: "1px solid",
+                        borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
+                        borderRadius: "0.5rem",
+                        backgroundColor: isDarkMode ? "rgb(55, 65, 81)" : "white",
+                        color: isDarkMode ? "white" : "black",
+                      },
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
@@ -346,7 +402,7 @@ const LogMatch = () => {
                         {teams.map((team) => (
                           <Pill
                             key={team}
-                            className="!bg-blue-50 !text-blue-600 !font-medium"
+                            className={`!font-medium ${isDarkMode ? "!bg-blue-900 !text-blue-200" : "!bg-blue-50 !text-blue-600"}`}
                           >
                             {team}
                           </Pill>
@@ -366,8 +422,14 @@ const LogMatch = () => {
                             onChange={(value) => { handleTeamChange(index, value || "") }}
                             required
                             styles={{
-                              input: { borderRadius: "0.75rem" },
-                              label: { fontWeight: 500, fontSize: "0.875rem" }
+                              input: { 
+                                border: "1px solid",
+                                borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
+                                borderRadius: "0.5rem",
+                                backgroundColor: isDarkMode ? "rgb(55, 65, 81)" : "white",
+                                color: isDarkMode ? "white" : "black",
+                              },
+                              label: { fontWeight: 500, fontSize: "0.875rem", color: isDarkMode ? "white" : "black" }
                             }}
                           />
                         </Grid.Col>
@@ -384,8 +446,14 @@ const LogMatch = () => {
                       required
                       className="!mt-4"
                       styles={{
-                        input: { borderRadius: "0.75rem" },
-                        label: { fontWeight: 500, fontSize: "0.875rem" }
+                        input: { 
+                          border: "1px solid",
+                          borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
+                          borderRadius: "0.5rem",
+                          backgroundColor: isDarkMode ? "rgb(55, 65, 81)" : "white",
+                          color: isDarkMode ? "white" : "black",
+                        },
+                        label: { fontWeight: 500, fontSize: "0.875rem", color: isDarkMode ? "white" : "black" }
                       }}
                     />
                   )}
@@ -404,7 +472,7 @@ const LogMatch = () => {
                     className="!mb-4"
                     styles={{
                       input: { cursor: "pointer" },
-                      label: { fontWeight: 500 }
+                      label: { fontWeight: 500, color: isDarkMode ? "white" : "black" }
                     }}
                   />
 
@@ -420,8 +488,14 @@ const LogMatch = () => {
                             required={!form.values.useManualWinner}
                             disabled={form.values.useManualWinner}
                             styles={{
-                              input: { borderRadius: "0.75rem" },
-                              label: { fontWeight: 500, fontSize: "0.875rem" }
+                              input: {
+                                border: "1px solid",
+                                borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
+                                borderRadius: "0.5rem",
+                                backgroundColor: isDarkMode ? "rgb(55, 65, 81)" : "white",
+                                color: isDarkMode ? "white" : "black",
+                              },
+                              label: { fontWeight: 500, fontSize: "0.875rem", color: isDarkMode ? "white" : "black" },
                             }}
                           />
 
@@ -432,7 +506,7 @@ const LogMatch = () => {
                               onChange={() => form.setFieldValue("manualWinner", player._id)}
                               styles={{
                                 input: { cursor: "pointer" },
-                                label: { fontWeight: 500 }
+                                label: { fontWeight: 500, color: isDarkMode ? "white" : "black" },
                               }}
                             />
                           )}
@@ -447,10 +521,16 @@ const LogMatch = () => {
 
           {/* Match Details Section */}
           <Box className="!mb-8">
-            <MantineText className="!text-xs !uppercase !font-medium !tracking-wide !text-gray-500 mb-2">
+            <MantineText
+              className={`!text-xs !uppercase !font-medium !tracking-wide ${isDarkMode ? "!text-gray-400" : "!text-gray-500"
+                } !mb-2`}
+            >
               Match Details
             </MantineText>
-            <Paper className="!bg-gray-50 !p-4 !rounded-xl !border !border-gray-100">
+            <Paper
+              className={`!p-4 !rounded-xl !border ${isDarkMode ? "!bg-gray-700 !border-gray-600" : "!bg-gray-50 !border-gray-100"
+                }`}
+            >
               <Grid>
                 <Grid.Col span={6}>
                   <TextInput
@@ -460,8 +540,14 @@ const LogMatch = () => {
                     {...form.getInputProps("duration")}
                     required
                     styles={{
-                      input: { borderRadius: "0.75rem" },
-                      label: { fontWeight: 500, fontSize: "0.875rem" }
+                      input: {
+                        border: "1px solid",
+                        borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
+                        borderRadius: "0.5rem",
+                        backgroundColor: isDarkMode ? "rgb(55, 65, 81)" : "white",
+                        color: isDarkMode ? "white" : "black",
+                      },
+                      label: { fontWeight: 500, fontSize: "0.875rem", color: isDarkMode ? "white" : "black" },
                     }}
                   />
                 </Grid.Col>
@@ -472,8 +558,14 @@ const LogMatch = () => {
                     {...form.getInputProps("date")}
                     required
                     styles={{
-                      input: { borderRadius: "0.75rem" },
-                      label: { fontWeight: 500, fontSize: "0.875rem" }
+                      input: {
+                        border: "1px solid",
+                        borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
+                        borderRadius: "0.5rem",
+                        backgroundColor: isDarkMode ? "rgb(55, 65, 81)" : "white",
+                        color: isDarkMode ? "white" : "black",
+                      },
+                      label: { fontWeight: 500, fontSize: "0.875rem", color: isDarkMode ? "white" : "black" },
                     }}
                   />
                 </Grid.Col>
@@ -486,7 +578,7 @@ const LogMatch = () => {
                   className="!mt-4"
                   styles={{
                     input: { cursor: "pointer" },
-                    label: { fontWeight: 500 }
+                    label: { fontWeight: 500, color: isDarkMode ? "white" : "black" },
                   }}
                 />
               )}
@@ -501,8 +593,14 @@ const LogMatch = () => {
                 accept="image/*"
                 className="!mt-4"
                 styles={{
-                  input: { borderRadius: "0.75rem" },
-                  label: { fontWeight: 500, fontSize: "0.875rem" }
+                  input: {
+                    border: "1px solid",
+                    borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
+                    borderRadius: "0.5rem",
+                    backgroundColor: isDarkMode ? "rgb(55, 65, 81)" : "white",
+                    color: isDarkMode ? "white" : "black",
+                  },
+                  label: { fontWeight: 500, fontSize: "0.875rem", color: isDarkMode ? "white" : "black" },
                 }}
               />
 
@@ -513,8 +611,14 @@ const LogMatch = () => {
                 {...form.getInputProps("note")}
                 className="!mt-4"
                 styles={{
-                  input: { borderRadius: "0.75rem" },
-                  label: { fontWeight: 500, fontSize: "0.875rem" }
+                  input: {
+                    border: "1px solid",
+                    borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
+                    borderRadius: "0.5rem",
+                    backgroundColor: isDarkMode ? "rgb(55, 65, 81)" : "white",
+                    color: isDarkMode ? "white" : "black",
+                  },
+                  label: { fontWeight: 500, fontSize: "0.875rem", color: isDarkMode ? "white" : "black" },
                 }}
               />
             </Paper>
@@ -523,10 +627,16 @@ const LogMatch = () => {
           <Group justify="center" className="!mt-8">
             <Button
               type="submit"
+              variant="light"
+              color="blue"
               size="lg"
               disabled={loading}
               fullWidth
-              className="!bg-blue-600 !hover:bg-blue-700 !rounded-xl !h-11 !font-medium"
+              radius="md"
+              className={`!transition-colors !font-medium ${isDarkMode
+                  ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
+                  : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
+                }`}
             >
               Log Match
             </Button>

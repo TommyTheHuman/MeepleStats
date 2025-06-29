@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Box, Button, LoadingOverlay, Textarea, Autocomplete, Image, Title, Text, Grid, Container, Paper } from "@mantine/core";
+import { Box, Button, LoadingOverlay, Textarea, Autocomplete, Image, Title, Text, Grid, Container, Paper, useMantineColorScheme } from "@mantine/core";
 //import { useForm } from "@mantine/form";
 import { Game } from "../model/Interfaces";
 import { API_URL, JWT_STORAGE } from "../model/Constants";
@@ -21,6 +21,9 @@ interface ApiResponseItem {
 }
 
 const Wishlist = () => {
+  const { colorScheme } = useMantineColorScheme();
+  const isDarkMode = colorScheme === "dark";
+
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Game[]>([]);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
@@ -174,8 +177,22 @@ const Wishlist = () => {
       <Grid gutter="md">
         {/* Search Column - Full width on mobile, 1/3 on desktop */}
         <Grid.Col span={{ base: 12, md: 4 }}>
-          <Paper shadow="xs" p="md" radius="md" className="!bg-white !mb-6 !sticky !top-4">
-            <Title order={2} className="!mb-4 !text-gray-800 !text-xl !font-semibold">
+          <Paper
+            shadow="xs"
+            p="md"
+            radius="md"
+            className="!mb-6 !sticky !top-4"
+            style={{
+              backgroundColor: isDarkMode ? "#1f2937" : "white",
+              borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+            }}
+            withBorder
+          >
+            <Title
+              order={2}
+              className="!mb-4 !text-xl !font-semibold"
+              c={isDarkMode ? "gray.1" : "gray.8"}
+            >
               Add to Wishlist
             </Title>
 
@@ -207,14 +224,52 @@ const Wishlist = () => {
                 }))}
                 className="!mb-4"
                 styles={{
-                  input: { borderRadius: '0.5rem', height: '2.5rem' },
-                  label: { fontSize: '0.875rem', fontWeight: 500, marginBottom: '4px' }
+                  input: {
+                    borderRadius: '0.5rem',
+                    height: '2.5rem',
+                    backgroundColor: isDarkMode ? "#374151" : "white",
+                    borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                    color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                    "&:focus": {
+                      borderColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+                    },
+                  },
+                  label: {
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    marginBottom: '4px',
+                    color: isDarkMode ? "#d1d5db" : "#4b5563",
+                  },
+                  dropdown: {
+                    backgroundColor: isDarkMode ? "#374151" : "white",
+                    borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                  },
+                  option: {
+                    backgroundColor: isDarkMode ? "#374151" : "white",
+                    color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                    "&:hover": {
+                      backgroundColor: isDarkMode ? "#4b5563" : "#f9fafb",
+                    },
+                  },
                 }}
               />
 
               {selectedGame && (
-                <Paper p="md" withBorder radius="md" className="!mt-4 !bg-gray-50">
-                  <Title order={3} className="!mb-3 !text-lg !font-medium">
+                <Paper
+                  p="md"
+                  withBorder
+                  radius="md"
+                  className="!mt-4"
+                  style={{
+                    backgroundColor: isDarkMode ? "#374151" : "#f9fafb",
+                    borderColor: isDarkMode ? "#9ca3af" : "#e5e7eb",
+                  }}
+                >
+                  <Title
+                    order={3}
+                    className="!mb-3 !text-lg !font-medium"
+                    c={isDarkMode ? "gray.1" : "gray.9"}
+                  >
                     {selectedGame.name}
                   </Title>
 
@@ -230,10 +285,17 @@ const Wishlist = () => {
                     />
 
                     <div>
-                      <Text size="sm" className="!text-gray-700 !mb-1">
+                      <Text
+                        size="sm"
+                        className="!mb-1"
+                        c={isDarkMode ? "gray.3" : "gray.7"}
+                      >
                         Players: {selectedGame.minPlayers} - {selectedGame.maxPlayers}
                       </Text>
-                      <Text size="sm" className="!text-gray-700">
+                      <Text
+                        size="sm"
+                        c={isDarkMode ? "gray.3" : "gray.7"}
+                      >
                         Playing Time: {selectedGame.playingTime} minutes
                       </Text>
                     </div>
@@ -246,8 +308,21 @@ const Wishlist = () => {
                     onChange={handleNotesChange}
                     minRows={3}
                     styles={{
-                      input: { borderRadius: '0.5rem' },
-                      label: { fontSize: '0.875rem', fontWeight: 500, marginBottom: '4px' }
+                      input: {
+                        borderRadius: '0.5rem',
+                        backgroundColor: isDarkMode ? "#4b5563" : "white",
+                        borderColor: isDarkMode ? "#9ca3af" : "#d1d5db",
+                        color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                        "&:focus": {
+                          borderColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+                        },
+                      },
+                      label: {
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                        marginBottom: '4px',
+                        color: isDarkMode ? "#d1d5db" : "#4b5563",
+                      }
                     }}
                   />
 
@@ -255,7 +330,10 @@ const Wishlist = () => {
                     onClick={addToWishlist}
                     fullWidth
                     mt="md"
-                    className="!bg-blue-600 hover:!bg-blue-700 !transition-colors"
+                    className={`!transition-colors !font-medium ${isDarkMode
+                      ? "!bg-blue-700 !text-blue-200 hover:!bg-blue-600"
+                      : "!bg-blue-600 !text-white hover:!bg-blue-700"
+                      }`}
                     radius="md"
                   >
                     Add to Wishlist
@@ -268,13 +346,25 @@ const Wishlist = () => {
 
         {/* Wishlist Column - Full width on mobile, 2/3 on desktop */}
         <Grid.Col span={{ base: 12, md: 8 }}>
-          <Title order={2} className="!mb-4 !text-gray-800 !text-xl !font-semibold">
+          <Title
+            order={2}
+            className="!mb-4 !text-xl !font-semibold"
+            c={isDarkMode ? "gray.1" : "gray.8"}
+          >
             My Wishlist
           </Title>
 
           {wishlist.length === 0 ? (
-            <Paper p="xl" radius="md" className="!bg-gray-50 !border !border-gray-200 !text-center">
-              <Text className="!text-gray-600">Your wishlist is empty. Search for games to add them.</Text>
+            <Paper
+              p="xl"
+              radius="md"
+              className="!border !text-center"
+              style={{
+                backgroundColor: isDarkMode ? "#374151" : "#f9fafb",
+                borderColor: isDarkMode ? "#9ca3af" : "#e5e7eb",
+              }}
+            >
+              <Text c={isDarkMode ? "gray.3" : "gray.6"}>Your wishlist is empty. Search for games to add them.</Text>
             </Paper>
           ) : (
             <Grid gutter="md">

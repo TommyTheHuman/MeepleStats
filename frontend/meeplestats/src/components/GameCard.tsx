@@ -1,8 +1,10 @@
-import { Card, Checkbox, Image, TextInput, Text, Button, Stack, Group } from "@mantine/core";
+import { Card, Checkbox, Image, TextInput, Text, Button, Stack, Group, Badge, Tooltip } from "@mantine/core";
+import { useMantineColorScheme } from "@mantine/core";
 import { Game } from "../model/Interfaces";
 import { useState } from "react";
 import { API_URL, JWT_STORAGE } from "../model/Constants";
 import { notifications } from "@mantine/notifications";
+import { IconBook2 } from "@tabler/icons-react";
 
 
 const GameCard = ({ game }: { game: Game }) => {
@@ -10,7 +12,8 @@ const GameCard = ({ game }: { game: Game }) => {
   // Initialize state for price and isGift properties with the game object
   const [price, setPrice] = useState(game.price);
   const [isGifted, setIsGifted] = useState(game.isGifted);
-
+  const { colorScheme } = useMantineColorScheme();
+  const isDarkMode = colorScheme === "dark";
   // Function to update the game object
   const updateGame = async () => {
 
@@ -63,7 +66,8 @@ const GameCard = ({ game }: { game: Game }) => {
       shadow="xs"
       padding="md"
       radius="lg"
-      className="!bg-white !border !border-gray-100 !overflow-hidden !transition-shadow hover:!shadow-md !w-full"
+      className={`!overflow-hidden !transition-shadow hover:!shadow-md !w-full ${isDarkMode ? "!bg-gray-800 !border-gray-700" : "!bg-white !border-gray-100"
+        }`}
     >
       {/* Image Section */}
       <Card.Section>
@@ -75,6 +79,20 @@ const GameCard = ({ game }: { game: Game }) => {
             className="!w-full !h-full !object-cover !transition-transform hover:!scale-105"
             loading="lazy"
           />
+
+          {/* Rulebook indicator */}
+          {game.hasRules && (
+            <Tooltip label="Rulebook available">
+              <Badge
+                className={`!absolute !top-2 !right-2 !z-10 ${isDarkMode ? "!bg-yellow-500 !text-gray-900" : "!bg-blue-500 !text-white"
+                  }`}
+                radius="sm"
+                leftSection={<IconBook2 size={14} />}
+              >
+                Rulebook
+              </Badge>
+            </Tooltip>
+          )}
         </div>
       </Card.Section>
 
@@ -82,7 +100,8 @@ const GameCard = ({ game }: { game: Game }) => {
       <Text
         size="md"
         fw={500}
-        className="!mt-3 !mb-2 !text-gray-900 !tracking-tight !truncate"
+        className={`!mt-3 !mb-2 !tracking-tight !truncate ${isDarkMode ? "!text-gray-100" : "!text-gray-900"
+          }`}
       >
         {game.name}
       </Text>
@@ -93,17 +112,17 @@ const GameCard = ({ game }: { game: Game }) => {
         <Checkbox
           label="Gift"
           checked={isGifted}
-          onChange={(event) => { setIsGifted(event.currentTarget.checked) }}
+          onChange={(event) => setIsGifted(event.currentTarget.checked)}
           className="!text-sm"
           styles={{
             label: {
-              fontSize: '0.875rem',
-              color: '#666',
-              paddingLeft: '4px'
+              fontSize: "0.875rem",
+              color: isDarkMode ? "#ddd" : "#666",
+              paddingLeft: "4px",
             },
             input: {
-              cursor: 'pointer'
-            }
+              cursor: "pointer",
+            },
           }}
         />
 
@@ -112,22 +131,23 @@ const GameCard = ({ game }: { game: Game }) => {
           label="Price"
           placeholder="0.00"
           value={price}
-          onChange={(event) => { setPrice(event.currentTarget.value) }}
+          onChange={(event) => setPrice(event.currentTarget.value)}
           styles={{
             input: {
-              borderRadius: '0.5rem',
-              border: '1px solid #e5e7eb',
-              backgroundColor: '#f9fafb',
-              height: '36px',
-              fontSize: '0.875rem',
-              padding: '0 12px'
+              borderRadius: "0.5rem",
+              border: `1px solid ${isDarkMode ? "#444" : "#e5e7eb"}`,
+              backgroundColor: isDarkMode ? "#333" : "#f9fafb",
+              color: isDarkMode ? "#ddd" : "#000",
+              height: "36px",
+              fontSize: "0.875rem",
+              padding: "0 12px",
             },
             label: {
-              fontSize: '0.875rem',
+              fontSize: "0.875rem",
               fontWeight: 500,
-              color: '#666',
-              marginBottom: '4px'
-            }
+              color: isDarkMode ? "#ddd" : "#666",
+              marginBottom: "4px",
+            },
           }}
           className="!mb-2"
           type="number"
@@ -142,8 +162,11 @@ const GameCard = ({ game }: { game: Game }) => {
           variant="light"
           radius="md"
           onClick={updateGame}
-          className="!bg-blue-50 !text-blue-600 !font-medium !transition-colors hover:!bg-blue-100 !text-sm !px-4 !py-1.5 active:!scale-95"
-          style={{ touchAction: 'manipulation' }}
+          className={`!font-medium !transition-colors !text-sm !px-4 !py-1.5 active:!scale-95 ${isDarkMode
+              ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
+              : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
+            }`}
+          style={{ touchAction: "manipulation" }}
         >
           Update
         </Button>

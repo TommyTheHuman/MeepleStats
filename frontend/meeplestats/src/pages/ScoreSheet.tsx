@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { API_URL, JWT_STORAGE } from "../model/Constants";
-import { ActionIcon, Box, Button, Group, Paper, Select, Stack, Table, TextInput, Title, Text } from "@mantine/core";
+import { ActionIcon, Box, Button, Group, Paper, Select, Stack, Table, TextInput, Title, Text, useMantineColorScheme } from "@mantine/core";
 import { ScoreSheetDataInterface } from "../model/Interfaces";
 import { IconInfoCircle, IconTrash } from "@tabler/icons-react";
 import { useMediaQuery } from "@mantine/hooks";
 
 const ScoreSheet = () => {
+  const { colorScheme } = useMantineColorScheme();
+  const isDarkMode = colorScheme === "dark";
 
   const [scoreSheets, setScoreSheets] = useState<[]>([]);
   const [selectedScoreSheet, setSelectedScoreSheet] = useState<string | null>(null);
@@ -145,7 +147,7 @@ const ScoreSheet = () => {
 
     return (
       <Stack mt="xl">
-        <Title order={2}>{scoreSheetData.game_name}</Title>
+        <Title order={2} c={isDarkMode ? "gray.1" : "gray.9"}>{scoreSheetData.game_name}</Title>
 
         <Group align="flex-end">
           <TextInput
@@ -158,33 +160,60 @@ const ScoreSheet = () => {
                 handleAddPlayer();
                 setPlayerName('');
               }
-            }}
-            styles={{
-              root: { flexGrow: 1 }
+            }} styles={{
+              root: { flexGrow: 1 },
+              input: {
+                borderRadius: "0.375rem",
+                backgroundColor: isDarkMode ? "#374151" : "white",
+                borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                "&:focus": {
+                  borderColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+                },
+              },
+              label: {
+                fontSize: "0.875rem",
+                fontWeight: 500,
+                color: isDarkMode ? "#d1d5db" : "#4b5563",
+                marginBottom: '4px'
+              }
             }}
           />
-          <Button onClick={handleAddPlayer} radius="md">
+          <Button
+            onClick={handleAddPlayer}
+            radius="md"
+            className={`!transition-colors !font-medium ${isDarkMode
+              ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
+              : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
+              }`}
+          >
             Add Player
           </Button>
         </Group>
 
         {columns.length > 0 && (
           <Box style={{ overflowX: 'auto', width: '100%' }}>
-            <Table striped highlightOnHover={!isMobile} withColumnBorders>
-              <thead>
+            <Table
+              striped
+              highlightOnHover={!isMobile}
+              withColumnBorders
+              className={isDarkMode ? "!bg-gray-800 !border-gray-700" : "!bg-white !border-gray-200"}
+            >
+              <thead className={isDarkMode ? "!bg-gray-600" : "!bg-gray-50"}>
                 <tr>
-                  <th style={{ width: '200px' }}>
-                    <Text>Scoring Field</Text>
+                  <th className={`${isDarkMode ? "!border-gray-600" : "!border-gray-300"}`} style={{ width: '200px' }}>
+                    <Text c={isDarkMode ? "gray.1" : "gray.9"}>Scoring Field</Text>
                   </th>
                   {columns.map((player, index) => (
-                    <th key={index}>
+                    <th key={index} className={isDarkMode ? "!border-gray-600" : "!border-gray-300"}>
                       <Group gap="xs" justify="space-between" wrap="nowrap">
-                        <Text truncate>{player}</Text>
+                        <Text truncate c={isDarkMode ? "gray.1" : "gray.9"}>{player}</Text>
                         <ActionIcon
                           color="red"
                           size={isMobile ? "md" : "sm"}
                           variant="subtle"
                           onClick={() => handleRemoveColumn(index)}
+                          className={`!transition-colors ${isDarkMode ? "!bg-gray-600 hover:!bg-gray-500" : "!bg-gray-100 hover:!bg-gray-200"}`}
                         >
                           <IconTrash size={isMobile ? 18 : 16} />
                         </ActionIcon>
@@ -196,24 +225,25 @@ const ScoreSheet = () => {
               <tbody>
                 {scoreSheetData.fields.map((field, index) => (
                   <>
-                    <tr key={index}>
-                      <td>
+                    <tr key={index} className={isDarkMode ? "!bg-gray-800" : "!bg-white"}>
+                      <td className={isDarkMode ? "!border-gray-600" : "!border-gray-300"}>
                         <Group gap="xs" wrap="nowrap">
-                          <Text>{field.label}</Text>
+                          <Text c={isDarkMode ? "gray.1" : "gray.9"}>{field.label}</Text>
                           {field.rule && (
                             <ActionIcon
                               size="sm"
                               variant="transparent"
                               onClick={() => toggleRuleExpansion(index)}
                               aria-label="Show scoring rule"
+                              className={`!transition-colors ${isDarkMode ? "!bg-gray-600 hover:!bg-gray-500" : "!bg-transparent hover:!bg-gray-100"}`}
                             >
-                              <IconInfoCircle size={16} color="gray" />
+                              <IconInfoCircle size={16} color={isDarkMode ? "#9ca3af" : "gray"} />
                             </ActionIcon>
                           )}
                         </Group>
                       </td>
                       {columns.map((playerName, playerIndex) => (
-                        <td key={playerIndex}>
+                        <td key={playerIndex} className={isDarkMode ? "!border-gray-600" : "!border-gray-300"}>
                           <TextInput
                             type="number"
                             placeholder="0"
@@ -225,6 +255,12 @@ const ScoreSheet = () => {
                                 width: '100%',
                                 minWidth: isMobile ? '60px' : '80px',
                                 padding: isMobile ? '8px 4px' : undefined,
+                                backgroundColor: isDarkMode ? "#374151" : "white",
+                                borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                                color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                                "&:focus": {
+                                  borderColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+                                },
                               }
                             }}
                           />
@@ -233,24 +269,34 @@ const ScoreSheet = () => {
                     </tr>
                     {field.rule && expandedRules.includes(index) && (
                       <tr>
-                        <td colSpan={columns.length + 1}>
+                        <td
+                          colSpan={columns.length + 1}
+                          className={isDarkMode ? "!border-gray-600" : "!border-gray-300"}
+                        >
                           <Box
                             py="xs"
                             px="md"
-                            bg="gray.0"
+                            className={isDarkMode ? "!bg-gray-600" : "!bg-gray-50"}
                             style={{ fontSize: isMobile ? '12px' : '14px' }}
                           >
-                            <Text size="sm" c="dimmed">{field.rule}</Text>
+                            <Text size="sm" c={isDarkMode ? "gray.3" : "dimmed"}>{field.rule}</Text>
                           </Box>
                         </td>
                       </tr>
                     )}
                   </>
                 ))}
-                <tr style={{ fontWeight: 'bold' }}>
-                  <td>Total</td>
+                <tr
+                  className={`!font-bold ${isDarkMode ? "!bg-gray-600" : "!bg-gray-50"}`}
+                >
+                  <td className={`${isDarkMode ? "!border-gray-600 !text-gray-100" : "!border-gray-300 !text-gray-900"}`}>
+                    Total
+                  </td>
                   {columns.map((playerName, playerIndex) => (
-                    <td key={playerIndex} style={{ textAlign: 'center' }}>
+                    <td
+                      key={playerIndex}
+                      className={`!text-center ${isDarkMode ? "!border-gray-600 !text-gray-100" : "!border-gray-300 !text-gray-900"}`}
+                    >
                       {total[playerName] || 0}
                     </td>
                   ))}
@@ -259,7 +305,15 @@ const ScoreSheet = () => {
             </Table>
 
             <Group justify="flex-end" mt="lg">
-              <Button onClick={calculateTotal} color="blue" radius="md">
+              <Button
+                onClick={calculateTotal}
+                color="blue"
+                radius="md"
+                className={`!transition-colors !font-medium ${isDarkMode
+                  ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
+                  : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
+                  }`}
+              >
                 Calculate Total
               </Button>
             </Group>
@@ -270,9 +324,15 @@ const ScoreSheet = () => {
   };
 
   return (
-    <Paper p="md" radius="md" shadow="sm" withBorder>
+    <Paper
+      p="md"
+      radius="md"
+      shadow="sm"
+      withBorder
+      className={isDarkMode ? "!bg-gray-800 !border-gray-700" : "!bg-white !border-gray-200"}
+    >
       <Stack>
-        <Title order={1}>Score Sheet</Title>
+        <Title order={1} c={isDarkMode ? "gray.1" : "gray.9"}>Score Sheet</Title>
 
         <Select
           label="Select Game"
@@ -288,8 +348,32 @@ const ScoreSheet = () => {
           searchable
           styles={{
             root: { maxWidth: '400px' },
-            input: { borderRadius: "md" },
-            label: { fontWeight: 500, fontSize: "0.875rem", marginBottom: '4px' }
+            input: {
+              borderRadius: "0.375rem",
+              backgroundColor: isDarkMode ? "#374151" : "white",
+              borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+              color: isDarkMode ? "#f3f4f6" : "#1f2937",
+              "&:focus": {
+                borderColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+              },
+            },
+            label: {
+              fontWeight: 500,
+              fontSize: "0.875rem",
+              marginBottom: '4px',
+              color: isDarkMode ? "#d1d5db" : "#4b5563",
+            },
+            dropdown: {
+              backgroundColor: isDarkMode ? "#374151" : "white",
+              borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+            },
+            option: {
+              backgroundColor: isDarkMode ? "#374151" : "white",
+              color: isDarkMode ? "#f3f4f6" : "#1f2937",
+              "&:hover": {
+                backgroundColor: isDarkMode ? "#4b5563" : "#f9fafb",
+              },
+            },
           }}
         />
 

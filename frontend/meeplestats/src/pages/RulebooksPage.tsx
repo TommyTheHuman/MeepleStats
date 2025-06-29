@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { fetchRulebooks, deleteRulebook, uploadRulebook } from "../api/rulebooksApi";
 import { RulebookInterface, Game } from "../model/Interfaces";
 import { API_URL, JWT_STORAGE } from "../model/Constants";
-import { Container, Title, Paper, Group, Text, Button, FileInput, Autocomplete, LoadingOverlay, Box, Badge, Stack, Card, ActionIcon, Tooltip, Alert, rem, Modal, Grid } from "@mantine/core";
+import { Container, Title, Paper, Group, Text, Button, FileInput, Autocomplete, LoadingOverlay, Box, Badge, Stack, Card, ActionIcon, Tooltip, Alert, rem, Modal, Grid, useMantineColorScheme } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconFileUpload, IconTrash, IconX, IconBook } from "@tabler/icons-react";
@@ -10,6 +10,8 @@ import { useContext } from "react";
 import { AuthContext } from "../components/AuthContext";
 
 const RulebooksPage = () => {
+  const { colorScheme } = useMantineColorScheme();
+  const isDarkMode = colorScheme === "dark";
   const [rulebooks, setRulebooks] = useState<RulebookInterface[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -193,7 +195,11 @@ const RulebooksPage = () => {
 
   return (
     <Container size="xl" py="xl">
-      <Title order={1} className="!mb-8 !text-gray-800 !text-2xl !font-bold">
+      <Title
+        order={1}
+        className="!mb-8 !text-2xl !font-bold"
+        c={isDarkMode ? "gray.1" : "gray.8"}
+      >
         Rulebooks
       </Title>
 
@@ -205,8 +211,20 @@ const RulebooksPage = () => {
         <Grid gutter="md">
           {/* Upload Form */}
           <Grid.Col span={{ base: 12, md: 4 }}>
-            <Paper p="md" radius="md" className="!bg-white">
-              <Title order={3} className="!mb-4 !text-gray-800 !text-lg !font-semibold">
+            <Paper
+              p="md"
+              radius="md"
+              style={{
+                backgroundColor: isDarkMode ? "#1f2937" : "white",
+                borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+              }}
+              withBorder
+            >
+              <Title
+                order={3}
+                className="!mb-4 !text-lg !font-semibold"
+                c={isDarkMode ? "gray.1" : "gray.8"}
+              >
                 Upload Rulebook
               </Title>
 
@@ -238,8 +256,33 @@ const RulebooksPage = () => {
                   }))}
                   className="!mb-4"
                   styles={{
-                    input: { borderRadius: '0.5rem', height: '2.5rem' },
-                    label: { fontSize: '0.875rem', fontWeight: 500, marginBottom: '4px' }
+                    input: {
+                      borderRadius: '0.5rem',
+                      height: '2.5rem',
+                      backgroundColor: isDarkMode ? "#374151" : "white",
+                      borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                      color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                      "&:focus": {
+                        borderColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+                      },
+                    },
+                    label: {
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      marginBottom: '4px',
+                      color: isDarkMode ? "#d1d5db" : "#4b5563",
+                    },
+                    dropdown: {
+                      backgroundColor: isDarkMode ? "#374151" : "white",
+                      borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                    },
+                    option: {
+                      backgroundColor: isDarkMode ? "#374151" : "white",
+                      color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                      "&:hover": {
+                        backgroundColor: isDarkMode ? "#4b5563" : "#f9fafb",
+                      },
+                    },
                   }}
                 />
 
@@ -252,15 +295,32 @@ const RulebooksPage = () => {
                   leftSection={<IconFileUpload size={rem(16)} />}
                   className="!mb-4"
                   styles={{
-                    input: { borderRadius: '0.5rem', height: '2.5rem' },
-                    label: { fontSize: '0.875rem', fontWeight: 500, marginBottom: '4px' }
+                    input: {
+                      borderRadius: '0.5rem',
+                      height: '2.5rem',
+                      backgroundColor: isDarkMode ? "#374151" : "white",
+                      borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                      color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                      "&:focus": {
+                        borderColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+                      },
+                    },
+                    label: {
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      marginBottom: '4px',
+                      color: isDarkMode ? "#d1d5db" : "#4b5563",
+                    }
                   }}
                 />
 
                 <Button
                   onClick={handleUpload}
                   fullWidth
-                  className="!bg-blue-600 hover:!bg-blue-700 !transition-colors"
+                  className={`!transition-colors !font-medium ${isDarkMode
+                    ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
+                    : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
+                    }`}
                   radius="md"
                   disabled={!file || !selectedGame}
                   leftSection={<IconFileUpload size={16} />}
@@ -273,12 +333,24 @@ const RulebooksPage = () => {
 
           {/* Rulebooks List */}
           <Grid.Col span={{ base: 12, md: 8 }}>
-            <Title order={2} className="!mb-4 !text-gray-800 !text-xl !font-semibold">
+            <Title
+              order={2}
+              className="!mb-4 !text-xl !font-semibold"
+              c={isDarkMode ? "gray.1" : "gray.8"}
+            >
               Rulebook Repository
             </Title>
 
             {loading ? (
-              <Paper p="md" className="!bg-white !relative !min-h-[100px]">
+              <Paper
+                p="md"
+                className="!relative !min-h-[100px]"
+                style={{
+                  backgroundColor: isDarkMode ? "#1f2937" : "white",
+                  borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                }}
+                withBorder
+              >
                 <LoadingOverlay visible={loading} overlayProps={{ radius: "sm", blur: 2 }} />
               </Paper>
             ) : error ? (
@@ -286,15 +358,38 @@ const RulebooksPage = () => {
                 {error}
               </Alert>
             ) : rulebooks.length === 0 ? (
-              <Paper p="xl" radius="md" className="!bg-gray-50 !border !border-gray-200 !text-center">
-                <Text className="!text-gray-600">No rulebooks available. Upload a rulebook to get started.</Text>
+              <Paper
+                p="xl"
+                radius="md"
+                className="!text-center"
+                style={{
+                  backgroundColor: isDarkMode ? "#374151" : "#f9fafb",
+                  borderColor: isDarkMode ? "#6b7280" : "#e5e7eb",
+                }}
+                withBorder
+              >
+                <Text c={isDarkMode ? "gray.4" : "gray.6"}>No rulebooks available. Upload a rulebook to get started.</Text>
               </Paper>
             ) : (
               <Stack gap="md">
                 {rulebooks.map((rulebook) => (
-                  <Card key={rulebook._id} withBorder shadow="sm" radius="md" padding="md" className="!bg-white">
+                  <Card
+                    key={rulebook._id}
+                    withBorder
+                    shadow="sm"
+                    radius="md"
+                    padding="md"
+                    style={{
+                      backgroundColor: isDarkMode ? "#1f2937" : "white",
+                      borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                    }}
+                  >
                     <Group justify="space-between" wrap="nowrap" mb={8}>
-                      <Text fw={600} className="!text-gray-800 !line-clamp-1">
+                      <Text
+                        fw={600}
+                        className="!line-clamp-1"
+                        c={isDarkMode ? "gray.1" : "gray.8"}
+                      >
                         {rulebook.game_name}
                       </Text>
 
@@ -305,6 +400,12 @@ const RulebooksPage = () => {
                             color="blue"
                             radius="md"
                             onClick={() => handleDownload(rulebook.file_url)}
+                            style={{
+                              backgroundColor: isDarkMode ? "#1d4ed8" : "#2563eb",
+                              "&:hover": {
+                                backgroundColor: isDarkMode ? "#2563eb" : "#1d4ed8",
+                              }
+                            }}
                           >
                             <IconBook size={16} />
                           </ActionIcon>
@@ -317,6 +418,12 @@ const RulebooksPage = () => {
                               color="red"
                               radius="md"
                               onClick={() => openDeleteModal(rulebook._id)}
+                              style={{
+                                backgroundColor: isDarkMode ? "#b91c1c" : "#dc2626",
+                                "&:hover": {
+                                  backgroundColor: isDarkMode ? "#dc2626" : "#b91c1c",
+                                }
+                              }}
                             >
                               <IconTrash size={16} />
                             </ActionIcon>
@@ -326,11 +433,32 @@ const RulebooksPage = () => {
                     </Group>
 
                     <Group gap={8} mb={8}>
-                      <Badge color="gray" radius="sm">{rulebook.filename}</Badge>
-                      <Badge color="blue" radius="sm">Uploaded: {formatDate(rulebook.uploaded_at)}</Badge>
+                      <Badge
+                        color={isDarkMode ? "dark" : "gray"}
+                        radius="sm"
+                        style={{
+                          backgroundColor: isDarkMode ? "#4b5563" : "#f3f4f6",
+                          color: isDarkMode ? "#e5e7eb" : "#4b5563",
+                        }}
+                      >
+                        {rulebook.filename}
+                      </Badge>
+                      <Badge
+                        color={isDarkMode ? "blue" : "blue"}
+                        radius="sm"
+                        style={{
+                          backgroundColor: isDarkMode ? "#1e3a8a" : "#dbeafe",
+                          color: isDarkMode ? "#93c5fd" : "#1d4ed8",
+                        }}
+                      >
+                        Uploaded: {formatDate(rulebook.uploaded_at)}
+                      </Badge>
                     </Group>
 
-                    <Text size="sm" c="dimmed">
+                    <Text
+                      size="sm"
+                      c={isDarkMode ? "gray.4" : "dimmed"}
+                    >
                       Uploaded by: {rulebook.uploaded_by}
                     </Text>
                   </Card>
@@ -357,10 +485,25 @@ const RulebooksPage = () => {
         </Text>
 
         <Group justify="flex-end" mt="md">
-          <Button variant="default" onClick={close} leftSection={<IconX size={14} />}>
+          <Button
+            variant="default"
+            onClick={close}
+            leftSection={<IconX size={14} />}
+            className={`!transition-colors !font-medium ${isDarkMode
+              ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
+              : "!bg-gray-100 !text-gray-600 hover:!bg-gray-200"
+              }`}
+          >
             Cancel
           </Button>
-          <Button color="red" onClick={handleDelete} leftSection={<IconTrash size={14} />}>
+          <Button
+            onClick={handleDelete}
+            leftSection={<IconTrash size={14} />}
+            className={`!transition-colors !font-medium ${isDarkMode
+              ? "!bg-red-700 !text-red-200 hover:!bg-red-600"
+              : "!bg-red-50 !text-red-600 hover:!bg-red-100"
+              }`}
+          >
             Delete
           </Button>
         </Group>

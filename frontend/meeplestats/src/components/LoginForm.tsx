@@ -1,4 +1,4 @@
-import { Box, Button, Group, LoadingOverlay, TextInput } from "@mantine/core";
+import { Box, Button, Group, LoadingOverlay, TextInput, useMantineColorScheme } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useContext, useRef, useState } from "react";
 import { notifications } from "@mantine/notifications";
@@ -9,7 +9,8 @@ import { AuthContext } from "./AuthContext";
 
 const LoginForm = () => {
   const navigate = useNavigate();
-
+  const { colorScheme } = useMantineColorScheme();
+  const isDarkMode = colorScheme === "dark";
   const [loading, setLoading] = useState(false);
   const { setAuthStatus } = useContext(AuthContext);
 
@@ -86,7 +87,17 @@ const LoginForm = () => {
   };
 
   return (
-    <Box pos="relative" w={320} mx="auto">
+    <Box
+      pos="relative"
+      w={320}
+      mx="auto"
+      className={isDarkMode ? "!bg-gray-800 !text-gray-100" : "!bg-white !text-gray-900"}
+      style={{
+        borderRadius: "8px",
+        padding: "16px",
+        boxShadow: isDarkMode ? "0 2px 4px rgba(0, 0, 0, 0.5)" : "0 2px 4px rgba(0, 0, 0, 0.1)",
+      }}
+    >
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
         <TextInput
@@ -96,6 +107,18 @@ const LoginForm = () => {
           {...form.getInputProps("username")}
           mb={form.errors.username ? "xs" : "md"}
           onKeyDown={handleUsernamelKeyDown}
+          styles={{
+            input: {
+              border: "1px solid",
+              borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
+              borderRadius: "0.5rem",
+              backgroundColor: isDarkMode ? "rgb(55, 65, 81)" : "white",
+              color: isDarkMode ? "white" : "black",
+            },
+            label: {
+              color: isDarkMode ? "white" : "black",
+            },
+          }}
         />
 
         <TextInput
@@ -106,10 +129,32 @@ const LoginForm = () => {
           {...form.getInputProps("password")}
           mb={form.errors.password ? "xs" : "md"}
           ref={passwordRef}
+          styles={{
+            input: {
+              border: "1px solid",
+              borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
+              borderRadius: "0.5rem",
+              backgroundColor: isDarkMode ? "rgb(55, 65, 81)" : "white",
+              color: isDarkMode ? "white" : "black",
+            },
+            label: {
+              color: isDarkMode ? "white" : "black",
+            },
+          }}
         />
 
         <Group justify="space-between" mt="md">
-          <Button type="submit" disabled={loading}>
+          <Button
+            type="submit"
+            disabled={loading}
+            variant="light"
+            color="blue"
+            radius="md"
+            className={`!transition-colors !font-medium ${isDarkMode
+              ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
+              : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
+              }`}
+          >
             Login
           </Button>
         </Group>

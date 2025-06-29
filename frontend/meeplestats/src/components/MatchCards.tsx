@@ -1,4 +1,4 @@
-import { Card, Image, Text, Group, Badge, Box, Modal, Button } from "@mantine/core";
+import { Card, Image, Text, Group, Badge, Box, Modal, Button, useMantineColorScheme } from "@mantine/core";
 import { useDisclosure } from '@mantine/hooks';
 import { MatchCardInterface } from "../model/Interfaces";
 import { IconPhoto } from "@tabler/icons-react";
@@ -7,6 +7,9 @@ import { API_URL } from "../model/Constants";
 const MatchCard = ({ game_name, date, game_duration, game_image, players, winner, notes, image_url, is_cooperative, is_team_match, winning_team, use_manual_winner }: MatchCardInterface) => {
 
   const [opened, { open, close }] = useDisclosure(false);
+
+  const { colorScheme } = useMantineColorScheme();
+  const isDarkMode = colorScheme === "dark";
 
   const isWinner = (playerId: string) => {
     if (is_cooperative) {
@@ -34,7 +37,7 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
   const isManualWinner = detectManualWinner();
 
   return (
-    <Card shadow="sm" radius="lg" className="!overflow-hidden !border !border-gray-100 !w-[280px]">
+    <Card shadow="sm" radius="lg" className={`!overflow-hidden !border !w-[280px] ${isDarkMode ? "!border-gray-600 !bg-gray-800" : "!border-gray-100 !bg-white"}`}>
       {/* Image container with fixed dimensions */}
       <Card.Section>
         <div className="!relative !overflow-hidden !h-[160px]">
@@ -49,16 +52,16 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
       </Card.Section>
       <Box className="!p-4">
         {/* Game title with truncation */}
-        <Text fw={600} size="lg" lineClamp={1} title={game_name} className="!text-[17px] !tracking-tight">
+        <Text fw={600} size="lg" lineClamp={1} title={game_name} className={`!text-[17px] !tracking-tight ${isDarkMode ? "!text-white" : "!text-black"}`}>
           {game_name}
         </Text>
 
         {/* Date and duration */}
         <Group justify="space-between" className="!mt-1 !mb-3">
-          <Text c="dimmed" size="sm" className="!text-gray-500">
+          <Text c="dimmed" size="sm" className={isDarkMode ? "!text-gray-400" : "!text-gray-500"}>
             {new Date(date).toLocaleDateString()}
           </Text>
-          <Badge variant="light" color="blue" size="sm" className="!font-medium !px-2 !bg-blue-50 !text-blue-600 !border-0">
+          <Badge variant="light" color="blue" size="sm" className={`!font-medium !px-2 !border-0 ${isDarkMode ? "!bg-blue-900 !text-blue-200" : "!bg-blue-50 !text-blue-600"}`}>
             {game_duration} min
           </Badge>
         </Group>
@@ -98,26 +101,26 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
         )}
 
         {/* Divider */}
-        <Box className="!w-full !h-px !bg-gray-100 !my-3"></Box>
+        <Box className={`!w-full !h-px !my-3 ${isDarkMode ? "!bg-gray-600" : "!bg-gray-100"}`}></Box>
 
         {/* Players list */}
-        <Text fw={500} size="sm" className="!mb-2 !text-gray-700">
+        <Text fw={500} size="sm" className={`!mb-2 ${isDarkMode ? "!text-gray-200" : "!text-gray-700"}`}>
           Players:
         </Text>
 
         {players.map((player, index) => (
-          <Group key={index} justify="space-between" className={`!py-1 ${index < players.length - 1 ? '!border-b !border-gray-50' : ''}`}>
+          <Group key={index} justify="space-between" className={`!py-1 ${index < players.length - 1 ? `!border-b ${isDarkMode ? "!border-gray-600" : "!border-gray-50"}` : ''}`}>
             <Box className="!flex !items-center !gap-1 !max-w-[70%]">
               <Text
                 size="sm"
                 fw={isWinner(player.id) ? 600 : 400}
                 c={isWinner(player.id) ? "blue.6" : "gray.7"}
-                className={`!truncate ${isWinner(player.id) ? '!text-blue-600' : '!text-gray-700'}`}
+                className={`!truncate ${isWinner(player.id) ? '!text-blue-600' : (isDarkMode ? '!text-gray-300' : '!text-gray-700')}`}
                 title={player.name}
               >
                 {player.name}
                 {player.team && is_team_match && (
-                  <span className="!ml-1 !text-xs !text-gray-500">
+                  <span className={`!ml-1 !text-xs ${isDarkMode ? "!text-gray-400" : "!text-gray-500"}`}>
                     ({player.team})
                   </span>
                 )}
@@ -131,7 +134,7 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
 
             {/* Only show scores for competitive (non-cooperative, non-team) matches */}
             {!is_cooperative && !is_team_match && !isManualWinner && (
-              <Text size="sm" fw={500} className={isWinner(player.id) ? '!text-blue-600' : '!text-gray-700'}>
+              <Text size="sm" fw={500} className={isWinner(player.id) ? '!text-blue-600' : (isDarkMode ? '!text-gray-300' : '!text-gray-700')}>
                 {player.score}
               </Text>
             )}
@@ -141,15 +144,15 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
         {/* Notes - Only shown if notes exist */}
         {notes && (
           <>
-            <Box className="!w-full !h-px !bg-gray-100 !my-3"></Box>
+            <Box className={`!w-full !h-px !my-3 ${isDarkMode ? "!bg-gray-600" : "!bg-gray-100"}`}></Box>
 
-            <Text fw={500} size="sm" className="!mb-2 !text-gray-700">
+            <Text fw={500} size="sm" className={`!mb-2 ${isDarkMode ? "!text-gray-200" : "!text-gray-700"}`}>
               Notes:
             </Text>
             <Text
               size="sm"
               c="dimmed"
-              className="!text-gray-500 !line-clamp-2 !break-all !whitespace-normal"
+              className={`!line-clamp-2 !break-all !whitespace-normal ${isDarkMode ? "!text-gray-400" : "!text-gray-500"}`}
               style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
             >
               {notes}
@@ -165,7 +168,7 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
           centered
           padding="md"
           classNames={{
-            title: "!text-gray-800 !font-medium",
+            title: `!font-medium ${isDarkMode ? "!text-gray-100" : "!text-gray-800"}`,
             body: "!flex !justify-center !items-center"
           }}
         >
@@ -192,7 +195,7 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
               color="blue"
               radius="md"
               size="sm"
-              className="!bg-blue-50 !text-blue-600 hover:!bg-blue-100 !transition-colors"
+              className={`!transition-colors ${isDarkMode ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600" : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"}`}
               p={8}
             >
               <IconPhoto size={18} stroke={1.5} />

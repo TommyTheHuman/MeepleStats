@@ -21,6 +21,7 @@ export interface Game {
   price: string;
   isGifted: boolean;
   username: string;
+  hasRules?: boolean;
 }
 
 export interface StatisticCardInterface {

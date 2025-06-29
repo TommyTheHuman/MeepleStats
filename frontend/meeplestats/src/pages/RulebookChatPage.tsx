@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router";
 import { fetchRulebookById, fetchRulebooks, sendChatQuery } from "../api/rulebooksApi";
 import { RulebookInterface } from "../model/Interfaces";
 import { API_URL } from "../model/Constants";
-import { Container, Title, Paper, Group, Text, Button, Select, LoadingOverlay, Box, Textarea, Stack, Avatar, Alert, Badge, ScrollArea } from "@mantine/core";
+import { Container, Title, Paper, Group, Text, Button, Select, LoadingOverlay, Box, Textarea, Stack, Avatar, Alert, Badge, ScrollArea, useMantineColorScheme } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconSend, IconRobot, IconUser, IconBook, IconFile } from "@tabler/icons-react";
 import { useContext } from "react";
@@ -23,6 +23,8 @@ interface Message {
 }
 
 const RulebookChatPage = () => {
+  const { colorScheme } = useMantineColorScheme();
+  const isDarkMode = colorScheme === "dark";
   const { rulebook_id } = useParams();
   const navigate = useNavigate();
   const [rulebooks, setRulebooks] = useState<RulebookInterface[]>([]);
@@ -214,7 +216,11 @@ const RulebookChatPage = () => {
 
   return (
     <Container size="xl" py="xl">
-      <Title order={1} className="!mb-8 !text-gray-800 !text-2xl !font-bold">
+      <Title
+        order={1}
+        className="!mb-8 !text-2xl !font-bold"
+        c={isDarkMode ? "gray.1" : "gray.8"}
+      >
         Rulebook Chat
       </Title>
 
@@ -223,7 +229,15 @@ const RulebookChatPage = () => {
           Please log in to use the Rulebook Chat feature.
         </Alert>
       ) : (
-        <Paper p="md" radius="md" className="!bg-white">
+        <Paper
+          p="md"
+          radius="md"
+          style={{
+            backgroundColor: isDarkMode ? "#1f2937" : "white",
+            borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+          }}
+          withBorder
+        >
           <LoadingOverlay visible={loading} overlayProps={{ radius: "md", blur: 2 }} />
 
           {error ? (
@@ -251,15 +265,43 @@ const RulebookChatPage = () => {
                     clearable={false}
                     className="!mb-2"
                     styles={{
-                      input: { borderRadius: '0.5rem', height: '2.5rem' },
-                      label: { fontSize: '0.875rem', fontWeight: 500, marginBottom: '4px' }
+                      input: {
+                        borderRadius: '0.5rem',
+                        height: '2.5rem',
+                        backgroundColor: isDarkMode ? "#374151" : "white",
+                        borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                        color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                        "&:focus": {
+                          borderColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+                        },
+                      },
+                      label: {
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                        marginBottom: '4px',
+                        color: isDarkMode ? "#d1d5db" : "#4b5563",
+                      },
+                      dropdown: {
+                        backgroundColor: isDarkMode ? "#374151" : "white",
+                        borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                      },
+                      option: {
+                        backgroundColor: isDarkMode ? "#374151" : "white",
+                        color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                        "&:hover": {
+                          backgroundColor: isDarkMode ? "#4b5563" : "#f9fafb",
+                        },
+                      },
                     }}
                   />
                 </Box>
 
                 <Button
                   onClick={handleViewRulebook}
-                  className="!bg-blue-600 hover:!bg-blue-700 !transition-colors !mt-7"
+                  className={`!transition-colors !font-medium !mt-7 ${isDarkMode
+                    ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
+                    : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
+                    }`}
                   radius="md"
                   leftSection={<IconBook size={16} />}
                   disabled={!selectedRulebook}
@@ -273,14 +315,21 @@ const RulebookChatPage = () => {
                   <Paper
                     p="md"
                     radius="md"
-                    className="!bg-gray-50 !mb-4"
+                    className="!mb-4"
                     withBorder
-                    style={{ height: '500px' }}
+                    style={{
+                      height: '500px',
+                      backgroundColor: isDarkMode ? "#374151" : "#f9fafb",
+                      borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                    }}
                   >
                     <ScrollArea h={480} scrollbarSize={6} offsetScrollbars>
                       {messages.length === 0 ? (
                         <Box className="flex items-center justify-center h-full">
-                          <Text className="text-gray-500 text-center">
+                          <Text
+                            className="text-center"
+                            c={isDarkMode ? "gray.4" : "gray.6"}
+                          >
                             Ask any question about "{selectedRulebook.game_name}" using the rulebook "{selectedRulebook.filename}".
                           </Text>
                         </Box>
@@ -366,13 +415,24 @@ const RulebookChatPage = () => {
                       className="!flex-grow"
                       disabled={chatLoading}
                       styles={{
-                        input: { borderRadius: '0.5rem' }
+                        input: {
+                          borderRadius: '0.5rem',
+                          backgroundColor: isDarkMode ? "#374151" : "white",
+                          borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                          color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                          "&:focus": {
+                            borderColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+                          },
+                        }
                       }}
                     />
 
                     <Button
                       onClick={handleSendMessage}
-                      className="!bg-blue-600 hover:!bg-blue-700 !transition-colors"
+                      className={`!transition-colors !font-medium ${isDarkMode
+                        ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
+                        : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
+                        }`}
                       radius="md"
                       disabled={!message.trim() || chatLoading}
                       loading={chatLoading}

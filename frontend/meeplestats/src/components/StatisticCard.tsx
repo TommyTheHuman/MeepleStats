@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { Game, Player, StaticResponse, StatisticCardInterface } from "../model/Interfaces";
 import { fetchStatistics } from "../api/statisticApi";
-import { Badge, Card, Group, Loader, Paper, RingProgress, Select, Stack, Text, TextInput } from "@mantine/core";
+import { Badge, Card, Group, Loader, Paper, RingProgress, Select, Stack, Text, TextInput, useMantineColorScheme } from "@mantine/core";
 import { DateInput, DateValue, MonthPickerInput, YearPickerInput } from "@mantine/dates";
 import { IconChartBar, IconTrophy } from "@tabler/icons-react";
 import { API_URL, FilterTypes, JWT_STORAGE } from "../model/Constants";
 
 
 const StatisticCard = ({ endpoint, title, filters }: StatisticCardInterface) => {
+
+  const { colorScheme } = useMantineColorScheme();
+  const isDarkMode = colorScheme === "dark";
 
   const [data, setData] = useState<StaticResponse | null>(null);
   const [filterValues, setFilterValues] = useState<Record<string, string>>({});
@@ -126,14 +129,14 @@ const StatisticCard = ({ endpoint, title, filters }: StatisticCardInterface) => 
             {data.description || ''}
           </Text>
           {data.value.map((item, index) => (
-            <Paper key={index} p="xs" withBorder radius="md" className="!bg-white !border-gray-100">
+            <Paper key={index} p="xs" withBorder radius="md" className={isDarkMode ? "!bg-gray-700 !border-gray-600" : "!bg-white !border-gray-100"}>
               {Object.entries(item).map(([key, value]) => (
                 key !== "_id" && key !== "status" && (
                   <Group key={key} className="!py-1">
-                    <Text className="!capitalize !text-gray-700 !font-medium">
+                    <Text className={`!capitalize !font-medium ${isDarkMode ? "!text-gray-300" : "!text-gray-700"}`}>
                       {key.replace(/_/g, " ")}:
                     </Text>
-                    <Text className="!text-gray-900">
+                    <Text className={isDarkMode ? "!text-gray-100" : "!text-gray-900"}>
                       {typeof value === 'number' && key.toLowerCase().includes('rate')
                         ? `${value.toFixed(1)}%`
                         : String(value)}
@@ -156,37 +159,37 @@ const StatisticCard = ({ endpoint, title, filters }: StatisticCardInterface) => 
           <Text className="!text-xs !text-gray-500 !uppercase !tracking-wider !mb-1 !text-center">
             {data.description || ''}
           </Text>
-          <Paper p="sm" withBorder radius="md" className="!bg-blue-50 !border-blue-100">
+          <Paper p="sm" withBorder radius="md" className={isDarkMode ? "!bg-blue-900 !border-blue-700" : "!bg-blue-50 !border-blue-100"}>
             <Group className="!mb-1">
               <Group gap="xs">
-                <IconTrophy size={16} className="!text-blue-600" />
-                <Text className="!font-medium !text-blue-700">
+                <IconTrophy size={16} className={isDarkMode ? "!text-blue-300" : "!text-blue-600"} />
+                <Text className={`!font-medium ${isDarkMode ? "!text-blue-200" : "!text-blue-700"}`}>
                   {bestItem.status === "most" ? "Most Played" : bestItem.status === "best" ? "Best" : "Highest"}
                 </Text>
               </Group>
-              <Badge variant="filled" color="blue" className="!bg-blue-600 !py-1">
+              <Badge variant="filled" color="blue" className={isDarkMode ? "!bg-blue-600 !py-1" : "!bg-blue-600 !py-1"}>
                 {bestItem.name}
               </Badge>
             </Group>
-            <Text className="!text-center !text-xl !font-bold !text-blue-700 !mt-2">
+            <Text className={`!text-center !text-xl !font-bold !mt-2 ${isDarkMode ? "!text-blue-200" : "!text-blue-700"}`}>
               {bestItem.total_matches || bestItem.total_wins || bestItem.value}
               {data.unit && <span className="!text-sm !font-normal !ml-1">{data.unit}</span>}
             </Text>
           </Paper>
 
-          <Paper p="sm" withBorder radius="md" className="!bg-gray-50 !border-gray-200">
+          <Paper p="sm" withBorder radius="md" className={isDarkMode ? "!bg-gray-700 !border-gray-600" : "!bg-gray-50 !border-gray-200"}>
             <Group className="!mb-1">
               <Group gap="xs">
-                <IconChartBar size={16} className="!text-gray-600" />
-                <Text className="!font-medium !text-gray-700">
+                <IconChartBar size={16} className={isDarkMode ? "!text-gray-400" : "!text-gray-600"} />
+                <Text className={`!font-medium ${isDarkMode ? "!text-gray-300" : "!text-gray-700"}`}>
                   {worstItem.status === "least" ? "Least Played" : worstItem.status === "worst" ? "Worst" : "Lowest"}
                 </Text>
               </Group>
-              <Badge variant="filled" color="gray" className="!bg-gray-600 !py-1">
+              <Badge variant="filled" color="gray" className={isDarkMode ? "!bg-gray-500 !py-1" : "!bg-gray-600 !py-1"}>
                 {worstItem.name}
               </Badge>
             </Group>
-            <Text className="!text-center !text-xl !font-bold !text-gray-700 !mt-2">
+            <Text className={`!text-center !text-xl !font-bold !mt-2 ${isDarkMode ? "!text-gray-300" : "!text-gray-700"}`}>
               {worstItem.total_matches || worstItem.total_wins || worstItem.value}
               {data.unit && <span className="!text-sm !font-normal !ml-1">{data.unit}</span>}
             </Text>
@@ -216,7 +219,7 @@ const StatisticCard = ({ endpoint, title, filters }: StatisticCardInterface) => 
     if (!filters || filters.length === 0) return null;
 
     return (
-      <Paper shadow="xs" p="sm" radius="md" className="mb-3 bg-gray-50">
+      <Paper shadow="xs" p="sm" radius="md" className={`mb-3 ${isDarkMode ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}>
         <Stack gap="xs">
           {filters.map((filter) => {
             if (filter.type === FilterTypes.string && filter.value === "game_name") {
@@ -232,7 +235,14 @@ const StatisticCard = ({ endpoint, title, filters }: StatisticCardInterface) => 
                   onChange={(value) => handleFilterChange(filter.value, value || '')}
                   styles={{
                     root: { marginBottom: 5 },
-                    input: { borderRadius: 8 }
+                    input: {
+                      borderRadius: 8,
+                      border: "1px solid",
+                      borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
+                      backgroundColor: isDarkMode ? "rgb(55, 65, 81)" : "white",
+                      color: isDarkMode ? "white" : "black",
+                    },
+                    label: { color: isDarkMode ? "white" : "black" }
                   }}
                 />
               );
@@ -252,7 +262,14 @@ const StatisticCard = ({ endpoint, title, filters }: StatisticCardInterface) => 
                   onChange={(value) => handleFilterChange(filter.value, value || '')}
                   styles={{
                     root: { marginBottom: 5 },
-                    input: { borderRadius: 8 }
+                    input: {
+                      borderRadius: 8,
+                      border: "1px solid",
+                      borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
+                      backgroundColor: isDarkMode ? "rgb(55, 65, 81)" : "white",
+                      color: isDarkMode ? "white" : "black",
+                    },
+                    label: { color: isDarkMode ? "white" : "black" }
                   }}
                 />
               );
@@ -268,7 +285,14 @@ const StatisticCard = ({ endpoint, title, filters }: StatisticCardInterface) => 
                   value={filterValues[filter.value] || ''}
                   styles={{
                     root: { marginBottom: 5 },
-                    input: { borderRadius: 8 }
+                    input: {
+                      borderRadius: 8,
+                      border: "1px solid",
+                      borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
+                      backgroundColor: isDarkMode ? "rgb(55, 65, 81)" : "white",
+                      color: isDarkMode ? "white" : "black",
+                    },
+                    label: { color: isDarkMode ? "white" : "black" }
                   }}
                 />
               );
@@ -325,8 +349,8 @@ const StatisticCard = ({ endpoint, title, filters }: StatisticCardInterface) => 
   };
 
   return (
-    <Card shadow="sm" padding="xl">
-      <Text ta={"center"} fw={600} fz={18}>{title}</Text>
+    <Card shadow="sm" padding="xl" className={isDarkMode ? "!bg-gray-800 !border-gray-700" : "!bg-white !border-gray-100"}>
+      <Text ta={"center"} fw={600} fz={18} className={isDarkMode ? "!text-white" : "!text-black"}>{title}</Text>
       {renderFilters()}
       {loading ? (
         <Loader />

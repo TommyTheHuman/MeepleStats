@@ -38,8 +38,14 @@ const GamesPage = () => {
         };
       }
 
-      const response = await fetch(`${API_URL}/games`, requestOptions)
-      const data: ApiResponseItem[] = await response.json();
+
+      const [gamesResponse, rulesResponse] = await Promise.all([
+        fetch(`${API_URL}/games`, requestOptions),
+        fetch(`${API_URL}/getGamesWithRules`, requestOptions),
+      ]);
+      const data: ApiResponseItem[] = await gamesResponse.json();
+      const bgg_ids = await rulesResponse.json();
+
       const mappedGames = data.map((game) => ({
         bgg_id: game.bgg_id,
         name: game.name,
@@ -53,7 +59,11 @@ const GamesPage = () => {
         price: game.price || "", // Ensure price field is included
         isGifted: game.isGifted || false, // Ensure isGift field is included
         username: game.username || "", // Get username from local storage
+        hasRules: bgg_ids.includes(game.bgg_id), // Add hasRules flag based on bgg_ids
       }));
+
+      // Sort games by name
+      mappedGames.sort((a, b) => a.name.localeCompare(b.name));
 
       setGames(mappedGames);
     };

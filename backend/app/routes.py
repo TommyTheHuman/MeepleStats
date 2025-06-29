@@ -535,6 +535,20 @@ def get_achievements():
     return jsonify(achievements_data), 200
 
 
+@data_bp.route('/getGamesWithRules', methods=['GET'])
+@jwt_required()
+def getGamesWithRules():
+
+    # Find games in the database
+    games = rulebooks_collection.find()
+
+    game_ids = []
+    for game in games:
+        if game.get('game_id') not in game_ids:
+            game_ids.append(game.get('game_id'))
+
+    return jsonify(game_ids), 200
+
 
 statistic_bp = Blueprint('statistic', __name__)
 

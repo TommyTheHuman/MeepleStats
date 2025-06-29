@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Faction } from "../model/Interfaces";
-import { Badge, Box, Checkbox, Grid, Group, Paper, Stack, Text, Title } from "@mantine/core";
+import { Badge, Box, Checkbox, Grid, Group, Paper, Stack, Text, Title, useMantineColorScheme } from "@mantine/core";
 import * as Plot from "@observablehq/plot";
 
 
@@ -13,6 +13,8 @@ const viable = [
 ]
 
 const RootCounter = () => {
+  const { colorScheme } = useMantineColorScheme();
+  const isDarkMode = colorScheme === "dark";
 
   const [selectedFactions, setSelectedFactions] = useState<Faction[]>([]);
   const plotRef = useRef<HTMLDivElement>(null);
@@ -100,15 +102,41 @@ const RootCounter = () => {
 
 
   return (
-    <Paper p="md" withBorder radius="md" className="!bg-white !shadow-sm !mb-6">
-      <Title order={3} className="!mb-4 !text-gray-800 !text-lg !font-semibold">
+    <Paper
+      p="md"
+      withBorder
+      radius="md"
+      className="!shadow-sm !mb-6"
+      style={{
+        backgroundColor: isDarkMode ? "#1f2937" : "white",
+        borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+      }}
+    >
+      <Title
+        order={3}
+        className="!mb-4 !text-lg !font-semibold"
+        c={isDarkMode ? "gray.1" : "gray.8"}
+      >
         Root Game Balance Calculator
       </Title>
 
       <Grid>
         <Grid.Col span={{ base: 12, sm: 5 }}>
-          <Paper p="sm" radius="md" className="!bg-gray-50 !border !border-gray-100">
-            <Text fw={600} size="sm" className="!text-gray-700 !mb-3">
+          <Paper
+            p="sm"
+            radius="md"
+            className="!border"
+            style={{
+              backgroundColor: isDarkMode ? "#374151" : "#f9fafb",
+              borderColor: isDarkMode ? "#9ca3af" : "#e5e7eb",
+            }}
+          >
+            <Text
+              fw={600}
+              size="sm"
+              className="!mb-3"
+              c={isDarkMode ? "gray.1" : "gray.7"}
+            >
               Select Factions
             </Text>
 
@@ -127,7 +155,14 @@ const RootCounter = () => {
                       }}
                     />
                     <Text size="sm">{f.name}</Text>
-                    <Badge size="sm" variant="light" color="gray">
+                    <Badge
+                      size="sm"
+                      variant="light"
+                      style={{
+                        backgroundColor: isDarkMode ? "#4b5563" : "#e5e7eb",
+                        color: isDarkMode ? "#d1d5db" : "#6b7280",
+                      }}
+                    >
                       {f.reach}
                     </Badge>
                   </Group>
@@ -135,7 +170,14 @@ const RootCounter = () => {
                 onChange={() => toggleFaction(f)}
                 className="!mb-2"
                 styles={{
-                  input: { cursor: 'pointer' }
+                  input: {
+                    cursor: 'pointer',
+                    backgroundColor: isDarkMode ? "#4b5563" : "white",
+                    borderColor: isDarkMode ? "#9ca3af" : "#d1d5db",
+                  },
+                  label: {
+                    color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                  }
                 }}
               />
             ))}
@@ -145,7 +187,11 @@ const RootCounter = () => {
         <Grid.Col span={{ base: 12, sm: 7 }}>
           <Stack>
             <Group justify="space-between">
-              <Title order={4} className="!text-gray-700 !font-semibold">
+              <Title
+                order={4}
+                className="!font-semibold"
+                c={isDarkMode ? "gray.1" : "gray.7"}
+              >
                 Reach Chart
               </Title>
 
@@ -161,24 +207,36 @@ const RootCounter = () => {
                 </Badge>
 
                 {currentPlayers > 0 && (
-                  <Text size="sm" fw={500} className="!text-gray-600">
+                  <Text
+                    size="sm"
+                    fw={500}
+                    c={isDarkMode ? "gray.3" : "gray.6"}
+                  >
                     Total Reach: {totalReach}/{targetReach}
                   </Text>
                 )}
               </Group>
             </Group>
 
-            <Paper p="md" radius="md" className="!bg-gray-50 !border !border-gray-100 !min-height-[200px]">
+            <Paper
+              p="md"
+              radius="md"
+              className="!border !min-height-[200px]"
+              style={{
+                backgroundColor: isDarkMode ? "#374151" : "#f9fafb",
+                borderColor: isDarkMode ? "#9ca3af" : "#e5e7eb",
+              }}
+            >
               {selectedFactions.length > 0 ? (
                 <div ref={plotRef} style={{ width: "100%" }} />
               ) : (
-                <Text ta="center" c="dimmed" py="xl">
+                <Text ta="center" c={isDarkMode ? "gray.4" : "dimmed"} py="xl">
                   Select factions to visualize game balance
                 </Text>
               )}
             </Paper>
 
-            <Text size="xs" c="dimmed" ta="center">
+            <Text size="xs" c={isDarkMode ? "gray.4" : "dimmed"} ta="center">
               Select multiple factions to check if their combined reach is balanced for your player count.
             </Text>
           </Stack>

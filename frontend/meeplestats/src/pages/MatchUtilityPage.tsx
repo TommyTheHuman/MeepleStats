@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { Wheel } from 'react-custom-roulette'
 import { Game } from '../model/Interfaces';
 import { API_URL, JWT_STORAGE } from '../model/Constants';
-import { Box, Button, Paper, Select, Stack, Title, Text, Group, Container, Grid, Divider, List } from '@mantine/core';
+import { Box, Button, Paper, Select, Stack, Title, Text, Group, Container, Grid, Divider, List, useMantineColorScheme } from '@mantine/core';
 import { useStopwatch } from 'react-timer-hook';
 import RootCounter from '../components/RootCounter';
 
 const MatchUtilityPage = () => {
+  const { colorScheme } = useMantineColorScheme();
+  const isDarkMode = colorScheme === "dark";
 
   const [games, setGames] = useState<Game[]>([]);
   const [mustSpin, setMustSpin] = useState(false);
@@ -89,21 +91,70 @@ const MatchUtilityPage = () => {
 
 
     return (
-      <Paper p="md" withBorder>
+      <Paper
+        p="md"
+        withBorder
+        style={{
+          backgroundColor: isDarkMode ? "#1f2937" : "white",
+          borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+        }}
+      >
         <Stack>
-          <Title order={3}>Stopwatch</Title>
-          <Box style={{ fontSize: '2rem', fontFamily: 'monospace', textAlign: 'center' }}>
+          <Title
+            order={3}
+            c={isDarkMode ? "gray.1" : "gray.9"}
+          >
+            Stopwatch
+          </Title>
+          <Box
+            style={{
+              fontSize: '2rem',
+              fontFamily: 'monospace',
+              textAlign: 'center',
+              color: isDarkMode ? "#f3f4f6" : "#1f2937"
+            }}
+          >
             <span>{String(hours).padStart(2, '0')}</span>:
             <span>{String(minutes).padStart(2, '0')}</span>:
             <span>{String(seconds).padStart(2, '0')}</span>
           </Box>
-          <Text size="sm" c={isRunning ? "green" : "gray"} ta={"center"}>
+          <Text
+            size="sm"
+            c={isRunning ? "green" : (isDarkMode ? "gray.4" : "gray")}
+            ta={"center"}
+          >
             {isRunning ? 'Running' : 'Not running'}
           </Text>
           <Group grow>
-            <Button onClick={start} color="green" disabled={isRunning}>Start</Button>
-            <Button onClick={pause} color="yellow" disabled={!isRunning}>Pause</Button>
-            <Button onClick={() => reset()} color="red">Reset</Button>
+            <Button
+              onClick={start}
+              disabled={isRunning}
+              className={`!transition-colors !font-medium ${isDarkMode
+                ? "!bg-green-700 !text-green-200 hover:!bg-green-600"
+                : "!bg-green-50 !text-green-600 hover:!bg-green-100"
+                }`}
+            >
+              Start
+            </Button>
+            <Button
+              onClick={pause}
+              disabled={!isRunning}
+              className={`!transition-colors !font-medium ${isDarkMode
+                ? "!bg-yellow-700 !text-yellow-200 hover:!bg-yellow-600"
+                : "!bg-yellow-50 !text-yellow-600 hover:!bg-yellow-100"
+                }`}
+            >
+              Pause
+            </Button>
+            <Button
+              onClick={() => reset()}
+              className={`!transition-colors !font-medium ${isDarkMode
+                ? "!bg-red-700 !text-red-200 hover:!bg-red-600"
+                : "!bg-red-50 !text-red-600 hover:!bg-red-100"
+                }`}
+            >
+              Reset
+            </Button>
           </Group>
         </Stack>
       </Paper>
@@ -115,14 +166,33 @@ const MatchUtilityPage = () => {
     <Container size="xl" py="md">
       <Grid gutter="md">
         <Grid.Col span={12}>
-          <Title order={1} ta="center" mb="lg">Game Selector Utilities</Title>
+          <Title
+            order={1}
+            ta="center"
+            mb="lg"
+            c={isDarkMode ? "gray.1" : "gray.9"}
+          >
+            Game Selector Utilities
+          </Title>
         </Grid.Col>
 
         {/* Left Column - Game Selection & Wheel Games List */}
         <Grid.Col span={{ base: 12, md: 4 }}>
-          <Paper p="md" withBorder>
+          <Paper
+            p="md"
+            withBorder
+            style={{
+              backgroundColor: isDarkMode ? "#1f2937" : "white",
+              borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+            }}
+          >
             <Stack>
-              <Title order={3}>Select Games</Title>
+              <Title
+                order={3}
+                c={isDarkMode ? "gray.1" : "gray.9"}
+              >
+                Select Games
+              </Title>
 
               <Select
                 label="Select a game to add"
@@ -132,24 +202,66 @@ const MatchUtilityPage = () => {
                 onChange={(value) => setSelectedGame(value)}
                 searchable
                 clearable
+                styles={{
+                  input: {
+                    backgroundColor: isDarkMode ? "#374151" : "white",
+                    borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                    color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                    "&:focus": {
+                      borderColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+                    },
+                  },
+                  label: {
+                    color: isDarkMode ? "#d1d5db" : "#4b5563",
+                  },
+                  dropdown: {
+                    backgroundColor: isDarkMode ? "#374151" : "white",
+                    borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                  },
+                  option: {
+                    backgroundColor: isDarkMode ? "#374151" : "white",
+                    color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                    "&:hover": {
+                      backgroundColor: isDarkMode ? "#4b5563" : "#f9fafb",
+                    },
+                  },
+                }}
               />
 
-              <Button onClick={handleAddGame} disabled={!selectedGame} fullWidth>
+              <Button
+                onClick={handleAddGame}
+                disabled={!selectedGame}
+                fullWidth
+                className={`!transition-colors !font-medium ${isDarkMode
+                  ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
+                  : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
+                  }`}
+              >
                 Add to Wheel
               </Button>
 
-              <Divider label="Games in Wheel" labelPosition="center" />
+              <Divider
+                label="Games in Wheel"
+                labelPosition="center"
+                style={{
+                  borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                }}
+              />
 
               {wheelGames.length > 0 ? (
                 <List>
                   {wheelGames.map((game, index) => (
                     <List.Item key={index} className="mb-2">
                       <Group justify="apart">
-                        <Text>{game.name}</Text>
+                        <Text c={isDarkMode ? "gray.1" : "gray.9"}>{game.name}</Text>
                         <Button
                           variant="subtle"
                           color="red"
                           onClick={() => handleRemoveGame(game)}
+                          className={`!transition-colors !font-medium ${isDarkMode
+                            ? "!bg-red-800 !text-red-200 hover:!bg-red-700"
+                            : "!bg-red-50 !text-red-600 hover:!bg-red-100"
+                            }`}
                         >
                           Remove
                         </Button>
@@ -158,7 +270,7 @@ const MatchUtilityPage = () => {
                   ))}
                 </List>
               ) : (
-                <Text color="dimmed" ta="center">No games added yet</Text>
+                <Text c={isDarkMode ? "gray.4" : "dimmed"} ta="center">No games added yet</Text>
               )}
             </Stack>
           </Paper>
@@ -167,9 +279,22 @@ const MatchUtilityPage = () => {
         {/* Right Column - Wheel & Stopwatch */}
         <Grid.Col span={{ base: 12, md: 8 }}>
           <Stack>
-            <Paper p="md" withBorder>
+            <Paper
+              p="md"
+              withBorder
+              style={{
+                backgroundColor: isDarkMode ? "#1f2937" : "white",
+                borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+              }}
+            >
               <Stack align="center">
-                <Title order={3} ta="center">Game Wheel</Title>
+                <Title
+                  order={3}
+                  ta="center"
+                  c={isDarkMode ? "gray.1" : "gray.9"}
+                >
+                  Game Wheel
+                </Title>
 
                 <Box style={{ width: '100%', maxWidth: '400px', display: 'flex', justifyContent: 'center' }}>
                   <Wheel
@@ -186,7 +311,10 @@ const MatchUtilityPage = () => {
                     onClick={handleSpinClick}
                     disabled={wheelGames.length === 0}
                     size="lg"
-                    color="blue"
+                    className={`!transition-colors !font-medium ${isDarkMode
+                      ? "!bg-blue-700 !text-blue-200 hover:!bg-blue-600"
+                      : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
+                      }`}
                   >
                     Spin the Wheel
                   </Button>
@@ -208,7 +336,14 @@ const MatchUtilityPage = () => {
       </Grid>
 
       {/* Root Counter with proper spacing */}
-      <Title order={2} mb="md" mt="xl">Game Balance Tools</Title>
+      <Title
+        order={2}
+        mb="md"
+        mt="xl"
+        c={isDarkMode ? "gray.1" : "gray.9"}
+      >
+        Game Balance Tools
+      </Title>
       <RootCounter />
 
     </Container>

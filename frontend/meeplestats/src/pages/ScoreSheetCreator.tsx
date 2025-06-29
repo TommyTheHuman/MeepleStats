@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { Game } from "../model/Interfaces";
 import { API_URL, JWT_STORAGE } from "../model/Constants";
-import { ActionIcon, Box, Button, Container, Divider, Grid, Group, LoadingOverlay, Paper, ScrollArea, Select, Stack, TextInput, Title } from "@mantine/core";
+import { ActionIcon, Box, Button, Container, Divider, Grid, Group, LoadingOverlay, Paper, ScrollArea, Select, Stack, TextInput, Title, useMantineColorScheme } from "@mantine/core";
 import { IconPlus, IconTrash, IconDownload } from "@tabler/icons-react";
 import { showNotification } from "@mantine/notifications";
 import { useMediaQuery } from "@mantine/hooks";
 
 const ScoreSheetCreator = () => {
+  const { colorScheme } = useMantineColorScheme();
+  const isDarkMode = colorScheme === "dark";
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(false);
@@ -141,18 +143,31 @@ const ScoreSheetCreator = () => {
 
   return (
     <Container size="xl" py="md" px={isMobile ? "xs" : "md"}>
-      <Title order={1} className="!mb-6 !text-gray-800 !text-2xl !font-bold">
+      <Title
+        order={1}
+        className="!mb-6 !text-2xl !font-bold"
+        c={isDarkMode ? "gray.1" : "gray.8"}
+      >
         Score Sheet Creator
       </Title>
 
       <Grid gutter={isMobile ? "xs" : "md"}>
         {/* Form Column - Full width on mobile, half width on desktop */}
         <Grid.Col span={isMobile ? 12 : 6}>
-          <Paper p={isMobile ? "sm" : "md"} radius="md" className="!bg-white !shadow-sm !mb-4">
+          <Paper
+            p={isMobile ? "sm" : "md"}
+            radius="md"
+            className={`!shadow-sm !mb-4 ${isDarkMode ? "!bg-gray-800 !border-gray-700" : "!bg-white !border-gray-200"}`}
+            withBorder
+          >
             <Box pos="relative">
               <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: "md", blur: 2 }} />
 
-              <Title order={3} className="!mb-4 !text-gray-800 !text-lg !font-semibold">
+              <Title
+                order={3}
+                className="!mb-4 !text-lg !font-semibold"
+                c={isDarkMode ? "gray.1" : "gray.8"}
+              >
                 Game Details
               </Title>
 
@@ -170,8 +185,31 @@ const ScoreSheetCreator = () => {
                 searchable
                 className="!mb-4"
                 styles={{
-                  input: { borderRadius: "0.75rem" },
-                  label: { fontWeight: 500, fontSize: "0.875rem" }
+                  input: {
+                    borderRadius: "0.75rem",
+                    backgroundColor: isDarkMode ? "#374151" : "white",
+                    borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                    color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                    "&:focus": {
+                      borderColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+                    },
+                  },
+                  label: {
+                    fontWeight: 500,
+                    fontSize: "0.875rem",
+                    color: isDarkMode ? "#d1d5db" : "#4b5563",
+                  },
+                  dropdown: {
+                    backgroundColor: isDarkMode ? "#374151" : "white",
+                    borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                  },
+                  option: {
+                    backgroundColor: isDarkMode ? "#374151" : "white",
+                    color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                    "&:hover": {
+                      backgroundColor: isDarkMode ? "#4b5563" : "#f9fafb",
+                    },
+                  },
                 }}
               />
 
@@ -182,26 +220,60 @@ const ScoreSheetCreator = () => {
                 placeholder="Enter a description for this score sheet"
                 className="!mb-4"
                 styles={{
-                  input: { borderRadius: "0.75rem" },
-                  label: { fontWeight: 500, fontSize: "0.875rem" }
+                  input: {
+                    borderRadius: "0.75rem",
+                    backgroundColor: isDarkMode ? "#374151" : "white",
+                    borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                    color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                    "&:focus": {
+                      borderColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+                    },
+                  },
+                  label: {
+                    fontWeight: 500,
+                    fontSize: "0.875rem",
+                    color: isDarkMode ? "#d1d5db" : "#4b5563",
+                  }
                 }}
               />
             </Box>
           </Paper>
 
-          <Paper p={isMobile ? "sm" : "md"} radius="md" className="!bg-white !shadow-sm !mb-4">
+          <Paper
+            p={isMobile ? "sm" : "md"}
+            radius="md"
+            className="!shadow-sm !mb-4"
+            style={{
+              backgroundColor: isDarkMode ? "#1f2937" : "white",
+              borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+            }}
+            withBorder
+          >
             <Box pos="relative">
-              <Title order={3} className="!mb-4 !text-gray-800 !text-lg !font-semibold">
+              <Title
+                order={3}
+                className="!mb-4 !text-lg !font-semibold"
+                c={isDarkMode ? "gray.1" : "gray.8"}
+              >
                 Score Fields
               </Title>
 
-              <Box className="!text-gray-600 !mb-4" style={{ fontSize: '0.875rem' }}>
+              <Box
+                className="!mb-4"
+                style={{
+                  fontSize: '0.875rem',
+                  color: isDarkMode ? "#9ca3af" : "#6b7280"
+                }}
+              >
                 Add fields to track different scoring elements for your game.
               </Box>
 
               <Button
                 onClick={addField}
-                className="!bg-blue-600 hover:!bg-blue-700 !transition-colors !mb-4"
+                className={`!transition-colors !font-medium !mb-4 ${isDarkMode
+                  ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
+                  : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
+                  }`}
                 radius="md"
                 leftSection={<IconPlus size={16} />}
                 fullWidth
@@ -211,7 +283,14 @@ const ScoreSheetCreator = () => {
 
               {fields.length > 0 && (
                 <Box className="!mb-4">
-                  <Divider label="Scoring Fields" labelPosition="center" className="!mb-4 !opacity-60" />
+                  <Divider
+                    label="Scoring Fields"
+                    labelPosition="center"
+                    className="!mb-4"
+                    style={{
+                      borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+                    }}
+                  />
 
                   {fields.map((field, index) => (
                     <Paper
@@ -219,7 +298,11 @@ const ScoreSheetCreator = () => {
                       p={isMobile ? "xs" : "sm"}
                       mb="sm"
                       radius="md"
-                      className="!bg-gray-50 !border !border-gray-100"
+                      style={{
+                        backgroundColor: isDarkMode ? "#374151" : "#f9fafb",
+                        borderColor: isDarkMode ? "#6b7280" : "#e5e7eb",
+                      }}
+                      withBorder
                     >
                       {/* Use the same Stack layout for both mobile and desktop */}
                       <Stack gap={isMobile ? "xs" : "sm"}>
@@ -229,8 +312,20 @@ const ScoreSheetCreator = () => {
                           onChange={(e) => updateField(index, "label", e.target.value)}
                           placeholder="e.g., Victory Points"
                           styles={{
-                            input: { borderRadius: "0.75rem" },
-                            label: { fontWeight: 500, fontSize: "0.875rem" }
+                            input: {
+                              borderRadius: "0.75rem",
+                              backgroundColor: isDarkMode ? "#4b5563" : "white",
+                              borderColor: isDarkMode ? "#9ca3af" : "#d1d5db",
+                              color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                              "&:focus": {
+                                borderColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+                              },
+                            },
+                            label: {
+                              fontWeight: 500,
+                              fontSize: "0.875rem",
+                              color: isDarkMode ? "#d1d5db" : "#4b5563",
+                            }
                           }}
                         />
 
@@ -245,8 +340,31 @@ const ScoreSheetCreator = () => {
                                 { value: "text", label: "Text" }
                               ]}
                               styles={{
-                                input: { borderRadius: "0.75rem" },
-                                label: { fontWeight: 500, fontSize: "0.875rem" }
+                                input: {
+                                  borderRadius: "0.75rem",
+                                  backgroundColor: isDarkMode ? "#4b5563" : "white",
+                                  borderColor: isDarkMode ? "#9ca3af" : "#d1d5db",
+                                  color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                                  "&:focus": {
+                                    borderColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+                                  },
+                                },
+                                label: {
+                                  fontWeight: 500,
+                                  fontSize: "0.875rem",
+                                  color: isDarkMode ? "#d1d5db" : "#4b5563",
+                                },
+                                dropdown: {
+                                  backgroundColor: isDarkMode ? "#4b5563" : "white",
+                                  borderColor: isDarkMode ? "#9ca3af" : "#d1d5db",
+                                },
+                                option: {
+                                  backgroundColor: isDarkMode ? "#4b5563" : "white",
+                                  color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                                  "&:hover": {
+                                    backgroundColor: isDarkMode ? "#6b7280" : "#f9fafb",
+                                  },
+                                },
                               }}
                             />
                           </Grid.Col>
@@ -258,8 +376,20 @@ const ScoreSheetCreator = () => {
                               onChange={(e) => updateField(index, "weight", parseFloat(e.target.value) || 0)}
                               placeholder="1"
                               styles={{
-                                input: { borderRadius: "0.75rem" },
-                                label: { fontWeight: 500, fontSize: "0.875rem" }
+                                input: {
+                                  borderRadius: "0.75rem",
+                                  backgroundColor: isDarkMode ? "#4b5563" : "white",
+                                  borderColor: isDarkMode ? "#9ca3af" : "#d1d5db",
+                                  color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                                  "&:focus": {
+                                    borderColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+                                  },
+                                },
+                                label: {
+                                  fontWeight: 500,
+                                  fontSize: "0.875rem",
+                                  color: isDarkMode ? "#d1d5db" : "#4b5563",
+                                }
                               }}
                             />
                           </Grid.Col>
@@ -271,8 +401,20 @@ const ScoreSheetCreator = () => {
                           onChange={(e) => updateField(index, "rule", e.target.value)}
                           placeholder="e.g., Highest wins"
                           styles={{
-                            input: { borderRadius: "0.75rem" },
-                            label: { fontWeight: 500, fontSize: "0.875rem" }
+                            input: {
+                              borderRadius: "0.75rem",
+                              backgroundColor: isDarkMode ? "#4b5563" : "white",
+                              borderColor: isDarkMode ? "#9ca3af" : "#d1d5db",
+                              color: isDarkMode ? "#f3f4f6" : "#1f2937",
+                              "&:focus": {
+                                borderColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+                              },
+                            },
+                            label: {
+                              fontWeight: 500,
+                              fontSize: "0.875rem",
+                              color: isDarkMode ? "#d1d5db" : "#4b5563",
+                            }
                           }}
                         />
 
@@ -283,6 +425,12 @@ const ScoreSheetCreator = () => {
                             variant={isMobile ? "filled" : "subtle"}
                             size={isMobile ? "md" : "lg"}
                             radius="md"
+                            style={{
+                              backgroundColor: isDarkMode ? "#4b5563" : "#f3f4f6",
+                              "&:hover": {
+                                backgroundColor: isDarkMode ? "#6b7280" : "#e5e7eb",
+                              }
+                            }}
                           >
                             <IconTrash size={isMobile ? 16 : 18} />
                           </ActionIcon>
@@ -297,7 +445,10 @@ const ScoreSheetCreator = () => {
                 <Group grow>
                   <Button
                     onClick={downloadJSON}
-                    className="!bg-green-600 hover:!bg-green-700 !transition-colors"
+                    className={`!transition-colors !font-medium ${isDarkMode
+                      ? "!bg-green-700 !text-green-100 hover:!bg-green-600"
+                      : "!bg-green-50 !text-green-600 hover:!bg-green-100"
+                      }`}
                     radius="md"
                     leftSection={<IconDownload size={16} />}
                     size={isMobile ? "sm" : "md"}
@@ -306,7 +457,10 @@ const ScoreSheetCreator = () => {
                   </Button>
                   <Button
                     onClick={handleUpload}
-                    className="!bg-blue-600 hover:!bg-blue-700 !transition-colors"
+                    className={`!transition-colors !font-medium ${isDarkMode
+                      ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
+                      : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
+                      }`}
                     radius="md"
                     leftSection={<IconPlus size={16} />}
                     size={isMobile ? "sm" : "md"}
@@ -321,8 +475,22 @@ const ScoreSheetCreator = () => {
 
         {/* Preview Column - Full width on mobile, half width on desktop */}
         <Grid.Col span={isMobile ? 12 : 6}>
-          <Paper p={isMobile ? "sm" : "md"} radius="md" className="!bg-white !shadow-sm" style={!isMobile ? { position: "sticky", top: "1rem" } : {}}>
-            <Title order={3} className="!mb-4 !text-gray-800 !text-lg !font-semibold">
+          <Paper
+            p={isMobile ? "sm" : "md"}
+            radius="md"
+            className="!shadow-sm"
+            style={{
+              backgroundColor: isDarkMode ? "#1f2937" : "white",
+              borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
+              ...((!isMobile) ? { position: "sticky", top: "1rem" } : {})
+            }}
+            withBorder
+          >
+            <Title
+              order={3}
+              className="!mb-4 !text-lg !font-semibold"
+              c={isDarkMode ? "gray.1" : "gray.8"}
+            >
               JSON Preview
             </Title>
 
@@ -330,10 +498,20 @@ const ScoreSheetCreator = () => {
               <Paper
                 p={isMobile ? "xs" : "md"}
                 radius="md"
-                className="!bg-gray-50 !border !border-gray-100 !overflow-auto"
-                style={{ fontFamily: 'monospace' }}
+                className="!overflow-auto"
+                style={{
+                  fontFamily: 'monospace',
+                  backgroundColor: isDarkMode ? "#374151" : "#f9fafb",
+                  borderColor: isDarkMode ? "#6b7280" : "#e5e7eb",
+                }}
+                withBorder
               >
-                <pre className="!text-xs md:!text-sm !text-gray-700 !whitespace-pre-wrap">
+                <pre
+                  className="!text-xs md:!text-sm !whitespace-pre-wrap"
+                  style={{
+                    color: isDarkMode ? "#e5e7eb" : "#4b5563"
+                  }}
+                >
                   {JSON.stringify(generateJSON(), null, 2)}
                 </pre>
               </Paper>
