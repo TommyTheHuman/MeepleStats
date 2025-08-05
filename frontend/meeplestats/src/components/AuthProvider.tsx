@@ -24,6 +24,13 @@ const AuthProvider = ({ children }: Readonly<{ children: React.ReactNode }>) => 
         if (response.ok) {
           setAuthStatus("LoggedIn");
         } else {
+          console.log("User is not authenticated, setting status to Anonymous");
+          // Clear JWT token if it exists
+          if (JWT_STORAGE === 'localstorage') {
+            localStorage.removeItem('jwt_token');
+          }
+          localStorage.removeItem('username');
+          localStorage.setItem('loggedIn', 'false');
           setAuthStatus("Anonymous");
         }
 

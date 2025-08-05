@@ -14,6 +14,12 @@ const GameCard = ({ game }: { game: Game }) => {
   const [isGifted, setIsGifted] = useState(game.isGifted);
   const { colorScheme } = useMantineColorScheme();
   const isDarkMode = colorScheme === "dark";
+
+  const openBGGLink = () => {
+    const bggUrl = `https://boardgamegeek.com/boardgame/${game.bgg_id}`;
+    window.open(bggUrl, "_blank");
+  };
+
   // Function to update the game object
   const updateGame = async () => {
 
@@ -66,6 +72,8 @@ const GameCard = ({ game }: { game: Game }) => {
       shadow="xs"
       padding="md"
       radius="lg"
+      style={{ cursor: "pointer" }}
+      onClick={openBGGLink}
       className={`!overflow-hidden !transition-shadow hover:!shadow-md !w-full ${isDarkMode ? "!bg-gray-800 !border-gray-700" : "!bg-white !border-gray-100"
         }`}
     >
@@ -163,8 +171,8 @@ const GameCard = ({ game }: { game: Game }) => {
           radius="md"
           onClick={updateGame}
           className={`!font-medium !transition-colors !text-sm !px-4 !py-1.5 active:!scale-95 ${isDarkMode
-              ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
-              : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
+            ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
+            : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
             }`}
           style={{ touchAction: "manipulation" }}
         >
