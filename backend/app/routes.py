@@ -552,6 +552,47 @@ def getGamesWithRules():
 
 statistic_bp = Blueprint('statistic', __name__)
 
+@data_bp.route('/addGame', methods=['POST'])
+@jwt_required()
+def addGame():
+    data = request.get_json()
+    game_id = data.get('game_id')
+
+    # Get the game information from BGG API
+    bgg_api_url = f"https://www.boardgamegeek.com/xmlapi2/thing?id={game_id}"
+    response = requests.get(bgg_api_url)
+
+    if response.status_code != 200:
+        return jsonify({'error': 'Failed to fetch game information from BGG API'}), 500
+
+    # Parse the XML response (assuming the response is in XML format)
+    import xml.etree.ElementTree as ET
+    root = ET.fromstring(response.content)
+    game = root.find('item')
+
+    game_data = {
+                'bgg_id': game.attrib['id'],
+                'name': game.find('name[@type=\'primary\']').attrib['value'],
+                "type": "base",
+                'min_players': game.find('minplayers').attrib['value'],
+                'max_players': game.find('maxplayers').attrib['value'],
+                'average_duration': game.find('playingtime').attrib['value'],
+                'image': {'url': game.find('image').text,
+                        'thumbnail': game.find('thumbnail').text
+                        },
+                'is_cooperative': False if game.find('link[@id=\'2023\']') is None else True,
+                'expansions': [],
+                'description': game.find('description').text,
+                'matches': [],
+                'record_score_by_player': {'player_id': "", 'score': 0},
+                'average_score': 0
+            }
+
+    if games_collection.find_one({'bgg_id': game_id}) is None:
+        games_collection.insert_one(game_data)
+        return jsonify({'message': 'Game added successfully'}), 201
+    return jsonify({'error': 'Game already exists'}), 400
+
 ### GLOBAL STATS ###
 
 @statistic_bp.route('/totHours', methods=['GET'])
