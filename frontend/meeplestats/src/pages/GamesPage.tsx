@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Game } from "../model/Interfaces";
 import { API_URL, JWT_STORAGE } from "../model/Constants";
-import { Button, Container, Grid, Modal, Paper, useMantineColorScheme, Text, Title, Image, Autocomplete, Group, Divider, ActionIcon } from "@mantine/core";
+import { Button, Container, Grid, Modal, Paper, useMantineColorScheme, Text, Title, Image, Autocomplete, Group, Divider, ActionIcon, Stack, Tooltip } from "@mantine/core";
 import GameCard from "../components/GameCard";
 import { IconPlus } from "@tabler/icons-react";
+import { SiBoardgamegeek } from "react-icons/si";
 
 interface ApiResponseItem {
   bgg_id: string;
@@ -181,6 +182,11 @@ const GamesPage = () => {
     setModalOpened(false);
   };
 
+  const openBGGLink = () => {
+    const bggUrl = `https://boardgamegeek.com/boardgame/${selectedGame?.bgg_id}/`;
+    window.open(bggUrl, "_blank");
+  };
+
   return (
     <Container size="xl" className="!px-4 md:!px-6">
       <Group justify="flex-end" mb="md">
@@ -291,43 +297,64 @@ const GamesPage = () => {
               radius="md"
               className="!mt-4"
               style={{
-                background: isDarkMode
-                  ? "#1e293b"
-                  : "#f1f5f9",
-                borderColor: isDarkMode ? "#60a5fa" : "#3b82f6",
+                background: isDarkMode ? "#232b3a" : "#f8fafc",
+                borderColor: isDarkMode ? "#2563eb" : "#3b82f6",
                 boxShadow: isDarkMode
-                  ? "0 2px 12px 0 rgba(30,64,175,0.15)"
-                  : "0 2px 12px 0 rgba(59,130,246,0.10)",
+                  ? "0 2px 8px 0 rgba(30,64,175,0.10)"
+                  : "0 2px 8px 0 rgba(59,130,246,0.06)",
               }}
             >
-              <Group align="flex-start" gap={"lg"} wrap="nowrap">
+              <Group align="flex-start" gap="lg" wrap="nowrap">
                 <Image
                   src={selectedGame.thumbnail}
                   alt={selectedGame.name}
                   radius="md"
-                  width={100}
-                  height={100}
+                  width={90}
+                  height={90}
                   fit="cover"
-                  className="!rounded-md !shadow-sm"
+                  className="!rounded-md !shadow"
                   style={{
-                    border: `2px solid ${isDarkMode ? "#60a5fa" : "#3b82f6"}`,
+                    border: `2px solid ${isDarkMode ? "#2563eb" : "#3b82f6"}`,
+                    background: "#fff",
                   }}
                 />
-                <div>
-                  <Title
-                    order={3}
-                    className="!mb-2 !text-lg !font-semibold"
-                    c={isDarkMode ? "blue.2" : "blue.7"}
-                  >
-                    {selectedGame.name}
-                  </Title>
+                <Stack w="100%" gap={4}>
+                  <Group justify="space-between" align="center" mb={0}>
+                    <Title
+                      order={3}
+                      className="!mb-0 !text-lg !font-semibold"
+                      c={isDarkMode ? "blue.2" : "blue.7"}
+                      style={{
+                        lineHeight: 1.2,
+                        wordBreak: "break-word",
+                        maxWidth: "calc(100% - 40px)",
+                      }}
+                    >
+                      {selectedGame.name}
+                    </Title>
+                    <Tooltip label="Open on BoardGameGeek" withArrow>
+                      <ActionIcon
+                        variant="light"
+                        color="blue"
+                        size="lg"
+                        onClick={openBGGLink}
+                        style={{ marginLeft: 8 }}
+                        aria-label="Open on BoardGameGeek"
+                      >
+                        <SiBoardgamegeek size={22} />
+                      </ActionIcon>
+                    </Tooltip>
+                  </Group>
                   <Text size="sm" c={isDarkMode ? "gray.3" : "gray.7"}>
-                    Players: {selectedGame.minPlayers} - {selectedGame.maxPlayers}
+                    <b>Players:</b> {selectedGame.minPlayers} - {selectedGame.maxPlayers}
                   </Text>
                   <Text size="sm" c={isDarkMode ? "gray.3" : "gray.7"}>
-                    Duration: {selectedGame.playingTime} minutes
+                    <b>Duration:</b> {selectedGame.playingTime} minutes
                   </Text>
-                </div>
+                  <Text size="xs" c={isDarkMode ? "gray.5" : "gray.6"} mt={2}>
+                    Year: {selectedGame.yearPublished}
+                  </Text>
+                </Stack>
               </Group>
               <Button
                 onClick={() => { addGame(); handleCloseModal(); }}
@@ -340,7 +367,7 @@ const GamesPage = () => {
                   : "!bg-blue-600 !text-white hover:!bg-blue-700"
                   }`}
                 radius="md"
-                style={{ marginTop: 24 }}
+                style={{ marginTop: 24, fontSize: 16, letterSpacing: 0.5 }}
               >
                 Add Game to Collection
               </Button>

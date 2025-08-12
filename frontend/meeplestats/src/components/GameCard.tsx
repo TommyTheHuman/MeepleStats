@@ -1,10 +1,12 @@
-import { Card, Checkbox, Image, TextInput, Text, Button, Stack, Group, Badge, Tooltip } from "@mantine/core";
+import { Card, Checkbox, Image, TextInput, Text, Button, Stack, Group, Badge, Tooltip, ActionIcon } from "@mantine/core";
 import { useMantineColorScheme } from "@mantine/core";
 import { Game } from "../model/Interfaces";
 import { useState } from "react";
 import { API_URL, JWT_STORAGE } from "../model/Constants";
 import { notifications } from "@mantine/notifications";
 import { IconBook2 } from "@tabler/icons-react";
+import { SiBoardgamegeek } from "react-icons/si";
+import { GiCardJoker } from "react-icons/gi";
 
 
 const GameCard = ({ game }: { game: Game }) => {
@@ -18,6 +20,13 @@ const GameCard = ({ game }: { game: Game }) => {
   const openBGGLink = () => {
     const bggUrl = `https://boardgamegeek.com/boardgame/${game.bgg_id}`;
     window.open(bggUrl, "_blank");
+  };
+
+  const openBGGSleeves = () => {
+    let name = game.name;
+    name = name?.replace(/\s+/g, "-").toLowerCase();
+    const bggSleevesUrl = `https://boardgamegeek.com/boardgame/${game.bgg_id}/${name}/sleeves`;
+    window.open(bggSleevesUrl, "_blank");
   };
 
   // Function to update the game object
@@ -73,7 +82,6 @@ const GameCard = ({ game }: { game: Game }) => {
       padding="md"
       radius="lg"
       style={{ cursor: "pointer" }}
-      onClick={openBGGLink}
       className={`!overflow-hidden !transition-shadow hover:!shadow-md !w-full ${isDarkMode ? "!bg-gray-800 !border-gray-700" : "!bg-white !border-gray-100"
         }`}
     >
@@ -166,6 +174,30 @@ const GameCard = ({ game }: { game: Game }) => {
 
       {/* Update Button */}
       <Group justify="flex-end" mt="xs">
+        <Tooltip label="Check the Sleeves" withArrow>
+          <ActionIcon
+            variant="light"
+            color="blue"
+            size="lg"
+            onClick={openBGGSleeves}
+            style={{ marginLeft: 8 }}
+            aria-label="Check the Sleeves"
+          >
+            <GiCardJoker size={22} />
+          </ActionIcon>
+        </Tooltip>
+        <Tooltip label="Open on BoardGameGeek" withArrow>
+          <ActionIcon
+            variant="light"
+            color="blue"
+            size="lg"
+            onClick={openBGGLink}
+            style={{ marginLeft: 8 }}
+            aria-label="Open on BoardGameGeek"
+          >
+            <SiBoardgamegeek size={22} />
+          </ActionIcon>
+        </Tooltip>
         <Button
           variant="light"
           radius="md"
