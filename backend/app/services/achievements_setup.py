@@ -140,6 +140,9 @@ def create_achievements():
             processed_badges[key] = process_file(file_path, STORAGE_TYPE)
         achievement['badges'] = processed_badges
     
+    if achievements_collection.find_one({"_id": achievement["_id"]}):
+        print(f"Achievement with _id {achievement['_id']} already exists. Skipping insertion.")
+        continue
     achievements_collection.insert_one(achievement)
 
 def process_file(file_path, storage_type):
