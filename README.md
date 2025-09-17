@@ -1,3 +1,7 @@
+
+[![Join our Discord](https://img.shields.io/badge/Join%20Our%20Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/tudaKMstpr)
+
+
 # 🎲 MeepleStats
 
 **MeepleStats** is a self-hosted web application designed to track board game statistics for your group of friends! It allows users to log game sessions, analyze player performance, and manage a wishlist of games. The application is built with a **Flask** backend and a **React** frontend.
@@ -265,7 +269,7 @@ Want to improve MeepleStats? Contributions are welcome! Feel free to open an iss
 ## 📌 To-Do
 
 - [x] Improve UI/UX
-- [ ] Support to Dark Mode
+- [x] Support to Dark Mode
 - [x] Show images for open matches
 - [x] Implement team-based game tracking
 - [x] Add achievements system
