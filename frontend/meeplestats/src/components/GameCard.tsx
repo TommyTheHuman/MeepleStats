@@ -14,6 +14,7 @@ const GameCard = ({ game }: { game: Game }) => {
   // Initialize state for price and isGift properties with the game object
   const [price, setPrice] = useState(game.price);
   const [isGifted, setIsGifted] = useState(game.isGifted);
+  const [location, setLocation] = useState(game.location);
   const { colorScheme } = useMantineColorScheme();
   const isDarkMode = colorScheme === "dark";
 
@@ -52,7 +53,8 @@ const GameCard = ({ game }: { game: Game }) => {
     requestOptions.body = JSON.stringify({
       game_id: game.bgg_id,
       price: price,
-      isGifted: isGifted
+      isGifted: isGifted,
+      location: location
     });
 
     console.log(requestOptions.body);
@@ -169,6 +171,31 @@ const GameCard = ({ game }: { game: Game }) => {
           type="number"
           step="0.01"
           inputMode="decimal"
+        />
+        <TextInput
+          label="Location"
+          placeholder="e.g. Shelf A3"
+          value={location}
+          onChange={(event) => setLocation(event.currentTarget.value)}
+          styles={{
+            input: {
+              borderRadius: "0.5rem",
+              border: `1px solid ${isDarkMode ? "#444" : "#e5e7eb"}`,
+              backgroundColor: isDarkMode ? "#333" : "#f9fafb",
+              color: isDarkMode ? "#ddd" : "#000",
+              height: "36px",
+              fontSize: "0.875rem",
+              padding: "0 12px",
+            },
+            label: {
+              fontSize: "0.875rem",
+              fontWeight: 500,
+              color: isDarkMode ? "#ddd" : "#666",
+              marginBottom: "4px",
+            },
+          }}
+          className="!mb-2"
+
         />
       </Stack>
 

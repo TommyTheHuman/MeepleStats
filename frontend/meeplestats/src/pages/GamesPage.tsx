@@ -20,6 +20,7 @@ interface ApiResponseItem {
   price: string;
   isGifted: boolean;
   username: string;
+  location?: string;
 }
 
 const GamesPage = () => {
@@ -79,6 +80,7 @@ const GamesPage = () => {
       isGifted: game.isGifted || false, // Ensure isGift field is included
       username: game.username || "", // Get username from local storage
       hasRules: bgg_ids.includes(game.bgg_id), // Add hasRules flag based on bgg_ids
+      location: game.location || "", // Ensure location field is included
     }));
 
     // Sort games by name

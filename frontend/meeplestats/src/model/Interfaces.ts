@@ -22,6 +22,7 @@ export interface Game {
   isGifted: boolean;
   username: string;
   hasRules?: boolean;
+  location?: string;
 }
 
 export interface StatisticCardInterface {

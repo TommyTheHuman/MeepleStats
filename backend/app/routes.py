@@ -167,10 +167,11 @@ def update_games():
     game_id = data.get('game_id')
     isGifted = data.get('isGifted')
     game_price = data.get('price')
+    location = data.get('location')
 
     if game_id:
         # Update the game in the database
-        res = games_collection.update_one({'bgg_id': game_id}, {'$set': {'isGifted': isGifted, 'price': float(game_price)}})
+        res = games_collection.update_one({'bgg_id': game_id}, {'$set': {'isGifted': isGifted, 'price': float(game_price) if game_price else None, 'location': location}})
         if res.modified_count:
             return jsonify({'message': 'Game updated successfully'}), 200
         else:
