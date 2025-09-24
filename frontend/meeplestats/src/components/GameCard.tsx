@@ -7,7 +7,7 @@ import { notifications } from "@mantine/notifications";
 import { IconBook2 } from "@tabler/icons-react";
 import { SiBoardgamegeek } from "react-icons/si";
 import { GiCardJoker } from "react-icons/gi";
-
+import { useTranslation } from "react-i18next";
 
 const GameCard = ({ game }: { game: Game }) => {
 
@@ -17,6 +17,8 @@ const GameCard = ({ game }: { game: Game }) => {
   const [location, setLocation] = useState(game.location);
   const { colorScheme } = useMantineColorScheme();
   const isDarkMode = colorScheme === "dark";
+
+  const { t } = useTranslation();
 
   const openBGGLink = () => {
     const bggUrl = `https://boardgamegeek.com/boardgame/${game.bgg_id}`;
@@ -100,14 +102,14 @@ const GameCard = ({ game }: { game: Game }) => {
 
           {/* Rulebook indicator */}
           {game.hasRules && (
-            <Tooltip label="Rulebook available">
+            <Tooltip label={t("Rulebook available", { defaultValue: "Rulebook available" })}>
               <Badge
                 className={`!absolute !top-2 !right-2 !z-10 ${isDarkMode ? "!bg-yellow-500 !text-gray-900" : "!bg-blue-500 !text-white"
                   }`}
                 radius="sm"
                 leftSection={<IconBook2 size={14} />}
               >
-                Rulebook
+                {t('Rulebook', { defaultValue: 'Rulebook' })}
               </Badge>
             </Tooltip>
           )}
@@ -128,7 +130,7 @@ const GameCard = ({ game }: { game: Game }) => {
       <Stack gap="xs" className="!mt-2">
         {/* Gift Checkbox */}
         <Checkbox
-          label="Gift"
+          label={t("GameGifted", { defaultValue: "Gift" })}
           checked={isGifted}
           onChange={(event) => setIsGifted(event.currentTarget.checked)}
           className="!text-sm"
@@ -146,7 +148,7 @@ const GameCard = ({ game }: { game: Game }) => {
 
         {/* Price Input */}
         <TextInput
-          label="Price"
+          label={t("GamePrice", { defaultValue: "Price" })}
           placeholder="0.00"
           value={price}
           onChange={(event) => setPrice(event.currentTarget.value)}
@@ -173,8 +175,8 @@ const GameCard = ({ game }: { game: Game }) => {
           inputMode="decimal"
         />
         <TextInput
-          label="Location"
-          placeholder="e.g. Shelf A3"
+          label={t("GameLocation", { defaultValue: "Location" })}
+          placeholder={t("GameLocationPlaceholder", { defaultValue: "e.g. Shelf A3" })}
           value={location}
           onChange={(event) => setLocation(event.currentTarget.value)}
           styles={{
@@ -201,7 +203,7 @@ const GameCard = ({ game }: { game: Game }) => {
 
       {/* Update Button */}
       <Group justify="flex-end" mt="xs">
-        <Tooltip label="Check the Sleeves" withArrow>
+        <Tooltip label={t("GameSleevesCheck", { defaultValue: "Check the Sleeves" })} withArrow>
           <ActionIcon
             variant="light"
             color="blue"
@@ -213,7 +215,7 @@ const GameCard = ({ game }: { game: Game }) => {
             <GiCardJoker size={22} />
           </ActionIcon>
         </Tooltip>
-        <Tooltip label="Open on BoardGameGeek" withArrow>
+        <Tooltip label={t("GameBGGOpen", { defaultValue: "Open on BoardGameGeek" })} withArrow>
           <ActionIcon
             variant="light"
             color="blue"
@@ -235,7 +237,7 @@ const GameCard = ({ game }: { game: Game }) => {
             }`}
           style={{ touchAction: "manipulation" }}
         >
-          Update
+          {t("GameUpdate", { defaultValue: "Update" })}
         </Button>
       </Group>
     </Card>

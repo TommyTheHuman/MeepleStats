@@ -5,6 +5,7 @@ import { notifications } from "@mantine/notifications";
 import { useNavigate } from "react-router";
 import { API_URL, Constants, JWT_STORAGE } from "../model/Constants";
 import { AuthContext } from "./AuthContext";
+import { useTranslation } from "react-i18next";
 
 
 const LoginForm = () => {
@@ -13,6 +14,8 @@ const LoginForm = () => {
   const isDarkMode = colorScheme === "dark";
   const [loading, setLoading] = useState(false);
   const { setAuthStatus } = useContext(AuthContext);
+
+  const { t } = useTranslation();
 
   const savedUsername = localStorage.getItem(Constants.username);
 
@@ -102,7 +105,7 @@ const LoginForm = () => {
         <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
         <TextInput
           withAsterisk
-          label="Username"
+          label={t("LoginUsername", { defaultValue: "Username" })}
           key={form.key("username")}
           {...form.getInputProps("username")}
           mb={form.errors.username ? "xs" : "md"}
@@ -123,7 +126,7 @@ const LoginForm = () => {
 
         <TextInput
           withAsterisk
-          label="Password"
+          label={t("LoginPassword", { defaultValue: "Password" })}
           type="password"
           key={form.key("password")}
           {...form.getInputProps("password")}
@@ -155,7 +158,7 @@ const LoginForm = () => {
               : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
               }`}
           >
-            Login
+            {t("LoginButton", { defaultValue: "Log in" })}
           </Button>
         </Group>
       </form>

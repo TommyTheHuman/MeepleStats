@@ -5,6 +5,7 @@ import { Badge, Card, Group, Loader, Paper, RingProgress, Select, Stack, Text, T
 import { DateInput, DateValue, MonthPickerInput, YearPickerInput } from "@mantine/dates";
 import { IconChartBar, IconTrophy } from "@tabler/icons-react";
 import { API_URL, FilterTypes, JWT_STORAGE } from "../model/Constants";
+import { useTranslation } from "react-i18next";
 
 
 const StatisticCard = ({ endpoint, title, filters }: StatisticCardInterface) => {
@@ -19,6 +20,8 @@ const StatisticCard = ({ endpoint, title, filters }: StatisticCardInterface) => 
 
   const [games, setGames] = useState<Game[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
+
+  const { t } = useTranslation();
 
   // Fetch games and players data for filter options
   useEffect(() => {
@@ -227,7 +230,7 @@ const StatisticCard = ({ endpoint, title, filters }: StatisticCardInterface) => 
                 <Select
                   key={filter.value}
                   label={filter.label}
-                  placeholder="Select a game"
+                  placeholder={t("StatisticCardSelectGame", { defaultValue: "Select a game" })}
                   data={games.map((game) => ({ value: game.name, label: game.name }))}
                   searchable
                   clearable
@@ -254,7 +257,7 @@ const StatisticCard = ({ endpoint, title, filters }: StatisticCardInterface) => 
                 <Select
                   key={filter.value}
                   label={filter.label}
-                  placeholder="Select a player"
+                  placeholder={t("StatisticCardSelectPlayer", { defaultValue: "Select a player" })}
                   data={players.map((player) => ({ value: player.username, label: player.username }))}
                   searchable
                   clearable

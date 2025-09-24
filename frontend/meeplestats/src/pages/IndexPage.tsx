@@ -5,6 +5,7 @@ import PlayerAchievementCard from "../components/PlayerAchievementCard";
 import { IconUser } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import { Player } from "../model/Interfaces";
+import { useTranslation } from "react-i18next";
 
 const filterTypeOptions = {
   startDate: { label: "Start Date", value: "start_date", type: FilterTypes.date },
@@ -21,6 +22,8 @@ export default function IndexPage() {
 
   const [selectedUsername, setSelectedUsername] = useState<string | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
+
+  const { t } = useTranslation();
 
   // Fetch players for dropdown
   useEffect(() => {
@@ -45,18 +48,18 @@ export default function IndexPage() {
       });
   }, []);
   const endpoints = [
-    { endpoint: "totHours", title: "Total Hours", filters: [filterTypeOptions.startDate, filterTypeOptions.endDate] },
-    { endpoint: "totMatches", title: "Total Matches", filters: [filterTypeOptions.startDate, filterTypeOptions.endDate] },
-    { endpoint: "playerWins", title: "Player Wins", filters: [filterTypeOptions.player, filterTypeOptions.startDate, filterTypeOptions.endDate] },
-    { endpoint: "playerWinRate", title: "Player Win Rate", filters: [filterTypeOptions.player, filterTypeOptions.startDate, filterTypeOptions.endDate] },
-    { endpoint: "playerHighestWinRate", title: "Player Highest Win Rate", filters: [filterTypeOptions.month, filterTypeOptions.year] },
-    { endpoint: "playerGameWins", title: "Player Game Wins", filters: [filterTypeOptions.player] },
-    { endpoint: "gameCoopWinRate", title: "Game Coop Win Rate", filters: [filterTypeOptions.game] },
-    { endpoint: "gameNumMatch", title: "Game Number of Matches" },
-    { endpoint: "gameAvgDuration", title: "Game Average Duration" },
-    { endpoint: "gameBestValue", title: "Game Best Value" },
-    { endpoint: "gameHighestScore", title: "Game Highest Score", filters: [filterTypeOptions.game] },
-    { endpoint: "gameAvgScore", title: "Game Average Score", filters: [filterTypeOptions.game] },
+    { endpoint: "totHours", title: t("TotalHoursAchTitle", { defaultValue: "Total Hours" }), filters: [filterTypeOptions.startDate, filterTypeOptions.endDate] },
+    { endpoint: "totMatches", title: t("TotalMatchesAchTitle", { defaultValue: "Total Matches" }), filters: [filterTypeOptions.startDate, filterTypeOptions.endDate] },
+    { endpoint: "playerWins", title: t("PlayerWinsAchTitle", { defaultValue: "Player Wins" }), filters: [filterTypeOptions.player, filterTypeOptions.startDate, filterTypeOptions.endDate] },
+    { endpoint: "playerWinRate", title: t("PlayerWinRateAchTitle", { defaultValue: "Player Win Rate" }), filters: [filterTypeOptions.player, filterTypeOptions.startDate, filterTypeOptions.endDate] },
+    { endpoint: "playerHighestWinRate", title: t("PlayerHighestWinRateAchTitle", { defaultValue: "Player Highest Win Rate" }), filters: [filterTypeOptions.month, filterTypeOptions.year] },
+    { endpoint: "playerGameWins", title: t("PlayerGameWinsAchTitle", { defaultValue: "Player Game Wins" }), filters: [filterTypeOptions.player] },
+    { endpoint: "gameCoopWinRate", title: t("GameCoopWinRateAchTitle", { defaultValue: "Game Coop Win Rate" }), filters: [filterTypeOptions.game] },
+    { endpoint: "gameNumMatch", title: t("GameNumMatchAchTitle", { defaultValue: "Game Number of Matches" }) },
+    { endpoint: "gameAvgDuration", title: t("GameAvgDurationAchTitle", { defaultValue: "Game Average Duration" }) },
+    { endpoint: "gameBestValue", title: t("GameBestValueAchTitle", { defaultValue: "Game Best Value" }) },
+    { endpoint: "gameHighestScore", title: t("GameHighestScoreAchTitle", { defaultValue: "Game Highest Score" }), filters: [filterTypeOptions.game] },
+    { endpoint: "gameAvgScore", title: t("GameAvgScoreAchTitle", { defaultValue: "Game Average Score" }), filters: [filterTypeOptions.game] },
     // Add more endpoints as needed
   ];
 
@@ -72,12 +75,12 @@ export default function IndexPage() {
       <div className={`!mb-6 !p-4 !rounded-lg !border ${isDarkMode ? "!bg-gray-700 !border-gray-600" : "!bg-gray-50 !border-gray-100"}`}>
         <Group justify="space-between" align="center" className="!flex-wrap">
           <Title order={2} className={`!mb-0 !font-semibold !text-xl ${isDarkMode ? "!text-gray-100" : "!text-gray-800"}`}>
-            Achievements
+            {t("AchievementsTitlePage", { defaultValue: "Achievements" })}
           </Title>
 
           <Group>
             <Select
-              placeholder="Select Player"
+              placeholder={t("SelectPlayerPlaceholder", { defaultValue: "Select Player" })}
               value={selectedUsername}
               onChange={setSelectedUsername}
               data={players.map(player => ({ value: player.username, label: player.username }))}
@@ -111,10 +114,10 @@ export default function IndexPage() {
       {/* Global Statistics */}
       <div className="!mb-8">
         <Title order={2} className={`!mb-4 !font-semibold !text-xl ${isDarkMode ? "!text-gray-100" : "!text-gray-800"}`}>
-          Global Statistics
+          {t("GlobalStatisticsTitle", { defaultValue: "Global Statistics" })}
         </Title>
         <Text className={`!mb-4 ${isDarkMode ? "!text-gray-400" : "!text-gray-600"}`}>
-          Overview of all gaming activity across MeepleStats
+          {t("GlobalStatisticsDescription", { defaultValue: "Overview of all gaming activity across MeepleStats" })}
         </Text>
         <Grid>
           {globalStats.map((item, index) => (
@@ -128,10 +131,10 @@ export default function IndexPage() {
       {/* Player Statistics */}
       <div className="!mb-8">
         <Title order={2} className={`!mb-4 !font-semibold !text-xl ${isDarkMode ? "!text-gray-100" : "!text-gray-800"}`}>
-          Player Statistics
+          {t("PlayerStatisticsTitle", { defaultValue: "Player Statistics" })}
         </Title>
         <Text className={`!mb-4 ${isDarkMode ? "!text-gray-400" : "!text-gray-600"}`}>
-          Performance metrics for individual players
+          {t("PlayerStatisticsDescription", { defaultValue: "Performance metrics for individual players" })}
         </Text>
         <Grid>
           {playerStats.map((item, index) => (
@@ -145,10 +148,10 @@ export default function IndexPage() {
       {/* Game Statistics */}
       <div>
         <Title order={2} className={`!mb-4 !font-semibold !text-xl ${isDarkMode ? "!text-gray-100" : "!text-gray-800"}`}>
-          Game Statistics
+          {t("GameStatisticsTitle", { defaultValue: "Game Statistics" })}
         </Title>
         <Text className={`!mb-4 ${isDarkMode ? "!text-gray-400" : "!text-gray-600"}`}>
-          Metrics about specific games in your collection
+          {t("GameStatisticsDescription", { defaultValue: "Metrics about specific games in your collection" })}
         </Text>
         <Grid>
           {gameStats.map((item, index) => (

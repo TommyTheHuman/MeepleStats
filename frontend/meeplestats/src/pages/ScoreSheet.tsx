@@ -4,6 +4,7 @@ import { ActionIcon, Box, Button, Group, Paper, Select, Stack, Table, TextInput,
 import { ScoreSheetDataInterface } from "../model/Interfaces";
 import { IconInfoCircle, IconTrash } from "@tabler/icons-react";
 import { useMediaQuery } from "@mantine/hooks";
+import { useTranslation } from "react-i18next";
 
 const ScoreSheet = () => {
   const { colorScheme } = useMantineColorScheme();
@@ -18,6 +19,8 @@ const ScoreSheet = () => {
   const [total, setTotal] = useState<{ [key: string]: number }>({});
   const [expandedRules, setExpandedRules] = useState<number[]>([]);
   const isMobile = useMediaQuery('(max-width: 768px)');
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchScoreSheets = async () => {
@@ -187,7 +190,7 @@ const ScoreSheet = () => {
               : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
               }`}
           >
-            Add Player
+            {t("ScoreSheetAddPlayerButton", { defaultValue: "Add Player" })}
           </Button>
         </Group>
 
@@ -202,7 +205,7 @@ const ScoreSheet = () => {
               <thead className={isDarkMode ? "!bg-gray-600" : "!bg-gray-50"}>
                 <tr>
                   <th className={`${isDarkMode ? "!border-gray-600" : "!border-gray-300"}`} style={{ width: '200px' }}>
-                    <Text c={isDarkMode ? "gray.1" : "gray.9"}>Scoring Field</Text>
+                    <Text c={isDarkMode ? "gray.1" : "gray.9"}>{t("ScoreSheetScoringField", { defaultValue: "Scoring Field" })}</Text>
                   </th>
                   {columns.map((player, index) => (
                     <th key={index} className={isDarkMode ? "!border-gray-600" : "!border-gray-300"}>
@@ -314,7 +317,7 @@ const ScoreSheet = () => {
                   : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
                   }`}
               >
-                Calculate Total
+                {t("ScoreSheetCalculateTotalButton", { defaultValue: "Calculate Total" })}
               </Button>
             </Group>
           </Box>
@@ -332,11 +335,11 @@ const ScoreSheet = () => {
       className={isDarkMode ? "!bg-gray-800 !border-gray-700" : "!bg-white !border-gray-200"}
     >
       <Stack>
-        <Title order={1} c={isDarkMode ? "gray.1" : "gray.9"}>Score Sheet</Title>
+        <Title order={1} c={isDarkMode ? "gray.1" : "gray.9"}>{t("ScoreSheetTitle", { defaultValue: "Score Sheet" })}</Title>
 
         <Select
-          label="Select Game"
-          placeholder="Choose a score sheet"
+          label={t("ScoreSheetSelectGameLabel", { defaultValue: "Select Game" })}
+          placeholder={t("ScoreSheetSelectGamePlaceholder", { defaultValue: "Choose a score sheet" })}
           data={scoreSheets.map((scoresheet) => ({ value: scoresheet, label: scoresheet }))}
           onChange={(value) => {
             if (value) {

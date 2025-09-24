@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router";
-
-
 import { ReactNode } from "react";
 import { API_URL, JWT_STORAGE } from "../model/Constants";
+import { useTranslation } from "react-i18next";
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -38,7 +38,7 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   }, []);
 
   if (isAuthenticated === null) {
-    return <div>Loading...</div>; // Avoid flickering
+    return <div>{t("Loading", { defaultValue: "Loading..." })}</div>; // Avoid flickering
   }
 
   return isAuthenticated ? children : <Navigate to="/login" replace />;

@@ -5,6 +5,7 @@ import { API_URL, JWT_STORAGE } from '../model/Constants';
 import { Box, Button, Paper, Select, Stack, Title, Text, Group, Container, Grid, Divider, List, useMantineColorScheme } from '@mantine/core';
 import { useStopwatch } from 'react-timer-hook';
 import RootCounter from '../components/RootCounter';
+import { useTranslation } from 'react-i18next';
 
 const MatchUtilityPage = () => {
   const { colorScheme } = useMantineColorScheme();
@@ -16,6 +17,7 @@ const MatchUtilityPage = () => {
   const [wheelGames, setWheelGames] = useState<Game[]>([]);
   const [prizeNumber, setPrizeNumber] = useState(0);
   const [wheelData, setWheelData] = useState<{ option: string }[]>([{ option: 'Add a Game!' }]);
+  const { t } = useTranslation();
 
 
   useEffect(() => {
@@ -104,7 +106,7 @@ const MatchUtilityPage = () => {
             order={3}
             c={isDarkMode ? "gray.1" : "gray.9"}
           >
-            Stopwatch
+            {t("StopwatchTitle", { defaultValue: "Stopwatch" })}
           </Title>
           <Box
             style={{
@@ -123,7 +125,7 @@ const MatchUtilityPage = () => {
             c={isRunning ? "green" : (isDarkMode ? "gray.4" : "gray")}
             ta={"center"}
           >
-            {isRunning ? 'Running' : 'Not running'}
+            {isRunning ? t("StopwatchRunning", { defaultValue: "Running" }) : t("StopwatchNotRunning", { defaultValue: "Not running" })}
           </Text>
           <Group grow>
             <Button
@@ -134,7 +136,7 @@ const MatchUtilityPage = () => {
                 : "!bg-green-50 !text-green-600 hover:!bg-green-100"
                 }`}
             >
-              Start
+              {t("StopwatchStart", { defaultValue: "Start" })}
             </Button>
             <Button
               onClick={pause}
@@ -144,7 +146,7 @@ const MatchUtilityPage = () => {
                 : "!bg-yellow-50 !text-yellow-600 hover:!bg-yellow-100"
                 }`}
             >
-              Pause
+              {t("StopwatchPause", { defaultValue: "Pause" })}
             </Button>
             <Button
               onClick={() => reset()}
@@ -153,7 +155,7 @@ const MatchUtilityPage = () => {
                 : "!bg-red-50 !text-red-600 hover:!bg-red-100"
                 }`}
             >
-              Reset
+              {t("StopwatchReset", { defaultValue: "Reset" })}
             </Button>
           </Group>
         </Stack>
@@ -172,7 +174,7 @@ const MatchUtilityPage = () => {
             mb="lg"
             c={isDarkMode ? "gray.1" : "gray.9"}
           >
-            Game Selector Utilities
+            {t("GameSelectorUtilitiesTitle", { defaultValue: "Game Selector Utilities" })}
           </Title>
         </Grid.Col>
 
@@ -191,12 +193,12 @@ const MatchUtilityPage = () => {
                 order={3}
                 c={isDarkMode ? "gray.1" : "gray.9"}
               >
-                Select Games
+                {t("UtilitySelectGamesTitle", { defaultValue: "Select Games" })}
               </Title>
 
               <Select
-                label="Select a game to add"
-                placeholder="Pick one"
+                label={t("UtilitySelectGameLabel", { defaultValue: "Select a game to add" })}
+                placeholder={t("UtilitySelectGamePlaceholder", { defaultValue: "Pick one" })}
                 data={games.map((game) => ({ value: game.bgg_id, label: game.name }))}
                 value={selectedGame}
                 onChange={(value) => setSelectedGame(value)}
@@ -237,11 +239,11 @@ const MatchUtilityPage = () => {
                   : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
                   }`}
               >
-                Add to Wheel
+                {t("UtilityAddToWheel", { defaultValue: "Add to Wheel" })}
               </Button>
 
               <Divider
-                label="Games in Wheel"
+                label={t("UtilityGamesInWheel", { defaultValue: "Games in Wheel" })}
                 labelPosition="center"
                 style={{
                   borderColor: isDarkMode ? "#6b7280" : "#d1d5db",
@@ -263,14 +265,14 @@ const MatchUtilityPage = () => {
                             : "!bg-red-50 !text-red-600 hover:!bg-red-100"
                             }`}
                         >
-                          Remove
+                          {t("UtilityRemove", { defaultValue: "Remove" })}
                         </Button>
                       </Group>
                     </List.Item>
                   ))}
                 </List>
               ) : (
-                <Text c={isDarkMode ? "gray.4" : "dimmed"} ta="center">No games added yet</Text>
+                <Text c={isDarkMode ? "gray.4" : "dimmed"} ta="center">{t("UtilityNoGamesAdded", { defaultValue: "No games added yet" })}</Text>
               )}
             </Stack>
           </Paper>
@@ -293,7 +295,7 @@ const MatchUtilityPage = () => {
                   ta="center"
                   c={isDarkMode ? "gray.1" : "gray.9"}
                 >
-                  Game Wheel
+                  {t("UtilityGameWheelTitle", { defaultValue: "Game Wheel" })}
                 </Title>
 
                 <Box style={{ width: '100%', maxWidth: '400px', display: 'flex', justifyContent: 'center' }}>
@@ -316,14 +318,14 @@ const MatchUtilityPage = () => {
                       : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
                       }`}
                   >
-                    Spin the Wheel
+                    {t("UtilitySpinTheWheel", { defaultValue: "Spin the Wheel" })}
                   </Button>
                 </Group>
 
                 {!mustSpin && wheelGames.length > 0 && (
                   <Box mt="md">
                     <Title order={3} ta="center" c="green">
-                      Selected: {wheelGames[prizeNumber].name}
+                      {t("UtilitySelectedGame", { defaultValue: "Selected" })}: {wheelGames[prizeNumber].name}
                     </Title>
                   </Box>
                 )}
@@ -342,7 +344,7 @@ const MatchUtilityPage = () => {
         mt="xl"
         c={isDarkMode ? "gray.1" : "gray.9"}
       >
-        Game Balance Tools
+        {t("UtilityGameBalanceTools", { defaultValue: "Game Balance Tools" })}
       </Title>
       <RootCounter />
 

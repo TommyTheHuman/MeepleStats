@@ -5,6 +5,7 @@ import { ActionIcon, Box, Button, Container, Divider, Grid, Group, LoadingOverla
 import { IconPlus, IconTrash, IconDownload } from "@tabler/icons-react";
 import { showNotification } from "@mantine/notifications";
 import { useMediaQuery } from "@mantine/hooks";
+import { useTranslation } from "react-i18next";
 
 const ScoreSheetCreator = () => {
   const { colorScheme } = useMantineColorScheme();
@@ -12,6 +13,8 @@ const ScoreSheetCreator = () => {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const { t } = useTranslation();
 
   const [generalInfo, setGeneralInfo] = useState({
     game_id: "",
@@ -148,7 +151,7 @@ const ScoreSheetCreator = () => {
         className="!mb-6 !text-2xl !font-bold"
         c={isDarkMode ? "gray.1" : "gray.8"}
       >
-        Score Sheet Creator
+        {t("ScoreSheetCreatorTitle", { defaultValue: "Score Sheet Creator" })}
       </Title>
 
       <Grid gutter={isMobile ? "xs" : "md"}>
@@ -168,12 +171,12 @@ const ScoreSheetCreator = () => {
                 className="!mb-4 !text-lg !font-semibold"
                 c={isDarkMode ? "gray.1" : "gray.8"}
               >
-                Game Details
+                {t("ScoreSheetCreatorGameDetailsTitle", { defaultValue: "Game Details" })}
               </Title>
 
               <Select
-                label="Select Game"
-                placeholder="Choose a game from your collection"
+                label={t("ScoreSheetCreatorSelectGameLabel", { defaultValue: "Select Game" })}
+                placeholder={t("ScoreSheetCreatorSelectGamePlaceholder", { defaultValue: "Choose a game from your collection" })}
                 data={games.map((game) => ({ value: game.name, label: game.name }))}
                 onChange={(value) => {
                   if (value) {
@@ -214,10 +217,10 @@ const ScoreSheetCreator = () => {
               />
 
               <TextInput
-                label="Description"
+                label={t("ScoreSheetCreatorDescriptionLabel", { defaultValue: "Description" })}
                 value={generalInfo.game_description}
                 onChange={(e) => setGeneralInfo({ ...generalInfo, game_description: e.target.value })}
-                placeholder="Enter a description for this score sheet"
+                placeholder={t("ScoreSheetCreatorDescriptionPlaceholder", { defaultValue: "Enter a description for this score sheet" })}
                 className="!mb-4"
                 styles={{
                   input: {
@@ -255,7 +258,7 @@ const ScoreSheetCreator = () => {
                 className="!mb-4 !text-lg !font-semibold"
                 c={isDarkMode ? "gray.1" : "gray.8"}
               >
-                Score Fields
+                {t("ScoreSheetCreatorScoreFieldsTitle", { defaultValue: "Score Fields" })}
               </Title>
 
               <Box
@@ -265,7 +268,7 @@ const ScoreSheetCreator = () => {
                   color: isDarkMode ? "#9ca3af" : "#6b7280"
                 }}
               >
-                Add fields to track different scoring elements for your game.
+                {t("ScoreSheetCreatorScoreFieldsDescription", { defaultValue: "Add fields to track different scoring elements for your game." })}
               </Box>
 
               <Button
@@ -278,7 +281,7 @@ const ScoreSheetCreator = () => {
                 leftSection={<IconPlus size={16} />}
                 fullWidth
               >
-                Add New Field
+                {t("ScoreSheetCreatorAddNewFieldButton", { defaultValue: "Add New Field" })}
               </Button>
 
               {fields.length > 0 && (
@@ -453,7 +456,7 @@ const ScoreSheetCreator = () => {
                     leftSection={<IconDownload size={16} />}
                     size={isMobile ? "sm" : "md"}
                   >
-                    Download
+                    {t("ScoreSheetCreatorDownloadButton", { defaultValue: "Download" })}
                   </Button>
                   <Button
                     onClick={handleUpload}
@@ -465,7 +468,7 @@ const ScoreSheetCreator = () => {
                     leftSection={<IconPlus size={16} />}
                     size={isMobile ? "sm" : "md"}
                   >
-                    Upload
+                    {t("ScoreSheetCreatorUploadButton", { defaultValue: "Upload" })}
                   </Button>
                 </Group>
               )}
@@ -491,7 +494,7 @@ const ScoreSheetCreator = () => {
               className="!mb-4 !text-lg !font-semibold"
               c={isDarkMode ? "gray.1" : "gray.8"}
             >
-              JSON Preview
+              {t("ScoreSheetCreatorJSONPreviewTitle", { defaultValue: "JSON Preview" })}
             </Title>
 
             <ScrollArea h={isMobile ? 300 : 600} scrollbarSize={6}>

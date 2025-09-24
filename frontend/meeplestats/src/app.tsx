@@ -7,7 +7,7 @@ import { router } from "./router";
 import { theme } from "./theme";
 import { RouterProvider } from "react-router";
 import { ThemeContext } from "./ThemeContext";
-
+import './i18n';
 
 const App = () => {
   const [colorScheme, setColorScheme] = useState<"light" | "dark">("dark");

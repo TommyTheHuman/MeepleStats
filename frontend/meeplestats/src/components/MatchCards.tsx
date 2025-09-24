@@ -3,6 +3,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { MatchCardInterface } from "../model/Interfaces";
 import { IconPhoto } from "@tabler/icons-react";
 import { API_URL } from "../model/Constants";
+import { useTranslation } from "react-i18next";
 
 const MatchCard = ({ game_name, date, game_duration, game_image, players, winner, notes, image_url, is_cooperative, is_team_match, winning_team, use_manual_winner }: MatchCardInterface) => {
 
@@ -10,6 +11,8 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
 
   const { colorScheme } = useMantineColorScheme();
   const isDarkMode = colorScheme === "dark";
+
+  const { t } = useTranslation();
 
   const isWinner = (playerId: string) => {
     if (is_cooperative) {
@@ -62,7 +65,7 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
             {new Date(date).toLocaleDateString()}
           </Text>
           <Badge variant="light" color="blue" size="sm" className={`!font-medium !px-2 !border-0 ${isDarkMode ? "!bg-blue-900 !text-blue-200" : "!bg-blue-50 !text-blue-600"}`}>
-            {game_duration} min
+            {game_duration} {t("min", { defaultValue: "min" })}
           </Badge>
         </Group>
 
@@ -85,7 +88,7 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
             size="sm"
             className="!mb-3"
           >
-            Winning Team: {winning_team}
+            {t("WinningTeam", { defaultValue: "Winning Team" })}: {winning_team}
           </Badge>
         )}
 
@@ -96,7 +99,7 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
             size="sm"
             className="!mb-3"
           >
-            Special Victory
+            {t("SpecialVictory", { defaultValue: "Special Victory" })}
           </Badge>
         )}
 
@@ -105,7 +108,7 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
 
         {/* Players list */}
         <Text fw={500} size="sm" className={`!mb-2 ${isDarkMode ? "!text-gray-200" : "!text-gray-700"}`}>
-          Players:
+          {t("MatchCardPlayers", { defaultValue: "Players" })}:
         </Text>
 
         {players.map((player, index) => (
@@ -147,7 +150,7 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
             <Box className={`!w-full !h-px !my-3 ${isDarkMode ? "!bg-gray-600" : "!bg-gray-100"}`}></Box>
 
             <Text fw={500} size="sm" className={`!mb-2 ${isDarkMode ? "!text-gray-200" : "!text-gray-700"}`}>
-              Notes:
+              {t("MatchCardNotes", { defaultValue: "Notes" })}:
             </Text>
             <Text
               size="sm"
@@ -163,7 +166,7 @@ const MatchCard = ({ game_name, date, game_duration, game_image, players, winner
         <Modal
           opened={opened}
           onClose={close}
-          title="Match Photo"
+          title={<>{t("MatchCardMatchPhoto", { defaultValue: "Match Photo" })}</>}
           size="lg"
           centered
           padding="md"

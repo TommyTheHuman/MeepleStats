@@ -5,6 +5,7 @@ import { Button, Container, Grid, Modal, Paper, useMantineColorScheme, Text, Tit
 import GameCard from "../components/GameCard";
 import { IconPlus } from "@tabler/icons-react";
 import { SiBoardgamegeek } from "react-icons/si";
+import { useTranslation } from "react-i18next";
 
 interface ApiResponseItem {
   bgg_id: string;
@@ -34,6 +35,8 @@ const GamesPage = () => {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   //const [loading, setLoading] = useState(false);
   const [modalOpened, setModalOpened] = useState(false);
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (query.length >= 3) {
@@ -198,7 +201,7 @@ const GamesPage = () => {
           size={48}
           radius="xl"
           onClick={() => setModalOpened(true)}
-          aria-label="Aggiungi un gioco"
+          aria-label="Add a Game"
           style={{
             boxShadow: isDarkMode
               ? "0 2px 12px 0 rgba(30,64,175,0.10)"
@@ -216,7 +219,7 @@ const GamesPage = () => {
           <Group gap="xs">
             <IconPlus size={22} />
             <Text fw={600} size="lg">
-              Add Game
+              {t("GamesPageAddGameModalTitle", { defaultValue: "Add Game" })}
             </Text>
           </Group>
         }
@@ -238,8 +241,8 @@ const GamesPage = () => {
       >
         <Autocomplete
           clearable
-          label="Search"
-          placeholder="Type at least 3 characters"
+          label={t("GamesPageSearch", { defaultValue: "Search" })}
+          placeholder={t("GamesPageSearchPlaceholder", { defaultValue: "Type at least 3 characters" })}
           value={query}
           onChange={(value) => {
             setQuery(value);
@@ -334,7 +337,7 @@ const GamesPage = () => {
                     >
                       {selectedGame.name}
                     </Title>
-                    <Tooltip label="Open on BoardGameGeek" withArrow>
+                    <Tooltip label={t("GamesPageOpenOnBGG", { defaultValue: "Open on BoardGameGeek" })} withArrow>
                       <ActionIcon
                         variant="light"
                         color="blue"
@@ -371,7 +374,7 @@ const GamesPage = () => {
                 radius="md"
                 style={{ marginTop: 24, fontSize: 16, letterSpacing: 0.5 }}
               >
-                Add Game to Collection
+                {t("GamesPageAddGameToCollectionButton", { defaultValue: "Add Game to Collection" })}
               </Button>
             </Paper>
           </>

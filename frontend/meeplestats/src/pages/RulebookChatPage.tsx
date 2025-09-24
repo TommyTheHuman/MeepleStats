@@ -10,7 +10,7 @@ import { useContext } from "react";
 import { AuthContext } from "../components/AuthContext";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-
+import { useTranslation } from "react-i18next";
 
 interface Message {
   id: string;
@@ -36,6 +36,7 @@ const RulebookChatPage = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatLoading, setChatLoading] = useState(false);
   const { authStatus } = useContext(AuthContext);
+  const { t } = useTranslation();
 
   const isLoggedIn = authStatus === "LoggedIn";
 
@@ -221,12 +222,12 @@ const RulebookChatPage = () => {
         className="!mb-8 !text-2xl !font-bold"
         c={isDarkMode ? "gray.1" : "gray.8"}
       >
-        Rulebook Chat
+        {t("RulebookChatTitle", { defaultValue: "Rulebook Chat" })}
       </Title>
 
       {!isLoggedIn ? (
-        <Alert icon={<IconAlertCircle size="1rem" />} title="Authentication Required" color="red">
-          Please log in to use the Rulebook Chat feature.
+        <Alert icon={<IconAlertCircle size="1rem" />} title={t("RulebookChatAuthRequiredTitle", { defaultValue: "Authentication Required" })} color="red">
+          {t("RulebookChatAuthRequired", { defaultValue: "Please log in to use the Rulebook Chat feature." })}
         </Alert>
       ) : (
         <Paper
@@ -245,16 +246,16 @@ const RulebookChatPage = () => {
               {error}
             </Alert>
           ) : rulebooks.length === 0 ? (
-            <Alert title="No Rulebooks Found" color="yellow">
-              There are no rulebooks available. Upload rulebooks to use the chat feature.
+            <Alert title={t("RulebookChatNoRulebooksFound", { defaultValue: "No Rulebooks Found" })} color="yellow">
+              {t("RulebookChatNoRulebooksAvailable", { defaultValue: "There are no rulebooks available. Upload rulebooks to use the chat feature." })}
             </Alert>
           ) : (
             <Box>
               <Group mb="md" align="flex-start" justify="space-between">
                 <Box style={{ flex: '1' }}>
                   <Select
-                    label="Select Rulebook"
-                    placeholder="Choose a rulebook"
+                    label={t("RulebookChatSelectRulebook", { defaultValue: "Select Rulebook" })}
+                    placeholder={t("RulebookChatSelectRulebookPlaceholder", { defaultValue: "Choose a rulebook" })}
                     data={rulebooks.map(rulebook => ({
                       value: rulebook._id,
                       label: `${rulebook.game_name} - ${rulebook.filename}`
@@ -306,7 +307,7 @@ const RulebookChatPage = () => {
                   leftSection={<IconBook size={16} />}
                   disabled={!selectedRulebook}
                 >
-                  View Rulebook
+                  {t("RulebookChatViewRulebook", { defaultValue: "View Rulebook" })}
                 </Button>
               </Group>
 
@@ -358,7 +359,7 @@ const RulebookChatPage = () => {
                                     } ${msg.error ? "!border-red-300" : ""}`}
                                 >
                                   {msg.isLoading ? (
-                                    <Text size="sm">Thinking...</Text>
+                                    <Text size="sm">{t("RulebookChatThinking", { defaultValue: "Thinking..." })}</Text>
                                   ) : (
                                     msg.sender === "bot" ? (
                                       <ReactMarkdown
@@ -375,7 +376,7 @@ const RulebookChatPage = () => {
 
                                 {msg.page_refs && msg.page_refs.length > 0 && (
                                   <Group mt="xs" gap="xs">
-                                    <Text size="xs" fw={500} c="dimmed">References:</Text>
+                                    <Text size="xs" fw={500} c="dimmed">{t("RulebookChatReferences", { defaultValue: "References" })}:</Text>
                                     {msg.page_refs.map((ref, index) => (
                                       <Badge
                                         key={index}
@@ -384,7 +385,7 @@ const RulebookChatPage = () => {
                                         variant="light"
                                         leftSection={<IconFile size={12} />}
                                       >
-                                        {ref.file.split('.')[0]} - Page {ref.page}
+                                        {ref.file.split('.')[0]} - {t("RulebookChatPage", { defaultValue: "Page" })} {ref.page}
                                       </Badge>
                                     ))}
                                   </Group>
@@ -405,7 +406,7 @@ const RulebookChatPage = () => {
 
                   <Group align="flex-start" gap="xs">
                     <Textarea
-                      placeholder="Ask a question about the rulebook..."
+                      placeholder={t("RulebookChatAskQuestionPlaceholder", { defaultValue: "Ask a question about the rulebook..." })}
                       value={message}
                       onChange={(e) => setMessage(e.currentTarget.value)}
                       onKeyDown={handleKeyDown}

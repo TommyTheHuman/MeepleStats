@@ -3,6 +3,7 @@ import { JWT_STORAGE, API_URL } from "../model/Constants";
 import { AchievementsResponse } from "../model/Interfaces";
 import { Card, Box, Title, Skeleton, Paper, Badge, Image, Text, useMantineColorScheme } from "@mantine/core";
 import { IconTrophy } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 
 const PlayerAchievementCard = ({ username }: { username?: string | null }) => {
 
@@ -11,6 +12,8 @@ const PlayerAchievementCard = ({ username }: { username?: string | null }) => {
 
   const [achievements, setAchievements] = useState<AchievementsResponse[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     const requestOptions: RequestInit = {
@@ -53,7 +56,7 @@ const PlayerAchievementCard = ({ username }: { username?: string | null }) => {
     <Card shadow="sm" radius="lg" className={`!overflow-hidden !border !w-full !mb-6 ${isDarkMode ? "!border-gray-600 !bg-gray-800" : "!border-gray-100 !bg-white"}`}>
       <Box className={isDarkMode ? "!p-4 !bg-gray-700" : "!p-4 !bg-gray-50"}>
         <Title order={3} className={isDarkMode ? "!text-gray-100" : "!text-gray-800"}>
-          {username ? `${username}'s Achievements` : 'My Achievements'}
+          {username ? `${username} ${t("playerAchievement", { defaultValue: "'s Achievements" })}` : t("MyAchievements", { defaultValue: "My Achievements" })}
         </Title>
       </Box>
 
@@ -65,7 +68,7 @@ const PlayerAchievementCard = ({ username }: { username?: string | null }) => {
             ))}
           </Box>
         ) : achievements.length === 0 ? (
-          <Text className={`!text-center !p-4 ${isDarkMode ? "!text-gray-400" : "!text-gray-500"}`}>No achievements found</Text>
+          <Text className={`!text-center !p-4 ${isDarkMode ? "!text-gray-400" : "!text-gray-500"}`}>{t("NoAchievementsFound", { defaultValue: "No achievements found" })}</Text>
         ) : (
           <Box className="!grid !grid-cols-1 md:!grid-cols-2 lg:!grid-cols-3 !gap-4">
             {achievements.map((achievement, index) => (

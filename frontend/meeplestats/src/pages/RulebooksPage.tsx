@@ -8,6 +8,7 @@ import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconFileUpload, IconTrash, IconX, IconBook } from "@tabler/icons-react";
 import { useContext } from "react";
 import { AuthContext } from "../components/AuthContext";
+import { useTranslation } from "react-i18next";
 
 const RulebooksPage = () => {
   const { colorScheme } = useMantineColorScheme();
@@ -23,6 +24,7 @@ const RulebooksPage = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [uploadLoading, setUploadLoading] = useState(false);
   const { authStatus } = useContext(AuthContext);
+  const { t } = useTranslation();
 
   const isLoggedIn = authStatus === "LoggedIn";
 
@@ -200,12 +202,12 @@ const RulebooksPage = () => {
         className="!mb-8 !text-2xl !font-bold"
         c={isDarkMode ? "gray.1" : "gray.8"}
       >
-        Rulebooks
+        {t("PageRulebookTitle", { defaultValue: "Rulebooks" })}
       </Title>
 
       {!isLoggedIn ? (
-        <Alert icon={<IconAlertCircle size="1rem" />} title="Authentication Required" color="red">
-          Please log in to view and manage rulebooks.
+        <Alert icon={<IconAlertCircle size="1rem" />} title={t("PageAuthRequiredTitle", { defaultValue: "Authentication Required" })} color="red">
+          {t("PageAuthRequired", { defaultValue: "Please log in to view and manage rulebooks." })}
         </Alert>
       ) : (
         <Grid gutter="md">
@@ -225,7 +227,7 @@ const RulebooksPage = () => {
                 className="!mb-4 !text-lg !font-semibold"
                 c={isDarkMode ? "gray.1" : "gray.8"}
               >
-                Upload Rulebook
+                {t("PageUploadRulebookTitle", { defaultValue: "Upload Rulebook" })}
               </Title>
 
               <Box pos="relative">
@@ -233,8 +235,8 @@ const RulebooksPage = () => {
 
                 <Autocomplete
                   clearable
-                  label="Select Game"
-                  placeholder="Type to search games"
+                  label={t("RuleBookSelectGameLabel", { defaultValue: "Select Game" })}
+                  placeholder={t("RuleBookSelectGamePlaceholder", { defaultValue: "Type to search games" })}
                   value={query}
                   onChange={(value) => {
                     setQuery(value);
@@ -287,8 +289,8 @@ const RulebooksPage = () => {
                 />
 
                 <FileInput
-                  label="Upload PDF Rulebook"
-                  placeholder="Select a PDF file"
+                  label={t("RuleBookUploadLabel", { defaultValue: "Upload PDF Rulebook" })}
+                  placeholder={t("RuleBookUploadPlaceholder", { defaultValue: "Select a PDF file" })}
                   accept="application/pdf"
                   value={file}
                   onChange={setFile}
@@ -325,7 +327,7 @@ const RulebooksPage = () => {
                   disabled={!file || !selectedGame}
                   leftSection={<IconFileUpload size={16} />}
                 >
-                  Upload Rulebook
+                  {t("RuleBookUploadButton", { defaultValue: "Upload Rulebook" })}
                 </Button>
               </Box>
             </Paper>
@@ -338,7 +340,7 @@ const RulebooksPage = () => {
               className="!mb-4 !text-xl !font-semibold"
               c={isDarkMode ? "gray.1" : "gray.8"}
             >
-              Rulebook Repository
+              {t("RuleBookRepositoryTitle", { defaultValue: "Rulebook Repository" })}
             </Title>
 
             {loading ? (
@@ -368,7 +370,7 @@ const RulebooksPage = () => {
                 }}
                 withBorder
               >
-                <Text c={isDarkMode ? "gray.4" : "gray.6"}>No rulebooks available. Upload a rulebook to get started.</Text>
+                <Text c={isDarkMode ? "gray.4" : "gray.6"}>{t("RuleBookNoAvailable", { defaultValue: "No rulebooks available. Upload a rulebook to get started." })}</Text>
               </Paper>
             ) : (
               <Stack gap="md">
@@ -459,7 +461,7 @@ const RulebooksPage = () => {
                       size="sm"
                       c={isDarkMode ? "gray.4" : "dimmed"}
                     >
-                      Uploaded by: {rulebook.uploaded_by}
+                      {t("RuleBookUploadedBy", { defaultValue: "Uploaded by" })}: {rulebook.uploaded_by}
                     </Text>
                   </Card>
                 ))}
@@ -473,7 +475,7 @@ const RulebooksPage = () => {
       <Modal
         opened={opened}
         onClose={close}
-        title="Confirm Deletion"
+        title={t("RuleBookDeleteConfirmationTitle", { defaultValue: "Confirm Deletion" })}
         centered
         overlayProps={{
           backgroundOpacity: 0.55,
@@ -481,7 +483,7 @@ const RulebooksPage = () => {
         }}
       >
         <Text size="sm" mb="lg">
-          Are you sure you want to delete this rulebook? This action cannot be undone.
+          {t("RuleBookDeleteConfirmationMessage", { defaultValue: "Are you sure you want to delete this rulebook? This action cannot be undone." })}
         </Text>
 
         <Group justify="flex-end" mt="md">
@@ -504,7 +506,7 @@ const RulebooksPage = () => {
               : "!bg-red-50 !text-red-600 hover:!bg-red-100"
               }`}
           >
-            Delete
+            {t("RuleBookDeleteButton", { defaultValue: "Delete" })}
           </Button>
         </Group>
       </Modal>

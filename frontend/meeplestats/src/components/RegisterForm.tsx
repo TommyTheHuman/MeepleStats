@@ -5,7 +5,7 @@ import { Box, Button, Group, LoadingOverlay, TextInput, useMantineColorScheme } 
 import { notifications } from "@mantine/notifications";
 import { API_URL, Constants, JWT_STORAGE } from "../model/Constants";
 import { AuthContext } from "./AuthContext";
-
+import { useTranslation } from "react-i18next";
 
 const RegisterForm = () => {
   const navigate = useNavigate();
@@ -14,6 +14,7 @@ const RegisterForm = () => {
 
   const [loading, setLoading] = useState(false);
   const { setAuthStatus } = useContext(AuthContext);
+  const { t } = useTranslation();
 
   const form = useForm({
     mode: "uncontrolled",
@@ -90,7 +91,7 @@ const RegisterForm = () => {
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <TextInput
           withAsterisk
-          label="Username"
+          label={t("RegisterUsername", { defaultValue: "Username" })}
           key={form.key("username")}
           {...form.getInputProps("username")}
           mb={form.errors.username ? "xs" : "md"}
@@ -109,7 +110,7 @@ const RegisterForm = () => {
         />
         <TextInput
           withAsterisk
-          label="Mail"
+          label={t("RegisterMail", { defaultValue: "Mail" })}
           key={form.key("mail")}
           {...form.getInputProps("mail")}
           mb={form.errors.mail ? "xs" : "md"}
@@ -128,7 +129,7 @@ const RegisterForm = () => {
         />
         <TextInput
           withAsterisk
-          label="Password"
+          label={t("RegisterPassword", { defaultValue: "Password" })}
           type="password"
           key={form.key("password")}
           {...form.getInputProps("password")}
@@ -148,7 +149,7 @@ const RegisterForm = () => {
         />
         <TextInput
           withAsterisk
-          label="Confirm Password"
+          label={t("RegisterConfirmPassword", { defaultValue: "Confirm Password" })}
           type="password"
           key={form.key("confirmPassword")}
           {...form.getInputProps("confirmPassword")}
@@ -178,7 +179,7 @@ const RegisterForm = () => {
               : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
               }`}
           >
-            Registrati
+            {t("RegisterButton", { defaultValue: "Register" })}
           </Button>
         </Group>
       </form>

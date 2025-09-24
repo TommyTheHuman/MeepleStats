@@ -7,7 +7,7 @@ import { PillsInput, Pill, Combobox, CheckIcon, useCombobox } from "@mantine/cor
 import { Game, Player } from "../model/Interfaces";
 import { API_URL, JWT_STORAGE } from "../model/Constants";
 import { notifications } from "@mantine/notifications";
-
+import { useTranslation } from "react-i18next";
 
 
 const LogMatch = () => {
@@ -22,6 +22,8 @@ const LogMatch = () => {
     onDropdownClose: () => combobox.resetSelectedOption(),
     onDropdownOpen: () => combobox.updateSelectedOptionIndex("active"),
   });
+
+  const { t } = useTranslation();
 
   const { colorScheme } = useMantineColorScheme();
   const isDarkMode = colorScheme === "dark";
@@ -146,10 +148,10 @@ const LogMatch = () => {
   };
 
   const values = form.values.players.map((player) => (
-    <Pill 
-      key={player.name} 
-      withRemoveButton 
-      onRemove={() => handleValueRemove(player.name)} 
+    <Pill
+      key={player.name}
+      withRemoveButton
+      onRemove={() => handleValueRemove(player.name)}
       className={`!font-medium ${isDarkMode ? "!bg-blue-900 !text-blue-200" : "!bg-blue-50 !text-blue-600"}`}
     >
       {player.name}
@@ -254,7 +256,7 @@ const LogMatch = () => {
           <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: "lg", blur: 2 }} />
 
           <Title order={2} ta="center" className="!font-semibold !tracking-tight !mb-6">
-            Log Match
+            {t("LogMatchTitle", { defaultValue: "Log Match" })}
           </Title>
 
           {/* Game Selection Section */}
@@ -263,14 +265,14 @@ const LogMatch = () => {
               className={`!text-xs !uppercase !font-medium !tracking-wide ${isDarkMode ? "!text-gray-400" : "!text-gray-500"
                 } !mb-2`}
             >
-              Game
+              {t("LogMatchGameSection", { defaultValue: "Game" })}
             </MantineText>
             <Paper
               className={`!p-4 !rounded-xl !border ${isDarkMode ? "!bg-gray-700 !border-gray-600" : "!bg-gray-50 !border-gray-100"
                 }`}
             >
               <Select
-                placeholder="Select a game"
+                placeholder={t("LogMatchGameSelectPlaceholder", { defaultValue: "Select a game" })}
                 data={games.map((game) => ({ value: game.name, label: game.name }))}
                 onChange={(value) => {
                   if (value) {
@@ -297,7 +299,7 @@ const LogMatch = () => {
 
               {!form.values.isCooperative && (
                 <Checkbox
-                  label="Team match"
+                  label={t("LogMatchTeamMatch", { defaultValue: "Team match" })}
                   {...form.getInputProps("isTeamMatch", { type: "checkbox" })}
                   className="mt-3"
                   styles={{
@@ -313,7 +315,7 @@ const LogMatch = () => {
           <Box className="!mb-8">
             <MantineText className={`!text-xs !uppercase !font-medium !tracking-wide ${isDarkMode ? "!text-gray-400" : "!text-gray-500"
               } !mb-2`}>
-              Players
+              {t("LogMatchPlayersSection", { defaultValue: "Players" })}
             </MantineText>
             <Paper
               className={`!p-4 !rounded-xl !border ${isDarkMode ? "!bg-gray-700 !border-gray-600" : "!bg-gray-50 !border-gray-100"
@@ -341,7 +343,7 @@ const LogMatch = () => {
                           onFocus={() => combobox.openDropdown()}
                           onBlur={() => combobox.closeDropdown()}
                           value={search}
-                          placeholder="Search players"
+                          placeholder={t("LogMatchPlayerSearchPlaceholder", { defaultValue: "Search players" })}
                           onChange={(event) => {
                             combobox.updateSelectedOptionIndex();
                             setSearch(event.currentTarget.value);
@@ -359,7 +361,7 @@ const LogMatch = () => {
                 </Combobox.DropdownTarget>
                 <Combobox.Dropdown>
                   <Combobox.Options>
-                    {options.length > 0 ? options : <Combobox.Empty>Nothing found...</Combobox.Empty>}
+                    {options.length > 0 ? options : <Combobox.Empty>{t("LogMatchPlayerSearchNotFound", { defaultValue: "Nothing found..." })}</Combobox.Empty>}
                   </Combobox.Options>
                 </Combobox.Dropdown>
               </Combobox>
@@ -368,14 +370,14 @@ const LogMatch = () => {
               {form.values.isTeamMatch && (
                 <Box className="!mt-6">
                   <Divider
-                    label="Team Setup"
+                    label={t("LogMatchTeamSetup", { defaultValue: "Team Setup" })}
                     labelPosition="center"
                     className={`!mb-4 ${isDarkMode ? "!border-gray-600 !text-gray-400" : "!opacity-60"
                       }`}
                   />
 
                   <TextInput
-                    placeholder="Enter team name and press Enter"
+                    placeholder={t("LogMatchTeamNamePlaceholder", { defaultValue: "Enter team name and press Enter" })}
                     className="!mb-4"
                     styles={{
                       input: {
@@ -397,7 +399,7 @@ const LogMatch = () => {
 
                   {teams.length > 0 && (
                     <Stack className="!mb-4">
-                      <MantineText size="sm" fw={500} c="dimmed">Current Teams</MantineText>
+                      <MantineText size="sm" fw={500} c="dimmed">{t("LogMatchCurrentTeams", { defaultValue: "Current Teams" })}</MantineText>
                       <Group>
                         {teams.map((team) => (
                           <Pill
@@ -417,12 +419,12 @@ const LogMatch = () => {
                         <Grid.Col span={6} key={player._id}>
                           <Select
                             label={`${player.name}`}
-                            placeholder="Select team"
+                            placeholder={t("LogMatchTeamSelectPlaceholder", { defaultValue: "Select team" })}
                             data={teams.map((team) => ({ value: team, label: team }))}
                             onChange={(value) => { handleTeamChange(index, value || "") }}
                             required
                             styles={{
-                              input: { 
+                              input: {
                                 border: "1px solid",
                                 borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
                                 borderRadius: "0.5rem",
@@ -439,14 +441,14 @@ const LogMatch = () => {
 
                   {teams.length > 0 && (
                     <Select
-                      label="Winning Team"
-                      placeholder="Select winning team"
+                      label={t("LogMatchWinningTeam", { defaultValue: "Winning Team" })}
+                      placeholder={t("LogMatchWinningTeamPlaceholder", { defaultValue: "Select winning team" })}
                       data={teams.map((team) => ({ value: team, label: team }))}
                       onChange={(value) => form.setFieldValue("winningTeam", value || "")}
                       required
                       className="!mt-4"
                       styles={{
-                        input: { 
+                        input: {
                           border: "1px solid",
                           borderColor: isDarkMode ? "rgb(75, 85, 99)" : "rgb(229, 231, 235)",
                           borderRadius: "0.5rem",
@@ -463,10 +465,10 @@ const LogMatch = () => {
               {/* Player Scores */}
               {!form.values.isCooperative && !form.values.isTeamMatch && form.values.players.length > 0 && (
                 <Box className="!mt-6">
-                  <Divider label="Player Scores" labelPosition="center" className="!mb-4 !opacity-60" />
+                  <Divider label={t("LogMatchPlayerScores", { defaultValue: "Player Scores" })} labelPosition="center" className="!mb-4 !opacity-60" />
 
                   <Checkbox
-                    label="Use manual winner selection instead of highest score"
+                    label={t("LogMatchUseManualWinner", { defaultValue: "Use manual winner selection instead of highest score" })}
                     checked={form.values.useManualWinner || false}
                     onChange={(event) => form.setFieldValue("useManualWinner", event.currentTarget.checked)}
                     className="!mb-4"
@@ -501,7 +503,7 @@ const LogMatch = () => {
 
                           {form.values.useManualWinner && (
                             <Checkbox
-                              label="Winner"
+                              label={t("LogMatchWinner", { defaultValue: "Winner" })}
                               checked={form.values.manualWinner === player._id}
                               onChange={() => form.setFieldValue("manualWinner", player._id)}
                               styles={{
@@ -525,7 +527,7 @@ const LogMatch = () => {
               className={`!text-xs !uppercase !font-medium !tracking-wide ${isDarkMode ? "!text-gray-400" : "!text-gray-500"
                 } !mb-2`}
             >
-              Match Details
+              {t("LogMatchDetails", { defaultValue: "Match Details" })}
             </MantineText>
             <Paper
               className={`!p-4 !rounded-xl !border ${isDarkMode ? "!bg-gray-700 !border-gray-600" : "!bg-gray-50 !border-gray-100"
@@ -534,9 +536,9 @@ const LogMatch = () => {
               <Grid>
                 <Grid.Col span={6}>
                   <TextInput
-                    label="Duration"
+                    label={t("LogMatchDuration", { defaultValue: "Duration" })}
                     type="number"
-                    placeholder="Minutes"
+                    placeholder={t("LogMatchDurationPlaceholder", { defaultValue: "Minutes" })}
                     {...form.getInputProps("duration")}
                     required
                     styles={{
@@ -553,7 +555,7 @@ const LogMatch = () => {
                 </Grid.Col>
                 <Grid.Col span={6}>
                   <TextInput
-                    label="Date"
+                    label={t("LogMatchDate", { defaultValue: "Date" })}
                     type="date"
                     {...form.getInputProps("date")}
                     required
@@ -573,7 +575,7 @@ const LogMatch = () => {
 
               {form.values.isCooperative && (
                 <Checkbox
-                  label="Match won"
+                  label={t("LogMatchWon", { defaultValue: "Match won" })}
                   {...form.getInputProps("isWin", { type: "checkbox" })}
                   className="!mt-4"
                   styles={{
@@ -584,7 +586,7 @@ const LogMatch = () => {
               )}
 
               <TextInput
-                label="Photo"
+                label={t("LogMatchPhoto", { defaultValue: "Photo" })}
                 type="file"
                 onChange={(event) => {
                   const file = event.currentTarget.files ? event.currentTarget.files[0] : null;
@@ -605,8 +607,8 @@ const LogMatch = () => {
               />
 
               <Textarea
-                label="Notes"
-                placeholder="Any details about this match..."
+                label={t("LogMatchNotes", { defaultValue: "Notes" })}
+                placeholder={t("LogMatchNotesPlaceholder", { defaultValue: "Any details about this match..." })}
                 minRows={3}
                 {...form.getInputProps("note")}
                 className="!mt-4"
@@ -634,11 +636,11 @@ const LogMatch = () => {
               fullWidth
               radius="md"
               className={`!transition-colors !font-medium ${isDarkMode
-                  ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
-                  : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
+                ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
+                : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
                 }`}
             >
-              Log Match
+              {t("LogMatchSubmit", { defaultValue: "Log Match" })}
             </Button>
           </Group>
         </form>

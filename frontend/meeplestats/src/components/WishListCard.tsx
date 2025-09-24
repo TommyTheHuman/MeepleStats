@@ -3,11 +3,15 @@ import { WishListCardInterface } from "../model/Interfaces";
 //import { useState } from "react";
 import { API_URL, JWT_STORAGE } from "../model/Constants";
 import { IconX } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 
 
 const WishListCard = ({ name, thumbnail, minPlayers, maxPlayers, notes, playingTime, username, gameId, onDelete }: WishListCardInterface) => {
   const { colorScheme } = useMantineColorScheme();
   const isDarkMode = colorScheme === "dark";
+
+  const { t } = useTranslation();
+
   const handleDelete = async () => {
     //setLoading(true);
     const requestOptions: RequestInit = {
@@ -56,7 +60,7 @@ const WishListCard = ({ name, thumbnail, minPlayers, maxPlayers, notes, playingT
       <Card.Section>
         <div className="!relative !overflow-hidden !h-[160px]">
           {/* Delete Button */}
-          <Tooltip label="Remove from wishlist">
+          <Tooltip label={t("WishListCardRemoveFromWishlist", { defaultValue: "Remove from wishlist" })}>
             <ActionIcon
               color="red"
               variant="subtle"
@@ -105,7 +109,7 @@ const WishListCard = ({ name, thumbnail, minPlayers, maxPlayers, notes, playingT
               color: isDarkMode ? "#93c5fd" : "#1d4ed8",
             }}
           >
-            {minPlayers} - {maxPlayers} players
+            {minPlayers} - {maxPlayers} {t("WishListCardPlayers", { defaultValue: "players" })}
           </Badge>
           <Badge
             className="!font-normal !px-2"
@@ -115,7 +119,7 @@ const WishListCard = ({ name, thumbnail, minPlayers, maxPlayers, notes, playingT
               color: isDarkMode ? "#fbbf24" : "#d97706",
             }}
           >
-            {playingTime} min
+            {playingTime} {t("WishListCardMinutes", { defaultValue: "min" })}
           </Badge>
           <Badge
             className="!font-normal !px-2"
@@ -137,7 +141,7 @@ const WishListCard = ({ name, thumbnail, minPlayers, maxPlayers, notes, playingT
               className="!mb-1"
               c={isDarkMode ? "gray.1" : "gray.7"}
             >
-              Notes
+              {t("WishListCardNotes", { defaultValue: "Notes" })}
             </Text>
             <Text
               size="sm"

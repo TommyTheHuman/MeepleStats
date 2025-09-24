@@ -4,7 +4,7 @@ import { Box, Button, LoadingOverlay, Textarea, Autocomplete, Image, Title, Text
 import { Game } from "../model/Interfaces";
 import { API_URL, JWT_STORAGE } from "../model/Constants";
 import WishListCard from "./WishListCard";
-
+import { useTranslation } from "react-i18next";
 
 interface ApiResponseItem {
   game_id: string;
@@ -29,6 +29,8 @@ const Wishlist = () => {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [wishlist, setWishlist] = useState<Game[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const { t } = useTranslation();
 
 
   useEffect(() => {
@@ -193,7 +195,7 @@ const Wishlist = () => {
               className="!mb-4 !text-xl !font-semibold"
               c={isDarkMode ? "gray.1" : "gray.8"}
             >
-              Add to Wishlist
+              {t("WishListAddToWishlist", { defaultValue: "Add to Wishlist" })}
             </Title>
 
             <Box pos="relative">
@@ -201,8 +203,8 @@ const Wishlist = () => {
 
               <Autocomplete
                 clearable
-                label="Search for games"
-                placeholder="Type at least 3 characters"
+                label={t("WishListSearchForGames", { defaultValue: "Search for games" })}
+                placeholder={t("WishListSearchPlaceholder", { defaultValue: "Type at least 3 characters" })}
                 value={query}
                 onChange={(value) => {
                   setQuery(value);
@@ -290,20 +292,20 @@ const Wishlist = () => {
                         className="!mb-1"
                         c={isDarkMode ? "gray.3" : "gray.7"}
                       >
-                        Players: {selectedGame.minPlayers} - {selectedGame.maxPlayers}
+                        {t("WishListPlayerCount", { defaultValue: "Players" })}: {selectedGame.minPlayers} - {selectedGame.maxPlayers}
                       </Text>
                       <Text
                         size="sm"
                         c={isDarkMode ? "gray.3" : "gray.7"}
                       >
-                        Playing Time: {selectedGame.playingTime} minutes
+                        {t("WishListPlayingTime", { defaultValue: "Playing Time" })}: {selectedGame.playingTime} {t("WishListMinutes", { defaultValue: "minutes" })}
                       </Text>
                     </div>
                   </div>
 
                   <Textarea
-                    label="Notes"
-                    placeholder="Add notes about this game"
+                    label={t("WishListNotes", { defaultValue: "Notes" })}
+                    placeholder={t("WishListNotesPlaceholder", { defaultValue: "Add notes about this game" })}
                     value={selectedGame.notes}
                     onChange={handleNotesChange}
                     minRows={3}
@@ -336,7 +338,7 @@ const Wishlist = () => {
                       }`}
                     radius="md"
                   >
-                    Add to Wishlist
+                    {t("WishListAddToWishlistButton", { defaultValue: "Add to Wishlist" })}
                   </Button>
                 </Paper>
               )}
@@ -351,7 +353,7 @@ const Wishlist = () => {
             className="!mb-4 !text-xl !font-semibold"
             c={isDarkMode ? "gray.1" : "gray.8"}
           >
-            My Wishlist
+            {t("WishListMyWishlist", { defaultValue: "My Wishlist" })}
           </Title>
 
           {wishlist.length === 0 ? (
@@ -364,7 +366,7 @@ const Wishlist = () => {
                 borderColor: isDarkMode ? "#9ca3af" : "#e5e7eb",
               }}
             >
-              <Text c={isDarkMode ? "gray.3" : "gray.6"}>Your wishlist is empty. Search for games to add them.</Text>
+              <Text c={isDarkMode ? "gray.3" : "gray.6"}>{t("WishListEmpty", { defaultValue: "Your wishlist is empty. Search for games to add them." })}</Text>
             </Paper>
           ) : (
             <Grid gutter="md">

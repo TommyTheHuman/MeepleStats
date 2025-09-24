@@ -5,6 +5,7 @@ import MatchCard from '../components/MatchCards';
 import { API_URL, JWT_STORAGE } from '../model/Constants';
 import { MasonryInfiniteGrid } from "@egjs/react-infinitegrid";
 import { useViewportSize } from '@mantine/hooks';
+import { useTranslation } from 'react-i18next';
 
 const MatchHistoryPage = () => {
 
@@ -12,6 +13,7 @@ const MatchHistoryPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [matches, setMatches] = useState<MatchCardInterface[]>([]);
   const { width } = useViewportSize();
+  const { t } = useTranslation();
 
 
   const getColumnCount = () => {
@@ -60,9 +62,9 @@ const MatchHistoryPage = () => {
 
   return (
     <Container size="xl" px="xs">
-      <Text size="xl" mb="md">Match History</Text>
+      <Text size="xl" mb="md">{t("MatchHistoryTitle", { defaultValue: "Match History" })}</Text>
       {loading ? (
-        <Text>Loading...</Text>
+        <Text>{t("MatchHistoryLoadingMessage", { defaultValue: "Loading..." })}</Text>
       ) : error ? (
         <Text c="red">{error}</Text>
       ) : (

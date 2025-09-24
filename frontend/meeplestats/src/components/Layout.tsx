@@ -6,6 +6,7 @@ import { Link, Outlet } from "react-router";
 import { AuthContext } from "./AuthContext";
 import { API_URL, Constants, JWT_STORAGE, ENABLE_RAG } from "../model/Constants";
 import { ThemeContext } from "../ThemeContext";
+import { useTranslation } from "react-i18next";
 
 export default function Layout() {
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure();
@@ -14,6 +15,15 @@ export default function Layout() {
   const { colorScheme, toggleColorScheme } = useContext(ThemeContext);
   const isDarkMode = colorScheme === "dark";
   const isLoggedIn = authStatus === "LoggedIn";
+
+  const { t, i18n } = useTranslation();
+
+  const languages = [
+    { value: "en", label: "English" },
+    { value: "it", label: "Italiano" },
+    { value: "de", label: "Deutsch" },
+    { value: "fr", label: "Français" }
+  ]
 
   const savedUsername = localStorage.getItem(Constants.username);
 
@@ -108,6 +118,27 @@ export default function Layout() {
             </Text>
           </Group>
           <Group>
+            { /** Language Selector */}
+            <select
+              value={i18n.language}
+              onChange={e => i18n.changeLanguage(e.target.value)}
+              style={{
+                borderRadius: 6,
+                padding: "2px 8px",
+                background: isDarkMode ? "#222" : "#eee",
+                color: isDarkMode ? "#fff" : "#222",
+                border: "none",
+                marginRight: 12,
+                fontWeight: 500,
+              }}
+            >
+              {languages.map(lang => (
+                <option key={lang.value} value={lang.value}>
+                  {lang.label}
+                </option>
+              ))}
+            </select>
+
             <ActionIcon
               variant="outline"
               color={isDarkMode ? "yellow" : "blue"}
@@ -150,7 +181,7 @@ export default function Layout() {
           <NavLink
             component={Link}
             to="/"
-            label="Home"
+            label={t('Home', { defaultValue: 'Home' })}
             onClick={closeMobile}
             className={`!transition-colors !rounded-md !mb-1 ${isDarkMode ? "hover:!bg-gray-800" : "hover:!bg-gray-100"
               }`}
@@ -161,7 +192,7 @@ export default function Layout() {
               <NavLink
                 component={Link}
                 to="/login"
-                label="Login"
+                label={t('Login', { defaultValue: 'Login' })}
                 onClick={closeMobile}
                 className={`!transition-colors !rounded-md !mb-1 ${isDarkMode ? "hover:!bg-gray-800" : "hover:!bg-gray-100"
                   }`}
@@ -169,7 +200,7 @@ export default function Layout() {
               <NavLink
                 component={Link}
                 to="/register"
-                label="Register"
+                label={t('Register', { defaultValue: 'Register' })}
                 onClick={closeMobile}
                 className={`!transition-colors !rounded-md !mb-1 ${isDarkMode ? "hover:!bg-gray-800" : "hover:!bg-gray-100"
                   }`}
@@ -182,7 +213,7 @@ export default function Layout() {
               <NavLink
                 component={Link}
                 to="/wishlist"
-                label="Wishlist"
+                label={t('Wishlist', { defaultValue: 'Wishlist' })}
                 onClick={closeMobile}
                 className={`!transition-colors !rounded-md !mb-1 ${isDarkMode ? "hover:!bg-gray-800" : "hover:!bg-gray-100"
                   }`}
@@ -190,7 +221,7 @@ export default function Layout() {
               <NavLink
                 component={Link}
                 to="/matchHistory"
-                label="Match History"
+                label={t('Match History', { defaultValue: 'Match History' })}
                 onClick={closeMobile}
                 className={`!transition-colors !rounded-md !mb-1 ${isDarkMode ? "hover:!bg-gray-800" : "hover:!bg-gray-100"
                   }`}
@@ -198,7 +229,7 @@ export default function Layout() {
               <NavLink
                 component={Link}
                 to="/logmatch"
-                label="Log Match"
+                label={t('Log Match', { defaultValue: 'Log Match' })}
                 onClick={closeMobile}
                 className={`!transition-colors !rounded-md !mb-1 ${isDarkMode ? "hover:!bg-gray-800" : "hover:!bg-gray-100"
                   }`}
@@ -206,7 +237,7 @@ export default function Layout() {
               <NavLink
                 component={Link}
                 to="/gameCollection"
-                label="Games Collection"
+                label={t('Games Collection', { defaultValue: 'Games Collection' })}
                 onClick={closeMobile}
                 className={`!transition-colors !rounded-md !mb-1 ${isDarkMode ? "hover:!bg-gray-800" : "hover:!bg-gray-100"
                   }`}
@@ -214,7 +245,7 @@ export default function Layout() {
               <NavLink
                 component={Link}
                 to="/matchUtility"
-                label="Match Utility"
+                label={t('Match Utility', { defaultValue: 'Match Utility' })}
                 onClick={closeMobile}
                 className={`!transition-colors !rounded-md !mb-1 ${isDarkMode ? "hover:!bg-gray-800" : "hover:!bg-gray-100"
                   }`}
@@ -224,7 +255,7 @@ export default function Layout() {
                   <NavLink
                     component={Link}
                     to="/rulebooks"
-                    label="Rulebook Repository"
+                    label={t('Rulebook Repository', { defaultValue: 'Rulebook Repository' })}
                     onClick={closeMobile}
                     className={`!transition-colors !rounded-md !mb-1 ${isDarkMode ? "hover:!bg-gray-800" : "hover:!bg-gray-100"
                       }`}
@@ -232,7 +263,7 @@ export default function Layout() {
                   <NavLink
                     component={Link}
                     to="/rulebook-chat"
-                    label="Rulebook Chat"
+                    label={t('Rulebook Chat', { defaultValue: 'Rulebook Chat' })}
                     onClick={closeMobile}
                     className={`!transition-colors !rounded-md !mb-1 ${isDarkMode ? "hover:!bg-gray-800" : "hover:!bg-gray-100"
                       }`}
@@ -242,7 +273,7 @@ export default function Layout() {
               <NavLink
                 component={Link}
                 to="/create-scoresheet"
-                label="Create Score Sheet"
+                label={t('Create Score Sheet', { defaultValue: 'Create Score Sheet' })}
                 onClick={closeMobile}
                 className={`!transition-colors !rounded-md !mb-1 ${isDarkMode ? "hover:!bg-gray-800" : "hover:!bg-gray-100"
                   }`}
@@ -250,7 +281,7 @@ export default function Layout() {
               <NavLink
                 component={Link}
                 to="/scoreSheet"
-                label="Score Sheet"
+                label={t('Score Sheets', { defaultValue: 'Score Sheets' })}
                 onClick={closeMobile}
                 className={`!transition-colors !rounded-md !mb-1 ${isDarkMode ? "hover:!bg-gray-800" : "hover:!bg-gray-100"
                   }`}
@@ -259,7 +290,7 @@ export default function Layout() {
               <Divider className="!my-4" />
 
               <Text fw={600} className={isDarkMode ? "!text-gray-100" : "!text-gray-800"}>
-                Admin Tools
+                {t('Admin Actions', { defaultValue: 'Admin Actions' })}
               </Text>
 
               <Stack gap="sm" className="!px-2 !mb-4">
@@ -271,11 +302,11 @@ export default function Layout() {
                   radius="md"
                   fullWidth
                   className={`!transition-colors ${isDarkMode
-                      ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
-                      : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
+                    ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
+                    : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
                     }`}
                 >
-                  Import Games
+                  {t('Import Games', { defaultValue: 'Import Games' })}
                 </Button>
 
                 <Button
@@ -286,11 +317,11 @@ export default function Layout() {
                   radius="md"
                   fullWidth
                   className={`!transition-colors ${isDarkMode
-                      ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
-                      : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
+                    ? "!bg-gray-700 !text-gray-200 hover:!bg-gray-600"
+                    : "!bg-blue-50 !text-blue-600 hover:!bg-blue-100"
                     }`}
                 >
-                  Setup Achievements
+                  {t('Setup Achievements', { defaultValue: 'Setup Achievements' })}
                 </Button>
               </Stack>
             </>
@@ -301,7 +332,7 @@ export default function Layout() {
           <div className="!mt-auto !pt-4">
             <Divider className={isDarkMode ? "!border-gray-700" : "!border-gray-200"} />
             <NavLink
-              label="Logout"
+              label={t('Logout', { defaultValue: 'Logout' })}
               onClick={() => {
                 handleLogout();
                 closeMobile();
