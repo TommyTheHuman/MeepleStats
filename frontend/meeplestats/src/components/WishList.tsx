@@ -45,7 +45,7 @@ const Wishlist = () => {
 
   const searchGames = async (query: string) => {
     if (query.length < 3) return; // Minimum 3 characters for search query
-    const response = await fetch(`https://boardgamegeek.com/xmlapi2/search?query=${query}`);
+    const response = await fetch(`${API_URL}/bgg/search?query=${query}`);
     const text = await response.text();
     const parser = new DOMParser();
     const xml = parser.parseFromString(text, "text/xml");
@@ -79,7 +79,7 @@ const Wishlist = () => {
   };
 
   const selectGame = async (id: string) => {
-    const response = await fetch(`https://boardgamegeek.com/xmlapi2/thing?id=${id}`);
+    const response = await fetch(`${API_URL}/bgg/thing?id=${id}`);
     const text = await response.text();
     const parser = new DOMParser();
     const xml = parser.parseFromString(text, "text/xml");

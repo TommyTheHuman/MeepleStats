@@ -1,3 +1,4 @@
+import os
 import requests
 import time
 import xml.etree.ElementTree as ET
@@ -8,36 +9,40 @@ from .db import games_collection
 def import_games_from_bgg(username):
     # Import the collection of games from the user's BGG collection - NO EXPANSIONS
     url_collection = f'https://boardgamegeek.com/xmlapi2/collection?username={username}&own=1&excludesubtype=boardgameexpansion'
-    response = requests.get(url_collection)
-    
+    bgg_token = os.getenv('BGG_API_KEY')
+    headers = {}
+    if bgg_token:
+        headers['Authorization'] = f'Bearer {bgg_token}'
+    response = requests.get(url_collection, headers=headers)
+
     while response.status_code == 202:
         # request queued, retry in 2 seconds
         time.sleep(2)
-        response = requests.get(url_collection)
-    
+        response = requests.get(url_collection, headers=headers)
+
     if response.status_code != 200:
         print("Error in collection request.")
         return
-    parse_collection(response.text)
+    parse_collection(response.text, headers)
         
     # Import the collection of expansions from the user's BGG collection
     url_collection_exp = f'https://boardgamegeek.com/xmlapi2/collection?username={username}&own=1&subtype=boardgameexpansion'
 
-    response = requests.get(url_collection_exp)
+    response = requests.get(url_collection_exp, headers=headers)
     
     while response.status_code == 202:
         # request queued, retry in 2 seconds
         time.sleep(2)
-        response = requests.get(url_collection_exp)
+        response = requests.get(url_collection_exp, headers=headers)
     
     if response.status_code != 200:
         print("Error in collection request.")
         return
-    parse_collection(response.text, expansions=True)
+    parse_collection(response.text, headers, expansions=True)
 
 
 
-def parse_collection(xml, expansions=False):
+def parse_collection(xml, headers, expansions=False):
     root = ET.fromstring(xml)
     game_ids = []
     for game in root.findall('item'):
@@ -49,16 +54,16 @@ def parse_collection(xml, expansions=False):
         # API max limit is 20 games per request
         # list to string
         game_ids_str = ','.join(game_ids)
-        request_games(game_ids_str, expansions)
+        request_games(game_ids_str, headers, expansions)
     else:
         # API max limit is 20 games per request
         # split the list in chunks of 20 games
         for i in range(0, len(game_ids), 20): # FIXME: check if this works
-            request_games(','.join(game_ids[i:i+20]), expansions)
+            request_games(','.join(game_ids[i:i+20]), headers, expansions)
 
-def request_games(game_ids, expansions):
+def request_games(game_ids, headers, expansions):
     url_game = f'https://boardgamegeek.com/xmlapi2/thing?id={game_ids}'
-    response = requests.get(url_game)
+    response = requests.get(url_game, headers=headers)
     if response.status_code != 200:
         print("Error in game request.")
         return

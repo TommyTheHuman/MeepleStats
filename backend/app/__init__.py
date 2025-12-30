@@ -44,11 +44,13 @@ def create_app():
         from .routes import utility_bp as utility_blueprint
         from .routes import rulebooks_bp as rulebooks_blueprint
         from .routes import scoresheets_bp as scoresheets_blueprint
+        from .routes import bgg_bp as bgg_blueprint
         app.register_blueprint(auth_blueprint)
         app.register_blueprint(data_blueprint)
         app.register_blueprint(statistic_blueprint)
         app.register_blueprint(utility_blueprint)
         app.register_blueprint(rulebooks_blueprint)
         app.register_blueprint(scoresheets_blueprint)
+        app.register_blueprint(bgg_blueprint)
 
     return app

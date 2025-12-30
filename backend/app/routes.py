@@ -1,7 +1,7 @@
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 import traceback
 from dotenv import find_dotenv, load_dotenv
-from flask import Blueprint, jsonify, render_template, request, send_from_directory
+from flask import Blueprint, Response, jsonify, render_template, request, send_from_directory
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, decode_token
 from jwt.exceptions import InvalidTokenError
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -28,6 +28,7 @@ if os.getenv('ENABLE_RAG') == 'True':
     index, embedding_provider = initialize_pinecone()
 
 STORAGE_TYPE = os.getenv('STORAGE_TYPE')#'local'#'s3'
+BGG_API_KEY = os.getenv('BGG_API_KEY')
 
 upload_folder = None
 
@@ -38,6 +39,33 @@ elif STORAGE_TYPE in ['local']:
     upload_folder = current_app.config['UPLOAD_FOLDER']
     if not os.path.exists(upload_folder):
         os.makedirs(upload_folder)
+
+
+bgg_bp = Blueprint('bgg', __name__)
+
+def _bgg_get(url, params = None):
+    headers = {}
+    if BGG_API_KEY:
+        headers["Authorization"] = f"Bearer {BGG_API_KEY}"
+    resp = requests.get(url, headers=headers, params=params, timeout=15)
+    while resp.status_code == 202:
+        time.sleep(2)
+        resp = requests.get(url, headers=headers, params=params, timeout=15)
+    return resp 
+
+@bgg_bp.route('/bgg/search', methods=['GET'])
+def bgg_search():
+    # Get the original query string from the parameters
+    query = request.args.get('query', '')
+    resp = _bgg_get('https://boardgamegeek.com/xmlapi2/search', params={'query': query})
+    return Response(resp.content, status=resp.status_code, content_type=resp.headers.get("Content-Type"))
+
+@bgg_bp.route('/bgg/thing', methods=['GET'])
+def bgg_thing():
+    # Get the object ID
+    object_id = request.args.get('id', '')
+    resp = _bgg_get(f'https://boardgamegeek.com/xmlapi2/thing', params={'id': object_id})
+    return Response(resp.content, status=resp.status_code, content_type=resp.headers.get("Content-Type"))
 
 auth_bp = Blueprint('auth', __name__)
 
