@@ -221,6 +221,7 @@ Create a `.env` file in the root directory of the project `/meeplestats` and def
 
 ```ini
 BGG_USERNAME=your_boardgamegeek_username
+BGG_API_KEY=your_boardgamegeek_API_KEY
 JWT_SECRET_KEY=your_secret_key
 JWT_ACCESS_TOKEN_EXPIRES=your_expiration_time
 JWT_TOKEN_LOCATION=your_token_location
