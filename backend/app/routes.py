@@ -1948,8 +1948,15 @@ scoresheets_bp = Blueprint('scoreSheet', __name__)
 @jwt_required()
 def get_score_sheets():
     try:
+
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        SCORESHEETS_DIR = os.path.join(BASE_DIR, "scoresheets")
+
+        if not os.path.exists(SCORESHEETS_DIR):
+            os.makedirs(SCORESHEETS_DIR)
+
         # Get all scoresheets from the folder
-        scoresheets = [f for f in os.listdir("../scoresheets") if f.endswith('.json')]
+        scoresheets = [f for f in os.listdir(SCORESHEETS_DIR) if f.endswith('.json')]
         # Get only the game name --> remove the _score_sheet.json
         scoresheets = [f.replace('_score_sheet.json', '') for f in scoresheets]
         return jsonify(scoresheets), 200
